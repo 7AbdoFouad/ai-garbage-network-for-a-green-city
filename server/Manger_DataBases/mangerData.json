@@ -1,0 +1,25 @@
+{
+    "managers":[
+    {
+        "id":1,
+        "name":"Mohamed gamal",
+        "email":"Hb6mW@example.com",
+        "password":"24569847",
+        "Permissions":"admin"
+    },
+    {
+        "id":2,
+        "name":"Ahmed mohamed",
+        "email":"bH6mW@example.com",
+        "password":"44444444",
+        "Permissions":"reports"
+    },
+    {
+        "id":3,
+        "name":"Ali mohamed",
+        "email":"aHb6mW@example.com",
+        "password":"55555555",
+        "Permissions":"Operations"
+    }
+]
+}

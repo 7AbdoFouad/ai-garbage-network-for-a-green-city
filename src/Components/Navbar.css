@@ -1,0 +1,29 @@
+/* Custom Navbar Styling */
+.navbar-custom {
+    background-color: #2c6e49; /* Green theme */
+    padding: 10px 20px;
+  }
+  
+  .logo-icon {
+    font-size: 28px;
+    color: #ffffff; /* White icon */
+  }
+  
+  .navbar-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffffff;
+    letter-spacing: 1px;
+  }
+  
+  .nav-link {
+    color: #ffffff !important;
+    font-size: 18px;
+    margin: 0 10px;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .nav-link:hover {
+    color: #c7f9cc !important; /* Light green on hover */
+  }
+  
