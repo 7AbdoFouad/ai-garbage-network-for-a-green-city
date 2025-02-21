@@ -1,48 +1,51 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { object, string } from "yup";
 import { useFormik } from "formik";
 import useUser from "../hooks/useUser";
-import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-import  useAuth  from "../hooks/useAuth";
 
 const schema = object().shape({
   email: string()
-    .required("Email is Required")
+    .required("Email is required")
     .matches(
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{3,}))$/,
       "Email is not valid"
     ),
-  password: string()
-    .required("Password is Required")
-    .min(8, "Password must be more than 8 characters"),
+  password: string().required("Password is required").min(8, "Password must be at least 8 characters"),
 });
 
 export default function Login() {
+  const [role, setRole] = useState("user");
+  const { login } = useAuth();
+  const { users, managers, truckDrivers } = useUser();
+  const navigate = useNavigate();
+
   const formik = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema: schema,
     onSubmit: () => checkUser(),
   });
-  const { login } = useAuth();
-  const { users } = useUser();
-
-  const navigate = useNavigate();
 
   const checkUser = async () => {
-    const check = users.find(
+    let db;
+    if (role === "user") db = users;
+    else if (role === "manager") db = managers;
+    else db = truckDrivers;
+
+    const check = db.find(
       (user) =>
         user.email === formik.values.email &&
         user.password === formik.values.password
     );
+
     if (check) {
       login(check);
-      navigate("/TodoListPage/" + check.id);
-      toast.success("Login Success");
+      navigate(`/${role}Dashboard/${check.id}`);
+      toast.success(`Login successful as ${role}`);
     } else {
-      toast.error("Login Failed , Please Check Your Email and Password");
+      toast.error("Login failed. Please check your email and password.");
     }
   };
 
@@ -53,14 +56,24 @@ export default function Login() {
           <div className="card">
             <div className="card-body">
               <h2 className="card-title text-center mb-4">Login</h2>
+              
+              {/* Role Selection */}
+              <div className="form-group mb-3">
+                <label>Select Role</label>
+                <select className="form-control" value={role} onChange={(e) => setRole(e.target.value)}>
+                  <option value="user">User</option>
+                  <option value="manager">Manager</option>
+                  <option value="truckdriver">Truck Driver</option>
+                </select>
+              </div>
+
+              {/* Login Form */}
               <form onSubmit={formik.handleSubmit}>
                 <div className="form-group">
-                  <label htmlFor="exampleInputEmail1">Email address</label>
+                  <label>Email address</label>
                   <input
                     type="text"
                     className="form-control"
-                    id="exampleInputEmail1"
-                    aria-describedby="emailHelp"
                     name="email"
                     placeholder="Enter email"
                     value={formik.values.email}
@@ -71,26 +84,25 @@ export default function Login() {
                     <p className="text-danger">{formik.errors.email}</p>
                   )}
                 </div>
+
                 <div className="form-group">
-                  <label htmlFor="exampleInputPassword1">Password</label>
+                  <label>Password</label>
                   <input
                     type="password"
                     className="form-control"
-                    id="exampleInputPassword1"
+                    name="password"
                     placeholder="Password"
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    name="password"
                   />
                   {formik.touched.password && formik.errors.password && (
                     <p className="text-danger">{formik.errors.password}</p>
                   )}
                 </div>
-                <div className="text-center  mt-2">
-                  <button type="submit" className="btn btn-primary">
-                    Submit
-                  </button>
+
+                <div className="text-center mt-3">
+                  <button type="submit" className="btn btn-success w-100">Login</button>
                 </div>
               </form>
             </div>

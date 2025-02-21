@@ -33,7 +33,7 @@ const LandingPage = () => {
           />
         </div>
       </div>
-      <div><button onClick={handleclick}>lolooooooooooooooooooo</button></div>
+      {/* <div><button onClick={handleclick}>lolooooooooooooooooooo</button></div> */}
     </div>
   );
 };

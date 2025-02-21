@@ -3,12 +3,14 @@ import axios from "axios";
 
 const useUser = () => {
   const [users, setUsers] = useState([]);
-  const [todos, setTodos] = useState([]);
+  const [managers, setmanagers] = useState([]);
+  const [truckDrivers, settruckDrivers] = useState([]);
   // const [user, setUser] = useState({});
 
   //========================== Users =================================
   // Register[add] a new user
-  const registerUser = async (values) => { //in project ,this only used  from Users 
+  const registerUser = async (values) => {
+    //in project ,this only used  from Users
     const res = await axios.post("http://localhost:3000/users", values);
     setUsers([...users, res.data]); // Assuming the server returns the created user object
     return res.data;
@@ -37,36 +39,70 @@ const useUser = () => {
     return res.data;
   };
 
-  //======================= Todos ===================================
-  // Add a todo
-  const addTodo = async (values) => {
-    const res = await axios.post(`http://localhost:3000/todos`, values);
+  //======================= managers ===================================
+  // Add a manager
+  const addManager = async (values) => {
+    const res = await axios.post(`http://localhost:3000/managers`, values);
     // console.log(res.data);
-    
-    setTodos([...todos, res.data]); // Assuming the server returns the created todo object
+
+    setmanagers([...managers, res.data]); // Assuming the server returns the created todo object
     return res.data;
   };
 
-  // Fetch a single todo
-  const fetchTodo = async (id) => {
+  // Fetch a single manager
+  const fetchManager = async (id) => {
     try {
-      const { data } = await axios.get(`http://localhost:3000/todos/${id}`);
+      const { data } = await axios.get(`http://localhost:3000/managers/${id}`);
       return data;
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Delete a todo
-  const deleteTodo = async (id) => {
-    await axios.delete(`http://localhost:3000/todos/${id}`);
-    setTodos(todos.filter((todo) => todo.id !== id));
+  // Delete a manager
+  const deleteManager = async (id) => {
+    await axios.delete(`http://localhost:3000/managers/${id}`);
+    setmanagers(managers.filter((todo) => todo.id !== id));
   };
 
-  // Update a todo
-  const updateTodo = async (id, values) => {
-    const res = await axios.put(`http://localhost:3000/todos/${id}`, values);
-    setTodos(todos.map((todo) => (todo.id === id ? res.data : todo)));
+  // Update a manager
+  const updateManager = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/managers/${id}`, values);
+    setmanagers(managers.map((todo) => (todo.id === id ? res.data : todo)));
+    return res.data;
+  };
+  //======================= truckDrivers ===================================
+  // Add a truckDriver
+  const addTruckDriver = async (values) => {
+    const res = await axios.post(`http://localhost:3000/Truckdrivers`, values);
+    settruckDrivers([...truckDrivers, res.data]); // Assuming the server returns the created todo object
+    return res.data;
+  };
+  // Fetch a single truckDriver
+  const fetchTruckDriver = async (id) => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:3000/Truckdrivers/${id}`
+      );
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // Delete a truckDriver
+  const deleteTruckDriver = async (id) => {
+    await axios.delete(`http://localhost:3000/Truckdrivers/${id}`);
+    settruckDrivers(truckDrivers.filter((todo) => todo.id !== id));
+  };
+  // Update a truckDriver
+  const updateTruckDriver = async (id, values) => {
+    const res = await axios.put(
+      `http://localhost:3000/Truckdrivers/${id}`,
+      values
+    );
+    settruckDrivers(
+      truckDrivers.map((todo) => (todo.id === id ? res.data : todo))
+    );
     return res.data;
   };
 
@@ -84,18 +120,46 @@ const useUser = () => {
   }, []);
 
   useEffect(() => {
-    const fetchTodos = async () => {
+    const fetchmanagers = async () => {
       try {
-        const { data } = await axios.get("http://localhost:3000/todos");
-        setTodos(data);
+        const { data } = await axios.get("http://localhost:3000/managers");
+        setmanagers(data);
       } catch (error) {
         console.error(error);
       }
     };
-    fetchTodos();
+    fetchmanagers();
   }, []);
 
-  return { users, todos, registerUser, deleteUser, fetchTodo, fetchUser, updateUser, addTodo, deleteTodo, updateTodo };
+  useEffect(() => {
+    const fetchtruckDrivers = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3000/Truckdrivers");
+        settruckDrivers(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchtruckDrivers();
+  }, []);
+
+  return {
+    users,
+    managers,
+    truckDrivers,
+    registerUser,
+    deleteUser,
+    fetchUser,
+    updateUser,
+    addManager,
+    deleteManager,
+    fetchManager,
+    updateManager,
+    addTruckDriver,
+    deleteTruckDriver,
+    fetchTruckDriver,
+    updateTruckDriver,
+  };
 };
 
 export default useUser;

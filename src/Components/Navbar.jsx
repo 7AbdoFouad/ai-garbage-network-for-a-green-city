@@ -125,62 +125,67 @@
 //     </nav>
 //   );
 // };
-
-// export default Navbar;
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FaLeaf } from "react-icons/fa";
-import "./Navbar.css"; // Custom styles
+import { FaLeaf, FaBars, FaTimes } from "react-icons/fa";
+import "./Navbar.css";
 
-const Navbar = () => {
+const CustomNavbar = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-custom">
-      <div className="container-fluid">
-        {/* Logo Icon */}
-        <NavLink to="/" className="navbar-brand d-flex align-items-center">
-          <img src="/src/Components/13215309.png" className="logo-icon" width={50} />
-        </NavLink>
+    <>
+      {/* Main Navbar */}
+      <nav className="navbar navbar-dark">
+        <div className="container custom-container d-flex justify-content-between align-items-center">
+          {/* Left: Logo & Title */}
+          <a className="navbar-brand d-flex align-items-center" href="/">
+            <FaLeaf className="logo-icon" />
+            <span className="navbar-title">Green City</span>
+          </a>
 
-        {/* Navbar Toggle for Mobile */}
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
+          {/* Mobile Toggle Button */}
+          <button className="navbar-toggler" onClick={toggleSidebar}>
+            <FaBars className="toggle-icon" />
+          </button>
+        </div>
+      </nav>
+
+      {/* Sidebar Menu */}
+      <div className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+        <button className="close-btn" onClick={toggleSidebar}>
+          <FaTimes />
         </button>
 
-        <div className="collapse navbar-collapse" id="navbarNav">
-          {/* Centered Title */}
-          <div className="navbar-title mx-auto">Green City</div>
-
-          {/* Navigation Links */}
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <NavLink to="/" className="nav-link">
-                Home
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink to="/about" className="nav-link">
-                About
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink to="/contact" className="nav-link">
-                Contact
-              </NavLink>
-            </li>
-          </ul>
-        </div>
+        <ul className="sidebar-links">
+          <li>
+            <NavLink to="/" className="nav-link" onClick={toggleSidebar}>
+              Home
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/login" className="nav-link" onClick={toggleSidebar}>
+              Login
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/registeration" className="nav-link" onClick={toggleSidebar}>
+            Registeration
+            </NavLink>
+          </li>
+        </ul>
       </div>
-    </nav>
+
+      {/* Overlay when sidebar is open */}
+      {sidebarOpen && <div className="overlay" onClick={toggleSidebar}></div>}
+    </>
   );
 };
 
-export default Navbar;
+export default CustomNavbar;
+
 

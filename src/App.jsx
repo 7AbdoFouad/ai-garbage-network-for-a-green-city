@@ -78,14 +78,10 @@ const App = () => {
   );
   return (
     <div>
-<<<<<<< HEAD
-    lol
-    Hello world Abdo and moataz
-=======
+
       <AuthProvider>
       <RouterProvider router={router} />
       </AuthProvider>
->>>>>>> ebfd627 (updating)
     </div>
   );
 };
