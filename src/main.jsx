@@ -8,7 +8,7 @@ import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 document.getElementById('html').style.cssText = 'width: 100vw;'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  // </React.StrictMode>,
 )

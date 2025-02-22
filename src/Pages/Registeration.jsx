@@ -14,7 +14,7 @@ const schema = object().shape({
   email: string()
     .required("Email is Required")
     .matches(
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{3,}))$/,
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{3,8}))$/,
       "Email is not valid"
     ),
   password: string()
@@ -25,12 +25,17 @@ const schema = object().shape({
 
 export default function Registeration() {
   const [submitting, setsubmitting] = useState(false);
-  const { registerUser } = useUser();
+  const { registerUser,users } = useUser();
   const navigate = useNavigate();
 
   const handleSupmit = async (e) => {
     try {
       setsubmitting(true);
+      if(users.find(user=>user.email===e.email)){
+        toast.error("Email already exists");
+        setsubmitting(false);
+        return;
+      }
       const res = await registerUser({ email: e.email, name: e.name, password: e.password});
       navigate("/TodoListPage/"+res.id);
       console.log(res);

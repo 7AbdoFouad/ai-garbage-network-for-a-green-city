@@ -125,67 +125,42 @@
 //     </nav>
 //   );
 // };
-import React, { useState } from "react";
+import React from "react";
 import { NavLink } from "react-router-dom";
-import { FaLeaf, FaBars, FaTimes } from "react-icons/fa";
+import { FaLeaf } from "react-icons/fa";
 import "./Navbar.css";
 
 const CustomNavbar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
-    <>
-      {/* Main Navbar */}
-      <nav className="navbar navbar-dark">
-        <div className="container custom-container d-flex justify-content-between align-items-center">
-          {/* Left: Logo & Title */}
-          <a className="navbar-brand d-flex align-items-center" href="/">
-            <FaLeaf className="logo-icon" />
-            <span className="navbar-title">Green City</span>
-          </a>
+    <nav className="navbar navbar-expand-lg navbar-dark">
+      <div className="container custom-container">
+        {/* Left: Logo & Title */}
+        <a className="navbar-brand d-flex align-items-center" href="/">
+          <FaLeaf className="logo-icon" />
+          <span className="navbar-title">Green City</span>
+        </a>
 
-          {/* Mobile Toggle Button */}
-          <button className="navbar-toggler" onClick={toggleSidebar}>
-            <FaBars className="toggle-icon" />
-          </button>
-        </div>
-      </nav>
-
-      {/* Sidebar Menu */}
-      <div className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <button className="close-btn" onClick={toggleSidebar}>
-          <FaTimes />
-        </button>
-
-        <ul className="sidebar-links">
-          <li>
-            <NavLink to="/" className="nav-link" onClick={toggleSidebar}>
+        {/* Navigation Links */}
+        <ul className="navbar-nav ms-auto">
+          <li className="nav-item">
+            <NavLink to="/" className="nav-link">
               Home
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/login" className="nav-link" onClick={toggleSidebar}>
+          <li className="nav-item">
+            <NavLink to="/login" className="nav-link">
               Login
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/registeration" className="nav-link" onClick={toggleSidebar}>
-            Registeration
+          <li className="nav-item">
+            <NavLink to="/registeration" className="nav-link">
+              Registration
             </NavLink>
           </li>
         </ul>
       </div>
-
-      {/* Overlay when sidebar is open */}
-      {sidebarOpen && <div className="overlay" onClick={toggleSidebar}></div>}
-    </>
+    </nav>
   );
 };
 
 export default CustomNavbar;
-
-

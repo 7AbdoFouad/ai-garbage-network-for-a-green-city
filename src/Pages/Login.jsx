@@ -10,10 +10,12 @@ const schema = object().shape({
   email: string()
     .required("Email is required")
     .matches(
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{3,}))$/,
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{3,8}))$/,
       "Email is not valid"
     ),
-  password: string().required("Password is required").min(8, "Password must be at least 8 characters"),
+  password: string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters"),
 });
 
 export default function Login() {
@@ -56,11 +58,15 @@ export default function Login() {
           <div className="card">
             <div className="card-body">
               <h2 className="card-title text-center mb-4">Login</h2>
-              
+
               {/* Role Selection */}
               <div className="form-group mb-3">
                 <label>Select Role</label>
-                <select className="form-control" value={role} onChange={(e) => setRole(e.target.value)}>
+                <select
+                  className="form-control"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                >
                   <option value="user">User</option>
                   <option value="manager">Manager</option>
                   <option value="truckdriver">Truck Driver</option>
@@ -102,7 +108,9 @@ export default function Login() {
                 </div>
 
                 <div className="text-center mt-3">
-                  <button type="submit" className="btn btn-success w-100">Login</button>
+                  <button type="submit" className="btn btn-success w-100">
+                    Login
+                  </button>
                 </div>
               </form>
             </div>

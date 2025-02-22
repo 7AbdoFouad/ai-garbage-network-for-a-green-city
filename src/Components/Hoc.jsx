@@ -1,20 +1,34 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
-import  useAuth  from "../hooks/useAuth";
-// import Cookies from 'js-cookie';
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import { toast } from "react-toastify";
 
-function withAuthorization(Component) {
+function withAuthorization(Component, requiredRole) {
   return function AuthRoute(props) {
-    const { isLoggedIn } = useAuth(); // Get login state from context
-    // const userData = Cookies.get('user');
-    // const isLoggedIn = userData ? true : false;
+    const { isLoggedIn, user } = useAuth(); 
+    const location = useLocation();
+
+    // Store last active page before redirection
+    useEffect(() => {
+      if (isLoggedIn) {
+        sessionStorage.setItem("lastActivePath", location.pathname);
+      }
+    }, [location.pathname, isLoggedIn]);
 
     if (!isLoggedIn) {
-      // Redirect to login page if not logged in
+      toast.error("You need to login to view this page");
       return <Navigate to="/login" replace />;
     }
+          // [1, 2, 3].includes(2) => true
+    if (requiredRole && !requiredRole.some((role) => user.Permissions.includes(role))) {
+      toast.error("You are not authorized to view this page");
 
-    // Render the wrapped component if logged in
+      // Retrieve the last active page (before unauthorized attempt)
+      const lastActivePath = sessionStorage.getItem("lastActivePath") || "/";
+
+      return <Navigate to={lastActivePath} replace />;
+    }
+
     return <Component {...props} />;
   };
 }

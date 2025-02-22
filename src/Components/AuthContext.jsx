@@ -9,14 +9,14 @@ export const AuthContext = createContext();
 
 // AuthProvider to wrap the app
 export default function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
-  const [user, setUser] = useState(null); // Store user info if needed
   const [cookies, setCookie, removeCookie] = useCookies(["user"]);
+  const [user, setUser] = useState(cookies.user ? cookies.user: null); // Store user info if needed
+  const [isLoggedIn, setIsLoggedIn] = useState(!!cookies.user); // Track login state
 
   const login = (userData) => {
+    setCookie("user", userData, { path: "/", expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
     setIsLoggedIn(true);
     setUser(userData);  // Save user details (including "role")
-    setCookie("user", userData, { path: "/", expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
     // localStorage.setItem("user", JSON.stringify(userData));
   };
 
@@ -27,17 +27,17 @@ export default function AuthProvider({ children }) {
     // localStorage.removeItem("user");
   };
   // Sync auth state with cookies
-  useEffect(() => {
-    if (cookies.user) {
-      try {
-        const userData = cookies.user; 
-        setIsLoggedIn(true);
-        setUser(userData);
-      } catch (error) {
-        console.error("Failed to parse user cookie:", error);
-      }
-    }
-  }, [cookies.user]); // Re-run when cookies change
+  // useEffect(() => {
+  //   if (cookies.user) {
+  //     try {
+  //       const userData = cookies.user; 
+  //       setIsLoggedIn(true);
+  //       setUser(userData);
+  //     } catch (error) {
+  //       console.error("Failed to parse user cookie:", error);
+  //     }
+  //   }
+  // }, [cookies.user]); // Re-run when cookies change
 
   // useEffect(() => {
   //   // Retrieve user data from cookies

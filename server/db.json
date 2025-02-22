@@ -5,40 +5,88 @@
         "name":"Mohamed gamal",
         "email":"Hb6mW@example.com",
         "password":"24569847",
-        "Permissions":"admin"
+        "Permissions":["admin"]
     },
     {
         "id":2,
         "name":"Ahmed mohamed",
         "email":"bH6mW@example.com",
         "password":"44444444",
-        "Permissions":"reports"
+        "Permissions":["ManageTrucks"]
     },
     {
         "id":3,
         "name":"Ali mohamed",
         "email":"aHb6mW@example.com",
         "password":"55555555",
-        "Permissions":"Operations"
+        "Permissions":["ManageAnnouncement"]
+    }
+    ,
+    {
+        "id":4,
+        "name":"weal ismail",
+        "email":"uuuumW@example.com",
+        "password":"84521368",
+        "Permissions":["ManageReportsAndDataAnalysis"]
+    }
+    ,
+    {
+        "id":5,
+        "name":"ramy ismail",
+        "email":"mmmm@example.com",
+        "password":"42132654",
+        "Permissions":["CommunityEngagementManagement"]
+    }
+    ,
+    {
+        "id":6,
+        "name":"samy ismail",
+        "email":"yyyy@example.com",
+        "password":"45875847",
+        "Permissions":["UserManagement"]
+    }
+    ,
+    {
+        "id":7,
+        "name":"omr ismail",
+        "email":"tttt@example.com",
+        "password":"55442121",
+        "Permissions":["PollsManagement"]
+    }
+    ,
+    {
+        "id":8,
+        "name":"teto ismail",
+        "email":"redg@example.com",
+        "password":"45612378",
+        "Permissions":["RewardsManagement"]
+    }
+    ,
+    {
+        "id":9,
+        "name":"yossef ismail",
+        "email":"esdw@example.com",
+        "password":"24853662",
+        "Permissions":["WasteBinManagement"]
     }
 ],
     "users":[
     {
         "id":1,
         "name":"Mohamed gamal",
-        "email":"Hb6mW@example.com",
+        "email":"aaaaa@example.com",
         "password":"24569847"
     },
     {
         "id":2,
         "name":"Ahmed mohamed",
-        "email":"bH6mW@example.com",
+        "email":"ooooo@example.com",
         "password":"44444444"
     },
     {
         "id":3,
         "name":"Ali mohamed",
-        "email":"aHb6mW@example.com",
+        "email":"iiiii@example.com",
         "password":"55555555"
     }
 ],
@@ -46,20 +94,20 @@
     {
         "id":1,
         "name":"Mohamed gamal",
-        "email":"Hb6mW@example.com",
+        "email":"ggggg@example.com",
         "password":"24569847"
     },
     {
         "id":2,
         "name":"Ahmed mohamed",
-        "email":"bH6mW@example.com",
-        "password":"44444444"
+        "email":"utrvd@example.com",
+        "password":"21456899"
     },
     {
         "id":3,
         "name":"Ali mohamed",
-        "email":"aHb6mW@example.com",
-        "password":"55555555"
+        "email":"zzzzz@example.com",
+        "password":"278914111"
     }
 ]
 }
