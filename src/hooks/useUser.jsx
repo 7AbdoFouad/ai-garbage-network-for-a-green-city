@@ -5,7 +5,8 @@ const useUser = () => {
   const [users, setUsers] = useState([]);
   const [managers, setmanagers] = useState([]);
   const [truckDrivers, settruckDrivers] = useState([]);
-  // const [user, setUser] = useState({});
+  // const [user, setUse
+  // r] = useState({});
 
   //========================== Users =================================
   // Register[add] a new user

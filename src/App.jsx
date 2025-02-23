@@ -213,7 +213,7 @@ const router = createBrowserRouter(
         <Route path="notifications" element={<ProtectedNotifications />} />
       </Route>
 
-<<<<<<< HEAD
+
       {/* User Routes */}
       <Route path="/userDashboard/:id" element={<LayoutUser />}>
         <Route index element={<ProtectedHomePageForUsers/>} />
@@ -268,15 +268,7 @@ const App = () => {
       />
       <RouterProvider router={router} />
     </AuthProvider>
-=======
-    lol
-    Hello world Abdo and moataz
 
-      <AuthProvider>
-      <RouterProvider router={router} />
-      </AuthProvider>
-  </div>
->>>>>>> 1d5b5b9 (Your commit message)
   );
 };
 
