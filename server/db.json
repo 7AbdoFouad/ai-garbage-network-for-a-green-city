@@ -1,113 +1,295 @@
 {
-    "managers":[
+  "managers": [
     {
-        "id":1,
-        "name":"Mohamed gamal",
-        "email":"Hb6mW@example.com",
-        "password":"24569847",
-        "Permissions":["admin"]
+      "id": "1",
+      "name": "Mohamed gamal",
+      "email": "Hb6mW@example.com",
+      "password": "24569847",
+      "Permissions": [
+        "admin"
+      ]
     },
     {
-        "id":2,
-        "name":"Ahmed mohamed",
-        "email":"bH6mW@example.com",
-        "password":"44444444",
-        "Permissions":["ManageTrucks"]
+      "id": "2",
+      "name": "Ahmed mohamed",
+      "email": "bH6mW@example.com",
+      "password": "44444444",
+      "Permissions": [
+        "ManageTrucks"
+      ]
     },
     {
-        "id":3,
-        "name":"Ali mohamed",
-        "email":"aHb6mW@example.com",
-        "password":"55555555",
-        "Permissions":["ManageAnnouncement"]
-    }
-    ,
-    {
-        "id":4,
-        "name":"weal ismail",
-        "email":"uuuumW@example.com",
-        "password":"84521368",
-        "Permissions":["ManageReportsAndDataAnalysis"]
-    }
-    ,
-    {
-        "id":5,
-        "name":"ramy ismail",
-        "email":"mmmm@example.com",
-        "password":"42132654",
-        "Permissions":["CommunityEngagementManagement"]
-    }
-    ,
-    {
-        "id":6,
-        "name":"samy ismail",
-        "email":"yyyy@example.com",
-        "password":"45875847",
-        "Permissions":["UserManagement"]
-    }
-    ,
-    {
-        "id":7,
-        "name":"omr ismail",
-        "email":"tttt@example.com",
-        "password":"55442121",
-        "Permissions":["PollsManagement"]
-    }
-    ,
-    {
-        "id":8,
-        "name":"teto ismail",
-        "email":"redg@example.com",
-        "password":"45612378",
-        "Permissions":["RewardsManagement"]
-    }
-    ,
-    {
-        "id":9,
-        "name":"yossef ismail",
-        "email":"esdw@example.com",
-        "password":"24853662",
-        "Permissions":["WasteBinManagement"]
-    }
-],
-    "users":[
-    {
-        "id":1,
-        "name":"Mohamed gamal",
-        "email":"aaaaa@example.com",
-        "password":"24569847"
+      "id": "3",
+      "name": "Ali mohamed",
+      "email": "aHb6mW@example.com",
+      "password": "55555555",
+      "Permissions": [
+        "ManageAnnouncement"
+      ]
     },
     {
-        "id":2,
-        "name":"Ahmed mohamed",
-        "email":"ooooo@example.com",
-        "password":"44444444"
+      "id": "4",
+      "name": "weal ismail",
+      "email": "uuuumW@example.com",
+      "password": "84521368",
+      "Permissions": [
+        "ManageReportsAndDataAnalysis"
+      ]
     },
     {
-        "id":3,
-        "name":"Ali mohamed",
-        "email":"iiiii@example.com",
-        "password":"55555555"
+      "id": "5",
+      "name": "ramy ismail",
+      "email": "mmmm@example.com",
+      "password": "42132654",
+      "Permissions": [
+        "CommunityEngagementManagement"
+      ]
+    },
+    {
+      "id": "6",
+      "name": "samy ismail",
+      "email": "yyyy@example.com",
+      "password": "45875847",
+      "Permissions": [
+        "UserManagement"
+      ]
+    },
+    {
+      "id": "7",
+      "name": "omr ismail",
+      "email": "tttt@example.com",
+      "password": "55442121",
+      "Permissions": [
+        "PollsManagement"
+      ]
+    },
+    {
+      "id": "8",
+      "name": "teto ismail",
+      "email": "redg@example.com",
+      "password": "45612378",
+      "Permissions": [
+        "RewardsManagement"
+      ]
+    },
+    {
+      "id": "9",
+      "name": "yossef ismail",
+      "email": "esdw@example.com",
+      "password": "24853662",
+      "Permissions": [
+        "WasteBinManagement"
+      ]
     }
-],
-"Truckdrivers":[
+  ],
+  "users": [
     {
-        "id":1,
-        "name":"Mohamed gamal",
-        "email":"ggggg@example.com",
-        "password":"24569847"
+      "id": "1",
+      "name": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "password": "24569847"
     },
     {
-        "id":2,
-        "name":"Ahmed mohamed",
-        "email":"utrvd@example.com",
-        "password":"21456899"
+      "id": "2",
+      "name": "Ahmed mohamed",
+      "email": "ooooo@example.com",
+      "password": "44444444"
     },
     {
-        "id":3,
-        "name":"Ali mohamed",
-        "email":"zzzzz@example.com",
-        "password":"278914111"
+      "id": "3",
+      "name": "Ali mohamed",
+      "email": "iiiii@example.com",
+      "password": "55555555"
+    },
+    {
+      "id": "fc18",
+      "email": "ytdsk@example.com",
+      "name": "nour hamdy",
+      "password": "12345678"
     }
-]
+  ],
+  "Truckdrivers": [
+    {
+      "id": "1",
+      "name": "Mohamed gamal",
+      "email": "ggggg@example.com",
+      "password": "24569847"
+    },
+    {
+      "id": "2",
+      "name": "Ahmed mohamed",
+      "email": "utrvd@example.com",
+      "password": "21456899"
+    },
+    {
+      "id": "3",
+      "name": "Ali mohamed",
+      "email": "zzzzz@example.com",
+      "password": "278914111"
+    }
+  ],
+  "ContactUs": [
+    {
+      "id": "1",
+      "name": "yassser mohamed",
+      "email": "rszfk@example.com",
+      "Message": "i suggest to add bin in El-Mahalla El-Kubra",
+      "todayDate": "2021-07-01"
+    },
+    {
+      "id": "2",
+      "name": "Ahmed kareem",
+      "email": "ewaxe@example.com",
+      "Message": "I want to know the location of the nearest bin",
+      "todayDate": "2021-07-01"
+    },
+    {
+      "id": "3",
+      "name": "salem nour",
+      "email": "hgtyb@example.com",
+      "Message": "I have a problem with my account",
+      "todayDate": "2021-07-01"
+    },
+    {
+      "id": "4d66",
+      "name": "jojy mogy",
+      "email": "tryuv@example.com",
+      "message": "always believe",
+      "date": "2025-02-24"
+    }
+  ],
+  "regions": [
+    {
+      "id": "1",
+      "regionName": "Al-Qantra Garb",
+      "numOfBins": "3"
+    },
+    {
+      "id": "2",
+      "regionName": "Al-Qantra shark",
+      "numOfBins": "2"
+    },
+    {
+      "id": "3",
+      "regionName": "Abo soltan",
+      "numOfBins": "3"
+    },
+    {
+      "id": "4",
+      "regionName": "El-Mostkbal",
+      "numOfBins": "2"
+    }
+  ],
+  "bins": [
+      {
+        "id": "1",
+        "region": "Al-Qantra Garb",
+        "binNumber": "1",
+        "binLocation": "in front of the mosque in street shehab",
+        "binStatus": "Valid",
+        "Fullness":"Empty"
+      },
+      {
+        "id": "2",
+        "region": "Al-Qantra Garb",
+        "binNumber": "2",
+        "binLocation": "behind the supermarket in street El-Gamal",
+        "binStatus": "Damaged",
+        "Fullness":"Full"
+      },
+      {
+        "id": "3",
+        "region": "Al-Qantra Garb",
+        "binNumber": "3",
+        "binLocation": "in the middle of El-wsam library",
+        "binStatus": "Valid",
+        "Fullness":"Empty"
+      },
+      {
+        "id": "4",
+        "region": "Al-Qantra shark",
+        "binNumber": "1",
+        "binLocation": "next to el-fahd ground",
+        "binStatus": "Valid",
+        "Fullness":"Empty"
+      },
+      {
+        "id": "5",
+        "region": "Al-Qantra shark",
+        "binNumber": "2",
+        "binLocation": "in front of yoscamp hotal in Al-Qantra main street", 
+        "binStatus": "Valid",
+        "Fullness":"Full"
+      },
+      {
+        "id": "6",
+        "region": "Abo soltan",
+        "binNumber": "1",
+        "binLocation": "next to vodafon center in El-Shohada street",
+        "binStatus": "Valid",
+        "Fullness":"Full"
+      },
+      {
+        "id": "7",
+        "region": "Abo soltan",
+        "binNumber": "2",
+        "binLocation": "in opposite of El-hadad market",
+        "binStatus": "Valid",
+        "Fullness":"Empty"
+      },
+      {
+        "id": "8",
+        "region": "Abo soltan",
+        "binNumber": "3",
+        "binLocation": "in front of El-hadad market",
+        "binStatus": "Damaged",
+        "Fullness":"Full"
+      },
+      {
+        "id": "9",
+        "region": "El-Mostkbal",
+        "binNumber": "1",
+        "binLocation": "in the middle El-matar cafe",
+        "binStatus": "Valid",
+        "Fullness":"Full"
+      },
+      {
+        "id": "10",
+        "region": "El-Mostkbal",
+        "binNumber": "2",
+        "binLocation": "next to El-omara garden in West-Elbaled street",
+        "binStatus": "Valid",
+        "Fullness":"Empty"
+      }
+  ],
+  "UsersAnnouncements": [
+    {
+      "id": "1",
+      "userName": "Mohamed gamal",
+      "email": "Hb6mW@example.com",
+      "AnnouncementType": "damaged bin",
+      "AnnouncementDescription": "the bin is damaged",
+      "region": "Al-Qantra Garb",
+      "binNumber": "1",
+      "siteLocation": "in front of the mosque in street shehab",
+      "todayDate": "2021-07-01",
+      "AnnouncementStatus": "Processed",
+      "photoFile": "bin1.jpg",
+      "userId": "1"
+    },
+    {
+      "id": "2",
+      "userName": "ramy ismail",
+      "email": "uyvbj@example.com",
+      "AnnouncementType": "damaged bin",
+      "AnnouncementDescription": "the bin is damaged",
+      "region": "Al-Qantra Garb",
+      "binNumber": "3",
+      "siteLocation": "in the middle of El-wsam library",
+      "todayDate": "2021-07-01",
+      "AnnouncementStatus": "Processed",
+      "photoFile": "bin2.jpg",
+      "userId": "3"
+    }
+  ]
 }

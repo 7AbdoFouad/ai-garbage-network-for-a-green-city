@@ -8,15 +8,15 @@ import { useParams } from "react-router-dom";
 const CustomNavbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const {id}= useParams();
-    const { fetchUser } = useUser();
-    const[user,setuser]=useState({})
-    useEffect(() => {
-        const fetchuser=async()=>{
-         const tuser=await fetchUser(id)
-            setuser(tuser)
-        }
-        fetchuser();
-    }, [id]);
+  //   const { fetchUser } = useUser();
+  //   const[user,setuser]=useState({})
+  //   useEffect(() => {
+  //       const fetchuser=async()=>{
+  //        const tuser=await fetchUser(id)
+  //           setuser(tuser)
+  //       }
+  //       fetchuser();
+  //   }, [id]);
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -24,20 +24,20 @@ const CustomNavbar = () => {
   return (
     <>
       {/* Main Navbar */}
-      <nav className="navbar custom-navbar">
-        <div className="container custom-container d-flex justify-content-center align-items-center">
+      {/* <nav className="navbar custom-navbar">
+        <div className="container custom-container d-flex justify-content-center align-items-center"> */}
           {/* Centered Title */}
-          <div className="navbar-title d-flex align-items-center">
+          {/* <div className="navbar-title d-flex align-items-center">
             <FaUserTie className="logo-icon" />
             <span className="greeting-text">Hello, {(user.name)}</span>
-          </div>
+          </div> */}
 
           {/* Mobile Toggle Button */}
-          <button className="menu-btn" onClick={toggleSidebar}>
+          <button className="menu-btn"  onClick={toggleSidebar}>
             <FaBars className="toggle-icon" />
           </button>
-        </div>
-      </nav>
+        {/* </div>
+      </nav> */}
 
       {/* Sidebar Menu */}
       <div className={`sidebar ${sidebarOpen ? "open" : ""}`}>

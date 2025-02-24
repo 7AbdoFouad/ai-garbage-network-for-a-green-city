@@ -135,7 +135,6 @@
     display: block;
     padding: 10px;
     border-radius: 5px;
-    transition: background 0.3s;
   }
   
   .sidebar-links .nav-link:hover {
@@ -166,4 +165,11 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 998;
   }
-  
+  .menu-btn{
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 61px;
+  }

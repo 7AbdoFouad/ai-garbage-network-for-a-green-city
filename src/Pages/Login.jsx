@@ -5,6 +5,7 @@ import useUser from "../hooks/useUser";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
 const schema = object().shape({
   email: string()
@@ -23,7 +24,8 @@ export default function Login() {
   const { login } = useAuth();
   const { users, managers, truckDrivers } = useUser();
   const navigate = useNavigate();
-
+  const {id}= useParams();
+  const { fetchManager, fetchTruckDriver, fetchUser } = useUser();
   const formik = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema: schema,
@@ -45,7 +47,10 @@ export default function Login() {
     if (check) {
       login(check);
       navigate(`/${role}Dashboard/${check.id}`);
-      toast.success(`Login successful as ${role}`);
+      if (role === "user") fetchUser(check.id);
+      else if (role === "manager") fetchManager(check.id);
+      else if (role === "truckdriver") fetchTruckDriver(check.id);
+      toast.success(`Login successful as ${role}   Welcome ${check.name}`);
     } else {
       toast.error("Login failed. Please check your email and password.");
     }
@@ -113,6 +118,9 @@ export default function Login() {
                   </button>
                 </div>
               </form>
+              <div>
+                forget password handling
+              </div>
             </div>
           </div>
         </div>

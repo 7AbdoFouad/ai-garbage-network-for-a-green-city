@@ -13,8 +13,8 @@
 //       window.removeEventListener("resize", handleResize);
 //     };
 //   }, []);
- 
-//   return (  
+
+//   return (
 //     <div>
 //       <nav className="navbar navbar-expand-lg bg-body-secondary">
 //         <div className="container-fluid">
@@ -125,42 +125,45 @@
 //     </nav>
 //   );
 // };
+
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { FaLeaf } from "react-icons/fa";
 import "./Navbar.css";
 
 const CustomNavbar = () => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark">
-      <div className="container custom-container">
-        {/* Left: Logo & Title */}
-        <a className="navbar-brand d-flex align-items-center" href="/">
-          <FaLeaf className="logo-icon" />
-          <span className="navbar-title">Green City</span>
-        </a>
+    <nav className="navbar navbar-dark">
+      <div className="container custom-container d-flex flex-column flex-sm-row align-items-center justify-content-center justify-content-md-between text-center text-sm-start">
+        
+        {/* Logo & Title - Title moves down on small screens */}
+        <div className="d-flex flex-column flex-sm-row align-items-center">
+          <img
+            src="/src/Components/4530300.jpg"
+            className="logo-icon me-2"
+            width={150}
+          />
+          <span className="navbar-title mt-2 mt-sm-0" style={{ marginLeft: `20px`, marginRight: `10px` }}>Green City</span>
+        </div>
 
-        {/* Navigation Links */}
-        <ul className="navbar-nav ms-auto">
+        {/* Navigation Links - Moves down first on small screens */}
+        <ul className="navbar-nav d-flex flex-column flex-sm-row mt-3 mt-sm-0">
           <li className="nav-item">
-            <NavLink to="/" className="nav-link">
-              Home
-            </NavLink>
+            <NavLink to="/" className="nav-link">Home</NavLink>
           </li>
           <li className="nav-item">
-            <NavLink to="/login" className="nav-link">
-              Login
-            </NavLink>
+            <NavLink to="/login" className="nav-link">Login</NavLink>
           </li>
           <li className="nav-item">
-            <NavLink to="/registeration" className="nav-link">
-              Registration
-            </NavLink>
+            <NavLink to="/registeration" className="nav-link">Registration</NavLink>
           </li>
         </ul>
+
       </div>
     </nav>
   );
 };
 
 export default CustomNavbar;
+
+
+

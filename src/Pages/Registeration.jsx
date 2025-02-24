@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import useUser from "../hooks/useUser";
 import { useNavigate, useParams } from "react-router-dom";
 
+
 const schema = object().shape({
   name: string()
     .required("Name is Required")
@@ -27,7 +28,7 @@ export default function Registeration() {
   const [submitting, setsubmitting] = useState(false);
   const { registerUser,users } = useUser();
   const navigate = useNavigate();
-
+  
   const handleSupmit = async (e) => {
     try {
       setsubmitting(true);
@@ -37,9 +38,10 @@ export default function Registeration() {
         return;
       }
       const res = await registerUser({ email: e.email, name: e.name, password: e.password});
-      navigate("/TodoListPage/"+res.id);
+      navigate(`/userDashboard/${res.id}`);
       console.log(res);
-      toast.success("Registeration Completed");
+      // toast.success("Registeration Completed");
+      toast.success(`Register successful as user   Welcome ${res.name}`);
     } catch (e) {
       console.log(e);
       toast.error("Failed to register user");

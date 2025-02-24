@@ -3,46 +3,56 @@ import { useFormik } from "formik";
 import { object, string } from "yup";
 import { toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
+import useUser from "../../hooks/useUser";
 
 const schema = object().shape({
-  name: string().required("الاسم مطلوب"),
+  name: string().required("Name is required"),
   email: string()
-    .required("البريد الإلكتروني مطلوب")
-    .email("البريد الإلكتروني غير صالح"),
-  message: string().required("الرسالة مطلوبة"),
+    .required("Email is required")
+    .email("Invalid email address"),
+  message: string().required("Message is required").min(10, "Message is too short"),
 });
 
 export default function ContactUsPage() {
-  const todayDate = new Date().toISOString().split("T")[0]; // Hidden field for date
-
+  const todayDate = new Date().toISOString().split("T")[0]; // Hidden field for date 
+  const [submitting, setsubmitting] = useState(false);
+  const { addContactUs } = useUser();
+  const handleSubmit = async (e) => {
+    try {
+    setsubmitting(true); 
+     await addContactUs(e);
+      toast.success("Message sent successfully!");
+      formik.resetForm();
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to send message. Please try again later.");
+    }finally {
+        setsubmitting(false);
+      }
+  };
   const formik = useFormik({
-    initialValues: { name: "", email: "", message: "" },
+    initialValues: { name: "", email: "", message: "", date: todayDate },
     validationSchema: schema,
-    onSubmit: (values) => {
-      console.log({ ...values, date: todayDate });
-      toast.success("تم إرسال رسالتك بنجاح!");
-    },
+    onSubmit: handleSubmit,
   });
 
+  
+ 
+
   return (
-    <div className="container my-5" dir="rtl">
+    <div className="container my-5" dir="ltr">
       {/* Logo & Navigation Bar Placeholder */}
-      <div className="text-center mb-4">
-        <img src="/src/Pages/UserPages/clean-green-city-vector-illustration-concept-flat-style-73462400.webp" alt="الشعار" className="mb-3" style={{ width: "120px" }} />
-        <nav className="navbar navbar-light bg-light rounded p-2">
-          <span className="navbar-brand mx-auto">نفس الشريط اللي فوق</span>
-        </nav>
-      </div>
+      
 
       {/* Contact Form */}
       <div className="row justify-content-center">
         <div className="col-lg-6 col-md-8 col-sm-10">
           <div className="card shadow-lg">
             <div className="card-body">
-              <h2 className="text-center mb-4">نموذج تواصل</h2>
+              <h2 className="text-center mb-4">Contact Form</h2>
               <form onSubmit={formik.handleSubmit}>
                 <div className="form-group mb-3">
-                  <label>الاسم:</label>
+                  <label>Name:</label>
                   <input
                     type="text"
                     className="form-control"
@@ -57,7 +67,7 @@ export default function ContactUsPage() {
                 </div>
 
                 <div className="form-group mb-3">
-                  <label>البريد الإلكتروني:</label>
+                  <label>Email:</label>
                   <input
                     type="email"
                     className="form-control"
@@ -72,7 +82,7 @@ export default function ContactUsPage() {
                 </div>
 
                 <div className="form-group mb-3">
-                  <label>الرسالة:</label>
+                  <label>Message:</label>
                   <textarea
                     className="form-control"
                     name="message"
@@ -90,9 +100,12 @@ export default function ContactUsPage() {
                 <input type="hidden" name="date" value={todayDate} />
 
                 <div className="text-center">
-                  <button type="submit" className="btn btn-success w-100">
-                    إرسال
-                  </button>
+                <button
+                type="submit"
+                className={`btn btn-primary btn-block ${submitting && "disabled"} mt-3`}
+              >
+                Submit
+              </button>
                 </div>
               </form>
             </div>
@@ -102,10 +115,10 @@ export default function ContactUsPage() {
 
       {/* Contact Info */}
       <div className="mt-5 text-center">
-        <h3 className="mb-3">معلومات الاتصال</h3>
-        <p><strong>الهاتف:</strong> 123-456-7890</p>
-        <p><strong>عنوان المكتب:</strong> الإسماعيلية</p>
-        <p><strong>البريد الإلكتروني:</strong> info@cleancity.com</p>
+        <h3 className="mb-3">Contact Information</h3>
+        <p><strong>Phone:</strong> 123-456-7890</p>
+        <p><strong>Office Address:</strong> Ismailia</p>
+        <p><strong>Email:</strong> info@cleancity.com</p>
       </div>
     </div>
   );

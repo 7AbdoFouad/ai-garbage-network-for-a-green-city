@@ -4,19 +4,20 @@ import { FaUserTie, FaBars, FaTimes } from "react-icons/fa"; // Changed icon to 
 import "./ManagerNavbar.css";
 import useUser from "../hooks/useUser";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const CustomNavbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const {id}= useParams();
-    const { fetchManager } = useUser();
-    const[manager,setmanagers]=useState({})
-    useEffect(() => {
-        const fetchmanager=async()=>{
-         const manager=await fetchManager(id)
-            setmanagers(manager)
-        }
-        fetchmanager();
-    }, [id]);
+    // const { fetchManager } = useUser();
+    // const[manager,setmanagers]=useState({})
+    // useEffect(() => {
+    //     const fetchmanager=async()=>{
+    //      const manager=await fetchManager(id);
+    //      setmanagers(manager);
+    //     }
+    //     fetchmanager();
+    // }, [id]);
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -24,20 +25,20 @@ const CustomNavbar = () => {
   return (
     <>
       {/* Main Navbar */}
-      <nav className="navbar custom-navbar">
-        <div className="container custom-container d-flex justify-content-center align-items-center">
+      {/* <nav className="navbar custom-navbar">
+        <div className="container custom-container d-flex justify-content-center align-items-center"> */}
           {/* Centered Title */}
-          <div className="navbar-title d-flex align-items-center">
+          {/* <div className="navbar-title d-flex align-items-center">
             <FaUserTie className="logo-icon" />
             <span className="greeting-text">Hello, {(manager.name)}</span>
-          </div>
+          </div> */}
 
           {/* Mobile Toggle Button */}
           <button className="menu-btn" onClick={toggleSidebar}>
             <FaBars className="toggle-icon" />
           </button>
-        </div>
-      </nav>
+        {/* </div>
+      </nav> */}
 
       {/* Sidebar Menu */}
       <div className={`sidebar ${sidebarOpen ? "open" : ""}`}>
