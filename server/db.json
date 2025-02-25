@@ -273,7 +273,6 @@
       "binNumber": "1",
       "siteLocation": "in front of the mosque in street shehab",
       "todayDate": "2021-07-01",
-      "AnnouncementStatus": "Processed",
       "photoFile": "bin1.jpg",
       "userId": "1"
     },
@@ -287,9 +286,74 @@
       "binNumber": "3",
       "siteLocation": "in the middle of El-wsam library",
       "todayDate": "2021-07-01",
-      "AnnouncementStatus": "Processed",
       "photoFile": "bin2.jpg",
       "userId": "3"
+    },
+    {
+      "id": "3",
+      "userName": "Mohamed gamal",
+      "email": "Hb6mW@example.com",
+      "AnnouncementType": "full bin",
+      "AnnouncementDescription": "the bin is full",
+      "region": "Al-Qantra Garb",
+      "binNumber": "3",
+      "siteLocation": "in the middle of El-wsam library",
+      "todayDate": "2021-07-01",
+      "photoFile": "bin1.jpg",
+      "userId": "1"
+    },
+    {
+      "id": "4",
+      "userName": "Mohamed gamal",
+      "email": "Hb6mW@example.com",
+      "AnnouncementType": "dengerous bin",
+      "AnnouncementDescription": "the bin is dengerous",
+      "region": "Abo soltan",
+      "binNumber": "2",
+      "siteLocation": "next to El-hadad market",
+      "todayDate": "2021-07-01",
+      "photoFile": "bin1.jpg",
+      "userId": "1"
+    },
+    {
+      "id": "5",
+      "userName": "Mohamed gamal",
+      "email": "Hb6mW@example.com",
+      "AnnouncementType": "garbage throw away",
+      "AnnouncementDescription": "alot of garbage",
+      "region": "El-Mostkbal",
+      "binNumber": "1",
+      "siteLocation": "behind El-matar cafe",
+      "todayDate": "2021-07-01",
+      "photoFile": "bin1.jpg",
+      "userId": "1"
+    },
+    {
+      "id": "6",
+      "userName": "Mohamed gamal",
+      "email": "Hb6mW@example.com",
+      "AnnouncementType": "damaged bin",
+      "AnnouncementDescription": "the bin is damaged",
+      "region": "Al-Qantra Garb",
+      "binNumber": "3",
+      "siteLocation": "opposite of El-hadad market",
+      "todayDate": "2021-07-01",
+      "photoFile": "bin1.jpg",
+      "userId": "1"
+    },
+    {
+      "id": "7",
+      "userName": "Mohamed gamal",
+      "email": "Hb6mW@example.com",
+      "AnnouncementType": "damaged bin",
+      "AnnouncementDescription": "the bin is damaged",
+      "region": "Al-Qantra Garb",
+      "binNumber": "1",
+      "siteLocation": "in front of the mosque in street shehab",
+      "todayDate": "2021-07-01",
+      "photoFile": "bin1.jpg",
+      "userId": "1"
     }
+    
   ]
 }

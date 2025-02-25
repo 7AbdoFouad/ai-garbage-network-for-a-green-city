@@ -225,7 +225,7 @@ const router = createBrowserRouter(
         <Route path="settings" element={<ProtectedSettingsPage />} />
         <Route path="polls" element={<ProtectedPollsPage />} />
         <Route path="rewards" element={<ProtectedRewardsPage />} />
-        <Route path="userAnnouncement" element={<ProtectedUserAnnouncementPage />} />
+        <Route path="userAnnouncement/:id" element={<ProtectedUserAnnouncementPage />} />
         <Route path="reports" element={<ProtectedReportsPage />} />
       </Route>
 
