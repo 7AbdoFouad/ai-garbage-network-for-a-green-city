@@ -1,0 +1,111 @@
+/* 📌 Contact Form Styling */
+.contactContainer {
+  background: linear-gradient(135deg, #ade8f4, #48cae4);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+}
+
+/* 📌 Card Styling */
+.contactCard {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out;
+  margin-top: 2rem;
+}
+
+.contactCard:hover {
+  transform: scale(1.02);
+}
+
+/* 📌 Input Fields */
+.formControl {
+  border-radius: 10px;
+  border: 2px solid #b5eaea;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  padding: 10px;
+}
+
+.formControl:focus {
+  border-color: #00b4d8;
+  box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+}
+
+/* 📌 Button Styling */
+.btnSubmit {
+  background: linear-gradient(135deg, #00b4d8, #0077b6);
+  color: white;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: background 0.3s ease-in-out, transform 0.2s ease;
+  border: none;
+}
+
+.btnSubmit:hover {
+  background: linear-gradient(135deg, #0077b6, #023e8a);
+  transform: scale(1.05);
+}
+
+.btnSubmit:disabled {
+  background: #b5eaea;
+  cursor: not-allowed;
+}
+
+/* 📌 Contact Info Styling */
+.contactInfo {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  margin-top: 5rem;
+}
+
+.contactInfo p {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* 📌 Animation for Smooth Appearance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeIn {
+  animation: fadeIn 1s ease-in-out;
+}
+
+
+  /* 
+   .btn-submit {
+    background: linear-gradient(135deg, #00b4d8, #0077b6);
+    color: white;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background 0.3s ease-in-out, transform 0.2s ease;
+  }
+  
+  .btn-submit:hover {
+    background: linear-gradient(135deg, #0077b6, #023e8a);
+    transform: scale(1.05);
+    -webkit-transform: scale(1.05);
+    -moz-transform: scale(1.05);
+    -ms-transform: scale(1.05);
+    -o-transform: scale(1.05);
+}
+  
+  */

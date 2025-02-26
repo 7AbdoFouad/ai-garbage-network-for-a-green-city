@@ -147,7 +147,7 @@ const CustomNavbar = () => {
 
         {/* Navigation Links - Moves down first on small screens */}
         <ul className="navbar-nav d-flex flex-column flex-sm-row mt-3 mt-sm-0">
-          <li className="nav-item">
+          <li className="nav-item" onFocus={(e) => e.target.blur()}>
             <NavLink to="/" className="nav-link">Home</NavLink>
           </li>
           <li className="nav-item">

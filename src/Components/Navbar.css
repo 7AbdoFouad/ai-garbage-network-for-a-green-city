@@ -134,7 +134,7 @@ margin-left: 5px;
 transition: 0.3s;
 font-size: x-large;
 font-weight: 600;
-border-radius:  5px;
+border-radius:  5px; 
 }
 .navbar-nav.ms-auto .nav-link:hover,
 .navbar-nav.ms-auto .nav-link.active {
@@ -143,6 +143,7 @@ border-radius:  5px;
   border-radius:  5px;
  
 }
+
 
 /* Overlay */
 .overlay {
