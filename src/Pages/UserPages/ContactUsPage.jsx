@@ -33,7 +33,7 @@ export default function ContactUsPage() {
   };
 
   const formik = useFormik({
-    initialValues: { name: "", email: "", message: "", date: todayDate },
+    initialValues: { name: "", email: "", message: "", todayDate: todayDate },
     validationSchema: schema,
     onSubmit: handleSubmit,
   });

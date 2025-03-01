@@ -134,14 +134,16 @@
       "name": "yassser mohamed",
       "email": "rszfk@example.com",
       "Message": "i suggest to add bin in El-Mahalla El-Kubra",
-      "todayDate": "2021-07-01"
+      "todayDate": "2021-07-01",
+      "userId": "1"
     },
     {
       "id": "2",
       "name": "Ahmed kareem",
       "email": "ewaxe@example.com",
       "Message": "I want to know the location of the nearest bin",
-      "todayDate": "2021-07-01"
+      "todayDate": "2021-07-01",
+      "userId": "1"
     },
     {
       "id": "3",
@@ -155,7 +157,7 @@
       "name": "jojy mogy",
       "email": "tryuv@example.com",
       "message": "always believe",
-      "date": "2025-02-24"
+      "todayDate": "2025-02-24"
     }
   ],
   "regions": [
@@ -181,86 +183,86 @@
     }
   ],
   "bins": [
-      {
-        "id": "1",
-        "region": "Al-Qantra Garb",
-        "binNumber": "1",
-        "binLocation": "in front of the mosque in street shehab",
-        "binStatus": "Valid",
-        "Fullness":"Empty"
-      },
-      {
-        "id": "2",
-        "region": "Al-Qantra Garb",
-        "binNumber": "2",
-        "binLocation": "behind the supermarket in street El-Gamal",
-        "binStatus": "Damaged",
-        "Fullness":"Full"
-      },
-      {
-        "id": "3",
-        "region": "Al-Qantra Garb",
-        "binNumber": "3",
-        "binLocation": "in the middle of El-wsam library",
-        "binStatus": "Valid",
-        "Fullness":"Empty"
-      },
-      {
-        "id": "4",
-        "region": "Al-Qantra shark",
-        "binNumber": "1",
-        "binLocation": "next to el-fahd ground",
-        "binStatus": "Valid",
-        "Fullness":"Empty"
-      },
-      {
-        "id": "5",
-        "region": "Al-Qantra shark",
-        "binNumber": "2",
-        "binLocation": "in front of yoscamp hotal in Al-Qantra main street", 
-        "binStatus": "Valid",
-        "Fullness":"Full"
-      },
-      {
-        "id": "6",
-        "region": "Abo soltan",
-        "binNumber": "1",
-        "binLocation": "next to vodafon center in El-Shohada street",
-        "binStatus": "Valid",
-        "Fullness":"Full"
-      },
-      {
-        "id": "7",
-        "region": "Abo soltan",
-        "binNumber": "2",
-        "binLocation": "in opposite of El-hadad market",
-        "binStatus": "Valid",
-        "Fullness":"Empty"
-      },
-      {
-        "id": "8",
-        "region": "Abo soltan",
-        "binNumber": "3",
-        "binLocation": "in front of El-hadad market",
-        "binStatus": "Damaged",
-        "Fullness":"Full"
-      },
-      {
-        "id": "9",
-        "region": "El-Mostkbal",
-        "binNumber": "1",
-        "binLocation": "in the middle El-matar cafe",
-        "binStatus": "Valid",
-        "Fullness":"Full"
-      },
-      {
-        "id": "10",
-        "region": "El-Mostkbal",
-        "binNumber": "2",
-        "binLocation": "next to El-omara garden in West-Elbaled street",
-        "binStatus": "Valid",
-        "Fullness":"Empty"
-      }
+    {
+      "id": "1",
+      "region": "Al-Qantra Garb",
+      "binNumber": "1",
+      "binLocation": "in front of the mosque in street shehab",
+      "binStatus": "Valid",
+      "Fullness": "Empty"
+    },
+    {
+      "id": "2",
+      "region": "Al-Qantra Garb",
+      "binNumber": "2",
+      "binLocation": "behind the supermarket in street El-Gamal",
+      "binStatus": "Damaged",
+      "Fullness": "Full"
+    },
+    {
+      "id": "3",
+      "region": "Al-Qantra Garb",
+      "binNumber": "3",
+      "binLocation": "in the middle of El-wsam library",
+      "binStatus": "Valid",
+      "Fullness": "Empty"
+    },
+    {
+      "id": "4",
+      "region": "Al-Qantra shark",
+      "binNumber": "1",
+      "binLocation": "next to el-fahd ground",
+      "binStatus": "Valid",
+      "Fullness": "Empty"
+    },
+    {
+      "id": "5",
+      "region": "Al-Qantra shark",
+      "binNumber": "2",
+      "binLocation": "in front of yoscamp hotal in Al-Qantra main street",
+      "binStatus": "Valid",
+      "Fullness": "Full"
+    },
+    {
+      "id": "6",
+      "region": "Abo soltan",
+      "binNumber": "1",
+      "binLocation": "next to vodafon center in El-Shohada street",
+      "binStatus": "Valid",
+      "Fullness": "Full"
+    },
+    {
+      "id": "7",
+      "region": "Abo soltan",
+      "binNumber": "2",
+      "binLocation": "in opposite of El-hadad market",
+      "binStatus": "Valid",
+      "Fullness": "Empty"
+    },
+    {
+      "id": "8",
+      "region": "Abo soltan",
+      "binNumber": "3",
+      "binLocation": "in front of El-hadad market",
+      "binStatus": "Damaged",
+      "Fullness": "Full"
+    },
+    {
+      "id": "9",
+      "region": "El-Mostkbal",
+      "binNumber": "1",
+      "binLocation": "in the middle El-matar cafe",
+      "binStatus": "Valid",
+      "Fullness": "Full"
+    },
+    {
+      "id": "10",
+      "region": "El-Mostkbal",
+      "binNumber": "2",
+      "binLocation": "next to El-omara garden in West-Elbaled street",
+      "binStatus": "Valid",
+      "Fullness": "Empty"
+    }
   ],
   "UsersAnnouncements": [
     {
@@ -353,7 +355,58 @@
       "todayDate": "2021-07-01",
       "photoFile": "bin1.jpg",
       "userId": "1"
+    },
+    {
+      "id": "fe8b",
+      "AnnouncementType": "تلف صندوق",
+      "AnnouncementDescription": "jjjj",
+      "region": "Abo soltan",
+      "binNumber": "3",
+      "siteLocation": "in front of El-hadad market",
+      "todayDate": "2025-03-01",
+      "photoFile": "C:\\fakepath\\dead.jpg",
+      "userId": "1",
+      "userName": "Mohamed gamal",
+      "email": "aaaaa@example.com"
+    },
+    {
+      "id": "c799",
+      "userName": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "AnnouncementType": "عدم جمع النفايات",
+      "AnnouncementDescription": "",
+      "region": "Abo soltan",
+      "binNumber": "3",
+      "siteLocation": "in front of El-hadad market",
+      "todayDate": "2025-03-01",
+      "photoFile": null,
+      "userId": "1"
+    },
+    {
+      "id": "5c06",
+      "userName": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "AnnouncementType": "نفايات متناثرة",
+      "AnnouncementDescription": "",
+      "region": "Al-Qantra shark",
+      "binNumber": "1",
+      "siteLocation": "next to el-fahd ground",
+      "todayDate": "2025-03-01",
+      "photoFile": "C:\\fakepath\\a2.jpg",
+      "userId": "1"
+    },
+    {
+      "id": "6b8b",
+      "userName": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "AnnouncementType": "تسرب مواد خطرة",
+      "AnnouncementDescription": "",
+      "region": "Al-Qantra shark",
+      "binNumber": "2",
+      "siteLocation": "in front of yoscamp hotal in Al-Qantra main street",
+      "todayDate": "2025-03-01",
+      "photoFile": null,
+      "userId": "1"
     }
-    
   ]
 }

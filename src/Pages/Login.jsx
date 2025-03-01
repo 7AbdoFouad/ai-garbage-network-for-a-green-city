@@ -40,16 +40,16 @@ export default function Login() {
 
     const check = db.find(
       (user) =>
-        user.email === formik.values.email &&
+        (user.email === formik.values.email || user.phone === formik.values.email) &&
         user.password === formik.values.password
     );
 
     if (check) {
       login(check);
       navigate(`/${role}Dashboard/${check.id}`);
-      if (role === "user") fetchUser(check.id);
-      else if (role === "manager") fetchManager(check.id);
-      else if (role === "truckdriver") fetchTruckDriver(check.id);
+      // if (role === "user") fetchUser(check.id);
+      // else if (role === "manager") fetchManager(check.id);
+      // else if (role === "truckdriver") fetchTruckDriver(check.id);
       toast.success(`Login successful as ${role}   Welcome ${check.name}`);
     } else {
       toast.error("Login failed. Please check your email and password.");
@@ -81,7 +81,7 @@ export default function Login() {
               {/* Login Form */}
               <form onSubmit={formik.handleSubmit}>
                 <div className="form-group">
-                  <label>Email address</label>
+                  <label>Email address or Phone</label>
                   <input
                     type="text"
                     className="form-control"
