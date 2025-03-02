@@ -67,7 +67,7 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="communityEngagement" className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`communityEngagement/${id}`} className="nav-link" onClick={toggleSidebar}>
               Community Engagement
             </NavLink>
           </li>
@@ -82,12 +82,12 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="polls" className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`polls/${id}`} className="nav-link" onClick={toggleSidebar}>
               Polls
             </NavLink>
           </li>
           <li>
-            <NavLink to="rewards" className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`rewards/${id}`} className="nav-link" onClick={toggleSidebar}>
               Rewards
             </NavLink>
           </li>

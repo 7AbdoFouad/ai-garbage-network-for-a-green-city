@@ -4,7 +4,7 @@
       "id": "1",
       "name": "Mohamed gamal",
       "email": "Hb6mW@example.com",
-      "password": "24569847",
+      "password": "66666666",
       "Permissions": [
         "admin"
       ]
@@ -87,25 +87,52 @@
       "id": "1",
       "name": "Mohamed gamal",
       "email": "aaaaa@example.com",
-      "password": "24569847"
+      "password": "24569847",
+      "phone": "01022378282",
+      "numOfAcceptedAnnouncementsCount": 5,
+      "numOfCompletedActivitiesCount": 6,
+      "numOfCompletedPollsCount": 5
     },
     {
       "id": "2",
       "name": "Ahmed mohamed",
       "email": "ooooo@example.com",
-      "password": "44444444"
+      "password": "44444444",
+      "phone": "01245712364",
+      "numOfAcceptedAnnouncementsCount": 2,
+      "numOfCompletedActivitiesCount": 3,
+      "numOfCompletedPollsCount": 7
     },
     {
       "id": "3",
       "name": "Ali mohamed",
       "email": "iiiii@example.com",
-      "password": "55555555"
+      "password": "55555555",
+      "phone": "01142368472",
+      "numOfAcceptedAnnouncementsCount": 0,
+      "numOfCompletedActivitiesCount": 1,
+      "numOfCompletedPollsCount": 6
     },
     {
-      "id": "fc18",
+      "id": "4",
       "email": "ytdsk@example.com",
       "name": "nour hamdy",
-      "password": "12345678"
+      "password": "12345678",
+      "phone": "01022457896",
+      "numOfAcceptedAnnouncementsCount": 0,
+      "numOfCompletedActivitiesCount": 0,
+      "numOfCompletedPollsCount": 0
+    },
+    {
+      "id": "6550",
+      "name": "jjjjjj",
+      "email": "bdalrhmnfwad15@gmail.com",
+      "phone": "01022378282",
+      "password": "55555555",
+      "repeatPassword": "55555555",
+      "numOfAcceptedAnnouncementsCount": 0,
+      "numOfCompletedActivitiesCount": 0,
+      "numOfCompletedPollsCount": 0
     }
   ],
   "Truckdrivers": [
@@ -331,32 +358,6 @@
       "userId": "1"
     },
     {
-      "id": "6",
-      "userName": "Mohamed gamal",
-      "email": "Hb6mW@example.com",
-      "AnnouncementType": "damaged bin",
-      "AnnouncementDescription": "the bin is damaged",
-      "region": "Al-Qantra Garb",
-      "binNumber": "3",
-      "siteLocation": "opposite of El-hadad market",
-      "todayDate": "2021-07-01",
-      "photoFile": "bin1.jpg",
-      "userId": "1"
-    },
-    {
-      "id": "7",
-      "userName": "Mohamed gamal",
-      "email": "Hb6mW@example.com",
-      "AnnouncementType": "damaged bin",
-      "AnnouncementDescription": "the bin is damaged",
-      "region": "Al-Qantra Garb",
-      "binNumber": "1",
-      "siteLocation": "in front of the mosque in street shehab",
-      "todayDate": "2021-07-01",
-      "photoFile": "bin1.jpg",
-      "userId": "1"
-    },
-    {
       "id": "fe8b",
       "AnnouncementType": "تلف صندوق",
       "AnnouncementDescription": "jjjj",
@@ -407,6 +408,156 @@
       "todayDate": "2025-03-01",
       "photoFile": null,
       "userId": "1"
+    },
+    {
+      "id": "96f2",
+      "userName": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "AnnouncementType": "نفايات متناثرة",
+      "AnnouncementDescription": "",
+      "region": "Al-Qantra shark",
+      "binNumber": "2",
+      "siteLocation": "in front of yoscamp hotal in Al-Qantra main street",
+      "todayDate": "2025-03-01",
+      "photoFile": null,
+      "userId": "1"
+    },
+    {
+      "id": "c526",
+      "userName": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "AnnouncementType": "تلف صندوق",
+      "AnnouncementDescription": "",
+      "region": "Al-Qantra shark",
+      "binNumber": "2",
+      "siteLocation": "in front of yoscamp hotal in Al-Qantra main street",
+      "todayDate": "2025-03-01",
+      "photoFile": "C:\\fakepath\\edu.webp",
+      "userId": "1"
     }
+  ],
+  "CommunityActivities": [
+    {
+      "id": "1",
+      "ActName": "ورشة إعادة التدوير المنزلي",
+      "ActDescription": "ورشة عمل لتعليم الأطفال كيفية إعادة تدوير النفايات المنزلية",
+      "actIntervalDate": "19/2/2025 - 27/2/2025",
+      "actstate": "متاحة",
+      "NumOfSubscribers": 10,
+      "NumOfRequiredSubscribers": 40
+    },
+    {
+      "id": "2",
+      "ActName": "ورشة صناعة الحقائب من القماش المعاد تدويره",
+      "ActDescription": "ورشة عمل لتعليم الأطفال كيفية صناعة الحقائب من القماش المعاد تدويره",
+      "actIntervalDate": "11/7/2025 - 20/8/2025",
+      "actstate": "متاحة",
+      "NumOfSubscribers": 20,
+      "NumOfRequiredSubscribers": 40
+    },
+    {
+      "id": "3",
+      "ActName": " ورشة تحويل النفايات العضوية إلى سماد",
+      "ActDescription": "ورشة عمل لتعليم الأطفال كيفية تحويل النفايات العضوية إلى سماد",
+      "actIntervalDate": "2/2/2025 - 3/3/2025",
+      "actstate": "متاحة",
+      "NumOfSubscribers": 35,
+      "NumOfRequiredSubscribers": 70
+    },
+    {
+      "id": "4",
+      "ActName": "ورشة تحويل الزيوت المستخدمة إلى صابون",
+      "ActDescription": "ورشة عمل لتعليم الأطفال كيفية تحويل الزيوت المستخدمة إلى صابون",
+      "actIntervalDate": "10/5/2025 - 30/6/2025",
+      "actstate": "متاحة",
+      "NumOfSubscribers": 22,
+      "NumOfRequiredSubscribers": 50
+    }
+  ],
+  "SubscribersOfCommunityActivities": [
+    {
+      "id": "1",
+      "name": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "ActivityName": "ورشة إعادة التدوير المنزلي",
+      "userId": "1"
+    },
+    {
+      "id": "2",
+      "name": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "ActivityName": "ورشة عمل لتعليم الأطفال كيفية تحويل النفايات العضوية إلى سماد",
+      "userId": "1"
+    },
+    {
+      "id": "3",
+      "name": "Ahmed mohamed",
+      "email": "ooooo@example.com",
+      "ActivityName": "حملة إعادة التدوير المنزلي",
+      "userId": "2"
+    },
+    {
+      "id": "4",
+      "name": "Ali mohamed",
+      "email": "iiiii@example.com",
+      "ActivityName": "حملة إعادة التدوير المنزلي",
+      "userId": "3"
+    }
+  ],
+  "Polls": [],
+  "SubscribersOfPolls": [],
+  "Rewards": [
+    {
+      "id": "1",
+      "rewardName": "مكافأة درع الإبلاغ المسؤول",
+      "rewardDesc": "مكافأة للمستخدمين الذين قاموا بتقديم بلاغات فعالة",
+      "rewardRequirements": {
+        "numOfAcceptedAnnouncements": 5
+      },
+      "ExpiryDate": "2025-07-01",
+      "rewardValue": "5$"
+    },
+    {
+      "id": "2",
+      "rewardName": "مكافأة وسام التفاعل",
+      "rewardDesc": "مكافأة للمستخدمين الذين شاركوا في الأنشطة المجتمعية",
+      "rewardRequirements": {
+        "numOfCompletedActivities": 6
+      },
+      "ExpiryDate": "2025-05-30",
+      "rewardValue": "5$"
+    },
+    {
+      "id": "3",
+      "rewardName": "مكافأة نجمة التطوير",
+      "rewardDesc": "مكافأة للمستخدمين الذين أكملوااستطلاعات الرأي",
+      "rewardRequirements": {
+        "numOfCompletedPolls": 5
+      },
+      "ExpiryDate": "2025-08-15",
+      "rewardValue": "5$"
+    },
+    {
+      "id": "4",
+      "rewardName": "نجمة الإنجاز",
+      "rewardDesc": "مكافأة للمستخدمين الذين يظهرون التزامًا فعّالًا في تحسين المجتمع من خلال المشاركة في البلاغات، الأنشطة الاجتماعية، واستطلاعات الرأي",
+      "rewardRequirements": {
+        "numOfAcceptedAnnouncements": 5,
+        "numOfCompletedActivities": 5,
+        "numOfCompletedPolls": 5
+      },
+      "ExpiryDate": "2025-09-24",
+      "rewardValue": "10$"
+    }
+  ],
+  "UsersSignedUpForRewards": [
+    {
+      "id": "1",
+      "name": "Mohamed gamal",
+      "email": "aaaaa@example.com",
+      "rewardName": "مكافأة درع الإبلاغ المسؤول",
+      "userId": "1"
+    }
+   
   ]
 }

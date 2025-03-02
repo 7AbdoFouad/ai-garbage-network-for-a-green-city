@@ -42,12 +42,7 @@ export default function Registeration() {
         setSubmitting(false);
         return;
       }
-      const res = await registerUser({
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
-        password: values.password,
-      });
+      const res = await registerUser(values);
       navigate(`/userDashboard/${res.id}`);
       toast.success(`Registration successful! Welcome, ${res.name}`);
     } catch (e) {
@@ -59,7 +54,16 @@ export default function Registeration() {
   };
 
   const formik = useFormik({
-    initialValues: { name: "", email: "", phone: "", password: "", repeatPassword: "" },
+    initialValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      repeatPassword: "",
+      numOfAcceptedAnnouncementsCount: 0,
+      numOfCompletedActivitiesCount: 0,
+      numOfCompletedPollsCount: 0,
+    },
     validationSchema: schema,
     onSubmit: handleSubmit,
   });
@@ -76,7 +80,11 @@ export default function Registeration() {
                 <label htmlFor="username">User Name</label>
                 <input
                   type="text"
-                  className={`form-control ${formik.touched.name && formik.errors.name ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    formik.touched.name && formik.errors.name
+                      ? "is-invalid"
+                      : ""
+                  }`}
                   id="username"
                   name="name"
                   placeholder="Enter Your Name"
@@ -94,7 +102,11 @@ export default function Registeration() {
                 <label htmlFor="email">Email address</label>
                 <input
                   type="text"
-                  className={`form-control ${formik.touched.email && formik.errors.email ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    formik.touched.email && formik.errors.email
+                      ? "is-invalid"
+                      : ""
+                  }`}
                   id="email"
                   name="email"
                   placeholder="Enter email"
@@ -112,7 +124,11 @@ export default function Registeration() {
                 <label htmlFor="phone">Phone Number</label>
                 <input
                   type="text"
-                  className={`form-control ${formik.touched.phone && formik.errors.phone ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    formik.touched.phone && formik.errors.phone
+                      ? "is-invalid"
+                      : ""
+                  }`}
                   id="phone"
                   name="phone"
                   placeholder="Enter your phone number"
@@ -130,7 +146,11 @@ export default function Registeration() {
                 <label htmlFor="password">Password</label>
                 <input
                   type="password"
-                  className={`form-control ${formik.touched.password && formik.errors.password ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    formik.touched.password && formik.errors.password
+                      ? "is-invalid"
+                      : ""
+                  }`}
                   id="password"
                   name="password"
                   placeholder="Password"
@@ -139,7 +159,9 @@ export default function Registeration() {
                   onBlur={formik.handleBlur}
                 />
                 {formik.touched.password && formik.errors.password && (
-                  <div className="invalid-feedback">{formik.errors.password}</div>
+                  <div className="invalid-feedback">
+                    {formik.errors.password}
+                  </div>
                 )}
               </div>
 
@@ -148,7 +170,12 @@ export default function Registeration() {
                 <label htmlFor="repeatPassword">Repeat Password</label>
                 <input
                   type="password"
-                  className={`form-control ${formik.touched.repeatPassword && formik.errors.repeatPassword ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    formik.touched.repeatPassword &&
+                    formik.errors.repeatPassword
+                      ? "is-invalid"
+                      : ""
+                  }`}
                   id="repeatPassword"
                   name="repeatPassword"
                   placeholder="Repeat Password"
@@ -156,15 +183,20 @@ export default function Registeration() {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
-                {formik.touched.repeatPassword && formik.errors.repeatPassword && (
-                  <div className="invalid-feedback">{formik.errors.repeatPassword}</div>
-                )}
+                {formik.touched.repeatPassword &&
+                  formik.errors.repeatPassword && (
+                    <div className="invalid-feedback">
+                      {formik.errors.repeatPassword}
+                    </div>
+                  )}
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className={`btn btn-primary btn-block mt-3 ${submitting && "disabled"}`}
+                className={`btn btn-primary btn-block mt-3 ${
+                  submitting && "disabled"
+                }`}
                 disabled={submitting}
               >
                 {submitting ? "Registering..." : "Submit"}

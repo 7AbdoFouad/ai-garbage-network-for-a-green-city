@@ -32,7 +32,7 @@ import HomePageForUsers from "./Pages/UserPages/HomePageForUsers";
 import AboutUsPage from "./Pages/UserPages/AboutUsPage";
 import ContactUsPage from "./Pages/UserPages/ContactUsPage";
 import FAQPage from "./Pages/UserPages/FAQPage";
-import CommunityEngagementManagemen from "./Pages/ManagerPages/CommunityEngagementManagement";
+import CommunityEngagementPage from "./Pages/UserPages/CommunityEngagementPage";
 import NotificationsPage from "./Pages/UserPages/NotificationsPage";
 import SettingPage from "./Pages/UserPages/SettingPage";
 import PollsPage from "./Pages/UserPages/PollsPage";
@@ -132,7 +132,7 @@ const ProtectedHomePageForUsers = withAuthorization(HomePageForUsers);
 const ProtectedAboutUsPage = withAuthorization(AboutUsPage);
 const ProtectedContactUsPage = withAuthorization(ContactUsPage);
 const ProtectedFAQPage = withAuthorization(FAQPage);
-const ProtectedCommunityEngagementManagemen = withAuthorization(CommunityEngagementManagemen);
+const ProtectedCommunityEngagementManagemen = withAuthorization(CommunityEngagementPage);
 const ProtectedNotificationPage = withAuthorization(NotificationsPage);
 const ProtectedSettingsPage = withAuthorization(SettingPage);
 const ProtectedPollsPage = withAuthorization(PollsPage);
@@ -220,11 +220,11 @@ const router = createBrowserRouter(
         <Route path="aboutUs" element={<ProtectedAboutUsPage />} />
         <Route path="contactUs" element={<ProtectedContactUsPage />} />
         <Route path="faq" element={<ProtectedFAQPage />} />
-        <Route path="communityEngagement" element={<ProtectedCommunityEngagementManagemen />} />
+        <Route path="communityEngagement/:id" element={<ProtectedCommunityEngagementManagemen />} />
         <Route path="notifications" element={<ProtectedNotificationPage />} />
         <Route path="settings" element={<ProtectedSettingsPage />} />
-        <Route path="polls" element={<ProtectedPollsPage />} />
-        <Route path="rewards" element={<ProtectedRewardsPage />} />
+        <Route path="polls/:id" element={<ProtectedPollsPage />} />
+        <Route path="rewards/:id" element={<ProtectedRewardsPage />} />
         <Route path="userAnnouncement/:id" element={<ProtectedUserAnnouncementPage />} />
         <Route path="reports" element={<ProtectedReportsPage />} />
       </Route>

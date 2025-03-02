@@ -8,12 +8,14 @@ import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 
 const schema = object().shape({
-  email: string()
-    .required("Email is required")
-    .matches(
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{3,8}))$/,
-      "Email is not valid"
-    ),
+  emailOrPhone: string()
+    .required("Email or phone number is required")
+    .test("email-or-phone", "Enter a valid email or phone number", (value) => {
+      const emailRegex =
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      const phoneRegex = /^[0-9]{10,15}$/; // Accepts 10-15 digit numbers (adjust as needed)
+      return emailRegex.test(value) || phoneRegex.test(value);
+    }),
   password: string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters"),
@@ -24,10 +26,10 @@ export default function Login() {
   const { login } = useAuth();
   const { users, managers, truckDrivers } = useUser();
   const navigate = useNavigate();
-  const {id}= useParams();
-  const { fetchManager, fetchTruckDriver, fetchUser } = useUser();
+  const { id } = useParams();
+
   const formik = useFormik({
-    initialValues: { email: "", password: "" },
+    initialValues: { emailOrPhone: "", password: "" },
     validationSchema: schema,
     onSubmit: () => checkUser(),
   });
@@ -40,19 +42,17 @@ export default function Login() {
 
     const check = db.find(
       (user) =>
-        (user.email === formik.values.email || user.phone === formik.values.email) &&
+        (user.email === formik.values.emailOrPhone ||
+          user.phone === formik.values.emailOrPhone) &&
         user.password === formik.values.password
     );
 
     if (check) {
       login(check);
       navigate(`/${role}Dashboard/${check.id}`);
-      // if (role === "user") fetchUser(check.id);
-      // else if (role === "manager") fetchManager(check.id);
-      // else if (role === "truckdriver") fetchTruckDriver(check.id);
-      toast.success(`Login successful as ${role}   Welcome ${check.name}`);
+      toast.success(`Login successful as ${role}. Welcome ${check.name}`);
     } else {
-      toast.error("Login failed. Please check your email and password.");
+      toast.error("Login failed. Please check your email or phone and password.");
     }
   };
 
@@ -85,14 +85,14 @@ export default function Login() {
                   <input
                     type="text"
                     className="form-control"
-                    name="email"
-                    placeholder="Enter email"
-                    value={formik.values.email}
+                    name="emailOrPhone"
+                    placeholder="Enter email or phone number"
+                    value={formik.values.emailOrPhone}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   />
-                  {formik.touched.email && formik.errors.email && (
-                    <p className="text-danger">{formik.errors.email}</p>
+                  {formik.touched.emailOrPhone && formik.errors.emailOrPhone && (
+                    <p className="text-danger">{formik.errors.emailOrPhone}</p>
                   )}
                 </div>
 
@@ -118,8 +118,9 @@ export default function Login() {
                   </button>
                 </div>
               </form>
-              <div>
-                forget password handling
+
+              <div className="mt-3 text-center">
+                <a href="/forgot-password">Forgot Password?</a>
               </div>
             </div>
           </div>
