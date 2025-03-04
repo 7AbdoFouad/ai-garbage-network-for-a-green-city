@@ -5,7 +5,6 @@ import useUser from "../hooks/useUser";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
 
 const schema = object().shape({
   emailOrPhone: string()
@@ -13,7 +12,7 @@ const schema = object().shape({
     .test("email-or-phone", "Enter a valid email or phone number", (value) => {
       const emailRegex =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      const phoneRegex = /^[0-9]{10,15}$/; // Accepts 10-15 digit numbers (adjust as needed)
+      const phoneRegex = /^[0-9]{10,15}$/;
       return emailRegex.test(value) || phoneRegex.test(value);
     }),
   password: string()
@@ -26,7 +25,6 @@ export default function Login() {
   const { login } = useAuth();
   const { users, managers, truckDrivers } = useUser();
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const formik = useFormik({
     initialValues: { emailOrPhone: "", password: "" },
@@ -64,7 +62,6 @@ export default function Login() {
             <div className="card-body">
               <h2 className="card-title text-center mb-4">Login</h2>
 
-              {/* Role Selection */}
               <div className="form-group mb-3">
                 <label>Select Role</label>
                 <select
@@ -78,7 +75,6 @@ export default function Login() {
                 </select>
               </div>
 
-              {/* Login Form */}
               <form onSubmit={formik.handleSubmit}>
                 <div className="form-group">
                   <label>Email address or Phone</label>
@@ -120,7 +116,9 @@ export default function Login() {
               </form>
 
               <div className="mt-3 text-center">
-                <a href="/forgot-password">Forgot Password?</a>
+                <button className="btn btn-link" onClick={() => navigate("/forgot-password")}>
+                  Forgot Password?
+                </button>
               </div>
             </div>
           </div>

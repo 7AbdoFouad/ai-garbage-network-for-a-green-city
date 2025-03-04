@@ -13,6 +13,8 @@ import NavBar from "./Components/Navbar";
 import LandingPage from "./Pages/LandingPage";
 import Login from "./Pages/Login";
 import Registeration from "./Pages/Registeration";
+import ForgetPassword from "./Pages/ForgotPassword";
+import ResetPassword from "./Pages/ResetPassword";
 import NotFound from "./Pages/NotFound";
 
 // Manager pages
@@ -241,6 +243,8 @@ const router = createBrowserRouter(
 
       {/* Authentication Routes */}
       <Route path="/login" element={<Login myrole="admin" />} />
+      <Route path="/forgot-password" element={<ForgetPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/registeration" element={<Registeration />} />
 
       {/* Not Found */}
