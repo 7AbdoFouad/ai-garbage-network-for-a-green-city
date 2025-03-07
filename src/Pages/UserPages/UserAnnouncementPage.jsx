@@ -141,6 +141,19 @@ const UserAnnouncementPage = () => {
     }
   };
 
+  const handleChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+  
+      reader.onloadend = () => {
+       formik.values.photoFile = reader.result; // Store the actual file, not base64
+      };
+  
+      reader.readAsDataURL(file);
+    }
+  };
+  
 
   const handleDelete = async (announcementId) => {
     try {
@@ -325,12 +338,23 @@ const UserAnnouncementPage = () => {
           <div className="col-12">
             <label className="form-label">إرفاق صورة (اختياري)</label>
             <input
-              type="file"
-              className="form-control"
-              ref={inputRef}
-              {...formik.getFieldProps("photoFile")}
-              // onChange={(e) => formik.setFieldValue("photoFile", e.target.files[0])}
-            />
+  type="file"
+  className="form-control"
+  ref={inputRef}
+  name="photoFile"
+  onChange={handleChange} // Use the fixed function
+  accept="image/*"
+/>
+{formik.values.photoFile && (
+  <div className="mt-2">
+    <img
+      src={(formik.values.photoFile)}
+      alt="Uploaded"
+      className="img-thumbnail"
+      width="200"
+    />
+  </div>
+)}
           </div>
           <div className="col-12 d-flex justify-content-between">
             <button type="submit" className="btn btn-primary" disabled={submitting || announcements.length >= 10}>
@@ -362,4 +386,4 @@ const UserAnnouncementPage = () => {
   );
 };
 
-export default UserAnnouncementPage;  
+export default UserAnnouncementPage;

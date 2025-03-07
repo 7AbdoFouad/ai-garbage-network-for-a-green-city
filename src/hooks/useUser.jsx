@@ -43,6 +43,7 @@ const useUser = () => {
     }
   };
 
+
   // Update a user
   const updateUser = async (id, values) => {
     const res = await axios.put(`http://localhost:3000/users/${id}`, values);

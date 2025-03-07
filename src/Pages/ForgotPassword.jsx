@@ -4,9 +4,50 @@ import { toast } from "react-toastify";
 
 export default function ForgotPassword() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = async(e) => {
+  //   e.preventDefault();
+    
+  //   // Simulate sending reset link
+  //   if (!emailOrPhone) {
+  //     toast.error("Please enter your email or phone number.");
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   setError(null);
+  //   setSuccess(null);   
+  //     try {
+  //    const res= await fetch("../api/send-email",{
+  //       method:"POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({email : "bdalrhmnfwad15@gmail.com"}),
+  //     });
+  //     const data=await res.json();
+  //     console.log(data);
+      
+  //     if(!res.ok){
+  //       const error=await res.json();
+  //       throw new Error(error.message||"failed to send email");
+  //     }
+  //     setSuccess(data.message);
+  //   } catch (error) {
+  //     console.log(error);
+      
+  //     const errorMessage=error instanceof Error ? error.message : "Internal Server Error";
+  //     setError(errorMessage);
+  //   }finally{
+  //     setLoading(false);
+  //   }
+  //   // toast.success("Password reset link sent to your email or phone.");
+  //   // navigate("/reset-password");
+  // };
+  const handleSubmit = async(e) => {
     e.preventDefault();
     
     // Simulate sending reset link
@@ -14,9 +55,35 @@ export default function ForgotPassword() {
       toast.error("Please enter your email or phone number.");
       return;
     }
-    
-    toast.success("Password reset link sent to your email or phone.");
-    navigate("/reset-password");
+    setLoading(true);
+    setError(null);
+    setSuccess(null);   
+      try {
+     const res= await fetch("http://localhost:5000/forget",{
+        method:"POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email : "bdalrhmnfwad15@gmail.com"}),
+      });
+      const data=await res.json();
+      console.log(data);
+      
+      if(!res.ok){
+        const error=await res.json();
+        throw new Error(error.message||"failed to send email");
+      }
+      setSuccess(data.message);
+    } catch (error) {
+      console.log(error);
+      
+      const errorMessage=error instanceof Error ? error.message : "Internal Server Error";
+      setError(errorMessage);
+    }finally{
+      setLoading(false);
+    }
+    // toast.success("Password reset link sent to your email or phone.");
+    // navigate("/reset-password");
   };
 
   return (
@@ -39,13 +106,16 @@ export default function ForgotPassword() {
                   />
                 </div>
                 <div className="text-center mt-3">
-                  <button type="submit" className="btn btn-primary w-100" >
-                    Send Reset Link
+                  <button type="submit" className="btn btn-primary w-100" disabled={loading} >
+                    {loading ? "Sending..." : "Send Reset Link"}
+                    
                   </button>
+                  {error && <div className="text-danger mt-2">{error}</div>}
+                  {success && <div className="text-success mt-2">{success}</div>}
                 </div>
               </form>
               <div className="mt-3 text-center">
-                <button className="btn btn-link" onClick={() => navigate("/login")}>
+                <button className="btn btn-link" >
                   Back to Login
                 </button>
               </div>

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 function withAuthorization(Component, requiredRole) {
   return function AuthRoute(props) {
-    const { isLoggedIn, user } = useAuth(); 
+    const { isLoggedIn, user,islogoutyet,setIslogoutyet } = useAuth(); 
     const location = useLocation();
 
     // Store last active page before redirection
@@ -15,6 +15,12 @@ function withAuthorization(Component, requiredRole) {
       }
     }, [location.pathname, isLoggedIn]);
 
+    if (islogoutyet) {
+      setIslogoutyet(false);
+      toast.error("Logout successfully");
+      return <Navigate to="/login" replace />;
+    }
+ 
     if (!isLoggedIn) {
       toast.error("You need to login to view this page");
       return <Navigate to="/login" replace />;

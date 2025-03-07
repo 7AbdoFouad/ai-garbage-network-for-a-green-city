@@ -93,7 +93,7 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="settings" className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`settings/${id}`} className="nav-link" onClick={toggleSidebar}>
             Settings
             </NavLink>
           </li>

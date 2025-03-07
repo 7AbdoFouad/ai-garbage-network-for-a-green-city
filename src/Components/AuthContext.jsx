@@ -12,7 +12,7 @@ export default function AuthProvider({ children }) {
   const [cookies, setCookie, removeCookie] = useCookies(["user"]);
   const [user, setUser] = useState(cookies.user ? cookies.user: null); // Store user info if needed
   const [isLoggedIn, setIsLoggedIn] = useState(!!cookies.user); // Track login state
-
+  const [islogoutyet, setIslogoutyet] = useState(false);
   const login = (userData) => {
     setCookie("user", userData, { path: "/", expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
     setIsLoggedIn(true);
@@ -20,10 +20,11 @@ export default function AuthProvider({ children }) {
     // localStorage.setItem("user", JSON.stringify(userData));
   };
 
+
   const logout = () => {
-    setIsLoggedIn(false);
     setUser(null);
     removeCookie("user", { path: "/" });
+    setIslogoutyet(true);
     // localStorage.removeItem("user");
   };
   // Sync auth state with cookies
@@ -63,7 +64,8 @@ export default function AuthProvider({ children }) {
   // };
 
  return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, logout}}> 
+  
+    <AuthContext.Provider value={{ isLoggedIn, user, login, logout,islogoutyet,setIslogoutyet }}> 
       {children}
     </AuthContext.Provider>)
 }

@@ -211,7 +211,7 @@ const router = createBrowserRouter(
           path="wasteBinManagement"
           element={<ProtectedWasteBinManagement />}
         />
-        <Route path="settings" element={<ProtectedSettings />} />
+        <Route path="settings/:id" element={<ProtectedSettings />} />
         <Route path="notifications" element={<ProtectedNotifications />} />
       </Route>
 
@@ -224,7 +224,7 @@ const router = createBrowserRouter(
         <Route path="faq" element={<ProtectedFAQPage />} />
         <Route path="communityEngagement/:id" element={<ProtectedCommunityEngagementManagemen />} />
         <Route path="notifications" element={<ProtectedNotificationPage />} />
-        <Route path="settings" element={<ProtectedSettingsPage />} />
+        <Route path="settings/:id" element={<ProtectedSettingsPage />} />
         <Route path="polls/:id" element={<ProtectedPollsPage />} />
         <Route path="rewards/:id" element={<ProtectedRewardsPage />} />
         <Route path="userAnnouncement/:id" element={<ProtectedUserAnnouncementPage />} />
@@ -238,7 +238,7 @@ const router = createBrowserRouter(
         <Route path="driverNotifications" element={<ProtectedDriverNotificationsPage />} />
         <Route path="driverPolls" element={<ProtectedDriverPollsPage />} />
         <Route path="requiredTasks" element={<ProtectedDriverRequiredTasksPage />} />
-        <Route path="settings" element={<ProtectedDriverSettingsPage />} />
+        <Route path="settings/:id" element={<ProtectedDriverSettingsPage />} />
       </Route>
 
       {/* Authentication Routes */}

@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import useUser from "../hooks/useUser";
 import { useNavigate } from "react-router-dom";
+import { profile } from "@tensorflow/tfjs";
 
 // 📌 Validation Schema
 const schema = object().shape({
@@ -42,7 +43,22 @@ export default function Registeration() {
         setSubmitting(false);
         return;
       }
-      const res = await registerUser(values);
+      if (users.find((user) => user.phone === values.phone)) {
+        toast.error("Phone number already exists");
+        setSubmitting(false);
+        return;
+      }
+      const res = await registerUser({
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        password: values.password,
+        Address: values.Address,
+        profileImage: values.profileImage,
+        numOfAcceptedAnnouncementsCount: values.numOfAcceptedAnnouncementsCount,        
+        numOfCompletedActivitiesCount: values.numOfCompletedActivitiesCount,
+        numOfCompletedPollsCount: values.numOfCompletedPollsCount,
+      });
       navigate(`/userDashboard/${res.id}`);
       toast.success(`Registration successful! Welcome, ${res.name}`);
     } catch (e) {
@@ -60,6 +76,8 @@ export default function Registeration() {
       phone: "",
       password: "",
       repeatPassword: "",
+      Address:"",
+      profileImage: "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
       numOfAcceptedAnnouncementsCount: 0,
       numOfCompletedActivitiesCount: 0,
       numOfCompletedPollsCount: 0,

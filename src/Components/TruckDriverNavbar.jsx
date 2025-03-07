@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { FaUserTie, FaBars, FaTimes } from "react-icons/fa"; // Changed icon to manager icon
 import "./ManagerNavbar.css";
-import useUser from "../hooks/useUser";
 import { useParams } from "react-router-dom";
 
 const CustomNavbar = () => {
@@ -72,7 +71,7 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="settings" className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`settings/${id}`} className="nav-link" onClick={toggleSidebar}>
               Settings
             </NavLink>
           </li>
