@@ -16,6 +16,7 @@ import Registeration from "./Pages/Registeration";
 import ForgetPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
 import NotFound from "./Pages/NotFound";
+import VerifyEmail from "./Pages/VerifyEmail";
 
 // Manager pages
 import HomePageForManagers from "./Pages/ManagerPages/HomePageForManagers";
@@ -246,6 +247,7 @@ const router = createBrowserRouter(
       <Route path="/forgot-password" element={<ForgetPassword />} />
       <Route path="/reset-password/:id" element={<ResetPassword />} />
       <Route path="/registeration" element={<Registeration />} />
+      {/* <Route path="/verify-email/:token" element={<VerifyEmail />} /> */}
 
       {/* Not Found */}
       <Route path="*" element={<NotFound />} />

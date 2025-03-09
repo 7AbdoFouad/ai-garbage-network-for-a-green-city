@@ -51,12 +51,36 @@ export default function UserManagement() {
     return true;
   });
   const handleDeleteUser = async(userId) => {
+
          try {
           await deleteUser(userId);
        toast.success("User deleted successfully.");
          } catch (error) {
           toast.error("Failed to delete user. Please try again later.");
          }  
+         //----------------------------
+         
+    try {
+      const user = users.find((user) => user.id === userId);
+      const res = await fetch("http://localhost:5000/delUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email:user.email}),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to send email.");
+      }
+
+      setSuccess("Password reset link sent. Please check your email.");
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   }
   const handleDeleteManager = async(userId) => {
     try {

@@ -68,7 +68,29 @@ export default function Registeration() {
       setSubmitting(false);
     }
   };
-
+  // const handleSubmit = async (values) => {
+  //   try {
+  //     setSubmitting(true);
+  
+  //     // Step 1: Send Verification Email
+  //     const response = await fetch("http://localhost:5000/register", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ email: values.email, name: values.name }),
+  //     });
+  
+  //     const data = await response.json();
+  //     if (!response.ok) throw new Error(data.error);
+  
+  //     toast.success("Verification email sent! Please check your inbox.");
+  //   } catch (e) {
+  //     console.log(e);
+  //     toast.error("Failed to send verification email.");
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+  
   const formik = useFormik({
     initialValues: {
       name: "",
