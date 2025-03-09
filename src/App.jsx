@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import {
   Route,
@@ -201,7 +201,7 @@ const router = createBrowserRouter(
           path="communityEngagementManagement"
           element={<ProtectedCommunityEngagementManagement />}
         />
-        <Route path="userManagement" element={<ProtectedUserManagement />} />
+        <Route path="userManagement/:id" element={<ProtectedUserManagement />} />
         <Route path="pollsManagement" element={<ProtectedPollsManagement />} />
         <Route
           path="rewardsManagement"
@@ -244,7 +244,7 @@ const router = createBrowserRouter(
       {/* Authentication Routes */}
       <Route path="/login" element={<Login myrole="admin" />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/reset-password/:id" element={<ResetPassword />} />
       <Route path="/registeration" element={<Registeration />} />
 
       {/* Not Found */}

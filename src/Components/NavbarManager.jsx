@@ -78,7 +78,7 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="userManagement" className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`userManagement/${id}`} className="nav-link" onClick={toggleSidebar}>
             User Management
             </NavLink>
           </li>

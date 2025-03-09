@@ -16,7 +16,6 @@ const schema = object().shape({
       .required("Password is required")
       .min(8, "Password must be at least 8 characters "),
     Address: string()
-      .required("Address is required")
       .min(3, "Address must be more than 3 characters"),
   });
 
