@@ -14,8 +14,6 @@ const schema = object().shape({
 });
 
 export default function ResetPassword() {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const {updateUser,fetchUser} = useUser();
   const [user , setUser]=useState({});

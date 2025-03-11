@@ -62,16 +62,14 @@ const EditAnnouncementModal = ({ show, onHide, onSave, announcement, regions }) 
     }
   };
 
-  const handleFileChange = (event) => {
-    formik.setFieldValue("photoFile", event.currentTarget.files[0]);
-  };
+  // const handleFileChange = (event) => {
+  //   formik.setFieldValue("photoFile", event.currentTarget.files[0]);
+  // };
 
   const filteredBins = bins.filter((bin) => bin.region === formik.values.region); 
-
   const siteLocation = filteredBins.find((bin) => bin.binNumber===formik.values.binNumber);
   if(siteLocation)formik.values.siteLocation=siteLocation.binLocation
   // if(announcement.photoFile)formik.values.photoFile=announcement.photoFile
-
 
   return (
     <div

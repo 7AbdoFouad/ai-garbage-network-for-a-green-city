@@ -61,7 +61,6 @@ export default function SettingPage() {
   useEffect(() => {
     setUserData({
       name: user.name || "",
-      phone: user.phone || "",
       Address: user.Address || "",
       profileImage: profileImage || "",
       email: user.email || "",
@@ -115,16 +114,7 @@ export default function SettingPage() {
             disabled={!isEditing}
           />
         </div>
-        <div className={styles.profileField}>
-          <strong>رقم الهاتف:</strong>{" "}
-          <input
-            className={styles.inputField}
-            name="phone"
-            value={userData.phone}
-            // onChange={handleChange}
-            disabled={!isEditing}
-          />
-        </div>
+
         <div className={styles.profileField}>
           <strong>العنوان:</strong>{" "}
           <input

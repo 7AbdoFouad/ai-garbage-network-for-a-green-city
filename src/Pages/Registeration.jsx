@@ -18,10 +18,7 @@ const schema = object().shape({
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       "Email is not valid"
     ),
-  phone: string()
-    .required("Phone number is required")
-    .matches(/^\d+$/, "Phone number must contain only numbers")
-    .length(11, "Phone number must be exactly 11 digits"),
+ 
   password: string()
     .required("Password is required")
     .min(8, "Password must be more than 8 characters"),
@@ -32,7 +29,7 @@ const schema = object().shape({
 
 export default function Registeration() {
   const [submitting, setSubmitting] = useState(false);
-  const { registerUser, users } = useUser();
+  const { registerUser, users,managers,truckDrivers } = useUser();
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
@@ -43,11 +40,17 @@ export default function Registeration() {
         setSubmitting(false);
         return;
       }
-      if (users.find((user) => user.phone === values.phone)) {
-        toast.error("Phone number already exists");
+      if (managers.find((manager) => manager.email === values.email)) {
+        toast.error("Email already exists");
         setSubmitting(false);
         return;
       }
+      if (truckDrivers.find((truckDriver) => truckDriver.email === values.email)) {
+        toast.error("Email already exists");
+        setSubmitting(false);
+        return;
+      }
+
       const res = await registerUser({
         name: values.name,
         email: values.email,
@@ -95,7 +98,6 @@ export default function Registeration() {
     initialValues: {
       name: "",
       email: "",
-      phone: "",
       password: "",
       repeatPassword: "",
       Address:"",
@@ -156,28 +158,6 @@ export default function Registeration() {
                 />
                 {formik.touched.email && formik.errors.email && (
                   <div className="invalid-feedback">{formik.errors.email}</div>
-                )}
-              </div>
-
-              {/* Phone Number Field */}
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number</label>
-                <input
-                  type="text"
-                  className={`form-control ${
-                    formik.touched.phone && formik.errors.phone
-                      ? "is-invalid"
-                      : ""
-                  }`}
-                  id="phone"
-                  name="phone"
-                  placeholder="Enter your phone number"
-                  value={formik.values.phone}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-                {formik.touched.phone && formik.errors.phone && (
-                  <div className="invalid-feedback">{formik.errors.phone}</div>
                 )}
               </div>
 

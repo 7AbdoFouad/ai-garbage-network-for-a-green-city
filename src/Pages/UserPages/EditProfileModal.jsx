@@ -8,10 +8,6 @@ const schema = object().shape({
       .required("Name is required")
       .min(3, "Name must be more than 3 characters")
       .matches(/^[a-zA-Z\s]+$/, "Invalid Name, must contain letters only"),
-    phone: string()
-      .required("Phone number is required")
-      .matches(/^\d+$/, "Phone number must contain only numbers")
-      .length(11, "Phone number must be exactly 11 digits"),
     password: string()
       .required("Password is required")
       .min(8, "Password must be at least 8 characters "),
@@ -22,7 +18,7 @@ const schema = object().shape({
 
 export default function EditProfileModal({ userData, saveData, closeModal }) {
   const formik = useFormik({
-    initialValues: { name: "", phone: "",Address:"", password: "" },
+    initialValues: { name: "",Address:"", password: "" },
     validationSchema: schema,
     onSubmit: (data) =>{console.log(data);
      saveData(data)}, 
@@ -30,7 +26,6 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
   useEffect(() => {
     formik.setValues({
       name: userData.name,
-      phone: userData.phone,
       Address: userData.Address,
       password: userData.password,
     });
@@ -58,25 +53,7 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
         {formik.touched.name && formik.errors.name && (
           <div className="invalid-feedback">{formik.errors.name}</div>
         )}
-        <label  htmlFor="phone" className={styles.label}>رقم الهاتف:</label>
-        <input
-          type="text"
-          name="phone"
-          id="phone"
-          placeholder="Enter Your Phone Number"
-          value={formik.values.phone}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik.touched.phone && formik.errors.phone
-              ? "is-invalid"
-              : ""
-          }`}
-        />
-        {formik.touched.phone && formik.errors.phone && (
-          <div className="invalid-feedback">{formik.errors.phone}</div>
-        )}
- 
+       
         <label htmlFor="Address" className={styles.label}>العنوان:</label>
         <input
           type="text"

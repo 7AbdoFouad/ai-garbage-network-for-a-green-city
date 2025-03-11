@@ -121,7 +121,6 @@ const UserAnnouncementPage = () => {
     setSelectedAnnouncement(announcement);    
     setShowModal(true);
   };
-
   const handleSave = async (values) => {
     // values is now the object with form values
     const updatedValues = {

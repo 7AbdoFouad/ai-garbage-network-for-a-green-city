@@ -81,6 +81,76 @@ router.post("/forget", async (req, res) => {
   }
 });
 
+router.post("/delUser", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const { email } = req.body; // method = "nodemailer" او "resend"
+
+  try {
+    // 📩 ارسال الايميل عبر Resend
+    await resend.emails.send({
+      from: "Abdulrahman <onboarding@resend.dev>",
+      to: email,
+      subject: "Delete Account",
+      html:`
+        Your account has been deleted From Clean City Management.
+      `,
+    });
+    return res.status(200).json({ message: "📧 Email sent via Resend" });
+  } catch (error) {
+    console.error("❌ Email Sending Error:", error);
+    return res.status(500).json({ error: "Failed to send email" });
+  }
+});
+
+router.post("/delMang", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const { email } = req.body; // method = "nodemailer" او "resend"
+
+  try {
+    // 📩 ارسال الايميل عبر Resend
+    await resend.emails.send({
+      from: "Abdulrahman <onboarding@resend.dev>",
+      to: email,
+      subject: "Delete Account",
+      html:`
+        Your account has been deleted From Clean City Management.
+      `,
+    });
+    return res.status(200).json({ message: "📧 Email sent via Resend" });
+  } catch (error) {
+    console.error("❌ Email Sending Error:", error);
+    return res.status(500).json({ error: "Failed to send email" });
+  }
+});
+router.post("/delTruck", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const { email } = req.body; // method = "nodemailer" او "resend"
+
+  try {
+    // 📩 ارسال الايميل عبر Resend
+    await resend.emails.send({
+      from: "Abdulrahman <onboarding@resend.dev>",
+      to: email,
+      subject: "Delete Account",
+      html:`
+        Your account has been deleted From Clean City Management.
+      `,
+    });
+    return res.status(200).json({ message: "📧 Email sent via Resend" });
+  } catch (error) {
+    console.error("❌ Email Sending Error:", error);
+    return res.status(500).json({ error: "Failed to send email" });
+  }
+});
 // __________________________________________________________________________
 // import express from "express";
 // import cors from "cors";
