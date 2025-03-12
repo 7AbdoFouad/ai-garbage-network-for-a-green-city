@@ -10,7 +10,9 @@ import useUser from "../../hooks/useUser";
 const schema = object().shape({
   name: string().required("Name is required"),
   email: string().required("Email is required").email("Invalid email address"),
-  message: string().required("Message is required").min(10, "Message is too short"),
+  message: string()
+    .required("Message is required")
+    .min(10, "Message is too short"),
 });
 
 export default function ContactUsPage() {
@@ -43,9 +45,15 @@ export default function ContactUsPage() {
       <div className={`container ${styles.contactWrapper}`}>
         {/* 📌 Contact Form */}
         <div className={`${styles.contactForm} fadeIn`}>
-          <div className={`${styles.contactCard} card shadow-lg p-5 rounded-4 border-0`}>
+          <div
+            className={`${styles.contactCard} card shadow-lg p-5 rounded-4 border-0`}
+          >
             <div className="card-body">
-              <h2 className={`text-center mb-4 text-success fw-bold ${styles.title}`}>📬 Contact Us</h2>
+              <h2
+                className={`text-center mb-4 text-success fw-bold ${styles.title}`}
+              >
+                📬 Contact Us
+              </h2>
               <form onSubmit={formik.handleSubmit}>
                 {/* Name Field */}
                 <div className="form-group mb-3">
@@ -60,7 +68,9 @@ export default function ContactUsPage() {
                     onBlur={formik.handleBlur}
                   />
                   {formik.touched.name && formik.errors.name && (
-                    <p className="text-danger fw-semibold mt-1">{formik.errors.name}</p>
+                    <p className="text-danger fw-semibold mt-1">
+                      {formik.errors.name}
+                    </p>
                   )}
                 </div>
 
@@ -77,7 +87,9 @@ export default function ContactUsPage() {
                     onBlur={formik.handleBlur}
                   />
                   {formik.touched.email && formik.errors.email && (
-                    <p className="text-danger fw-semibold mt-1">{formik.errors.email}</p>
+                    <p className="text-danger fw-semibold mt-1">
+                      {formik.errors.email}
+                    </p>
                   )}
                 </div>
 
@@ -95,7 +107,9 @@ export default function ContactUsPage() {
                     style={{ resize: "none" }}
                   ></textarea>
                   {formik.touched.message && formik.errors.message && (
-                    <p className="text-danger fw-semibold mt-1">{formik.errors.message}</p>
+                    <p className="text-danger fw-semibold mt-1">
+                      {formik.errors.message}
+                    </p>
                   )}
                 </div>
 
@@ -119,11 +133,21 @@ export default function ContactUsPage() {
 
         {/* 📌 Right Side Image */}
         <div className={`${styles.contactImage} fadeIn`}>
-          <img src="/src/Pages/UserPages/contact3.jpg" alt="Contact Us" className="img-fluid rounded-4 shadow-lg mb-4" />
+          <img
+            src="/src/Pages/UserPages/contact3.jpg"
+            alt="Contact Us"
+            className="img-fluid rounded-4 shadow-lg mb-4"
+          />
           <h3 className="mb-3 text-success fw-bold">📞 Contact Information</h3>
-        <p><strong>📱 Phone:</strong> 123-456-7890</p>
-        <p><strong>🏢 Office Address:</strong> Ismailia</p>
-        <p><strong>✉️ Email:</strong> info@cleancity.com</p>
+          <p>
+            <strong>📱 Phone:</strong> 123-456-7890
+          </p>
+          <p>
+            <strong>🏢 Office Address:</strong> Ismailia
+          </p>
+          <p>
+            <strong>✉️ Email:</strong> info@cleancity.com
+          </p>
         </div>
       </div>
 
@@ -137,5 +161,3 @@ export default function ContactUsPage() {
     </div>
   );
 }
-
-

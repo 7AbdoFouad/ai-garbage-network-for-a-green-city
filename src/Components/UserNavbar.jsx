@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 
 const CustomNavbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const {id}= useParams();
+  const { id } = useParams();
   //   const { fetchUser } = useUser();
   //   const[user,setuser]=useState({})
   //   useEffect(() => {
@@ -26,17 +26,17 @@ const CustomNavbar = () => {
       {/* Main Navbar */}
       {/* <nav className="navbar custom-navbar">
         <div className="container custom-container d-flex justify-content-center align-items-center"> */}
-          {/* Centered Title */}
-          {/* <div className="navbar-title d-flex align-items-center">
+      {/* Centered Title */}
+      {/* <div className="navbar-title d-flex align-items-center">
             <FaUserTie className="logo-icon" />
             <span className="greeting-text">Hello, {(user.name)}</span>
           </div> */}
 
-          {/* Mobile Toggle Button */}
-          <button className="menu-btn"  onClick={toggleSidebar}>
-            <FaBars className="toggle-icon" />
-          </button>
-        {/* </div>
+      {/* Mobile Toggle Button */}
+      <button className="menu-btn" onClick={toggleSidebar}>
+        <FaBars className="toggle-icon" />
+      </button>
+      {/* </div>
       </nav> */}
 
       {/* Sidebar Menu */}
@@ -47,8 +47,12 @@ const CustomNavbar = () => {
 
         <ul className="sidebar-links">
           <li>
-            <NavLink to={`/userDashboard/${id}`} className="nav-link" onClick={toggleSidebar}>
-               Home
+            <NavLink
+              to={`/userDashboard/${id}`}
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
+              Home
             </NavLink>
           </li>
           <li>
@@ -57,7 +61,11 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="contactUs" className="nav-link" onClick={toggleSidebar}>
+            <NavLink
+              to="contactUs"
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
               Contact Us
             </NavLink>
           </li>
@@ -67,33 +75,57 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to={`communityEngagement/${id}`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink
+              to={`communityEngagement/${id}`}
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
               Community Engagement
             </NavLink>
           </li>
           <li>
-            <NavLink to="notifications" className="nav-link" onClick={toggleSidebar}>
+            <NavLink
+              to="notifications"
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
               Notifications
             </NavLink>
           </li>
           <li>
-            <NavLink to={`settings/${id}`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink
+              to={`settings/${id}`}
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
               Settings
             </NavLink>
           </li>
           <li>
-            <NavLink to={`polls/${id}`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink
+              to={`polls/${id}`}
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
               Polls
             </NavLink>
           </li>
           <li>
-            <NavLink to={`rewards/${id}`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink
+              to={`rewards/${id}`}
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
               Rewards
             </NavLink>
           </li>
           <li>
-            <NavLink to={`userAnnouncement/${id}`} className="nav-link" onClick={toggleSidebar}>
-             Announcement
+            <NavLink
+              to={`userAnnouncement/${id}`}
+              className="nav-link"
+              onClick={toggleSidebar}
+            >
+              Announcement
             </NavLink>
           </li>
           <li>

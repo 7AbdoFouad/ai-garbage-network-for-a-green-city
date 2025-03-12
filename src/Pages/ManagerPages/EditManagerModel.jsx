@@ -26,8 +26,7 @@ const schema = object().shape({
     .required("Password is required")
     .min(8, "Password must be at least 8 characters "),
   Address: string().min(3, "Address must be more than 3 characters"),
-  Permissions: array()
-  .of(string().required("Permission is required"))
+  Permissions: array().of(string().required("Permission is required")),
 });
 // {
 //   "name": "Mohamed zeid",
@@ -83,7 +82,7 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
     const updatedPermissions = checked
       ? [...formik.values.Permissions, value] // Add if checked
       : formik.values.Permissions.filter((perm) => perm !== value); // Remove if unchecked
-  
+
     formik.setFieldValue("Permissions", updatedPermissions);
   };
   return (
@@ -213,9 +212,7 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
               />
               <label htmlFor="admin">مدير عام</label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
@@ -226,48 +223,50 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
               />
               <label htmlFor="ManageTrucks">مدير شاحنات</label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
                 value="ManageAnnouncement"
                 onChange={handleCheckboxChange}
                 id="ManageAnnouncement"
-                checked={formik.values.Permissions.includes("ManageAnnouncement")}
+                checked={formik.values.Permissions.includes(
+                  "ManageAnnouncement"
+                )}
               />
               <label htmlFor="ManageAnnouncement">مدير بلاغات</label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
                 value="ManageReportsAndDataAnalysis"
                 onChange={handleCheckboxChange}
                 id="ManageReportsAndDataAnalysis"
-                checked={formik.values.Permissions.includes("ManageReportsAndDataAnalysis")}
+                checked={formik.values.Permissions.includes(
+                  "ManageReportsAndDataAnalysis"
+                )}
               />
-              <label htmlFor="ManageReportsAndDataAnalysis">مدير تقارير وتحليل البيانات</label>
+              <label htmlFor="ManageReportsAndDataAnalysis">
+                مدير تقارير وتحليل البيانات
+              </label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
                 value="CommunityEngagementManagement"
                 onChange={handleCheckboxChange}
                 id="CommunityEngagementManagement"
-                checked={formik.values.Permissions.includes("CommunityEngagementManagement")}
+                checked={formik.values.Permissions.includes(
+                  "CommunityEngagementManagement"
+                )}
               />
-              <label htmlFor="CommunityEngagementManagement">مدير  فعاليات</label>
+              <label htmlFor="CommunityEngagementManagement">
+                مدير فعاليات
+              </label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
@@ -276,11 +275,9 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 id="UserManagement"
                 checked={formik.values.Permissions.includes("UserManagement")}
               />
-              <label htmlFor="UserManagement">مدير  مستخدمين</label>
+              <label htmlFor="UserManagement">مدير مستخدمين</label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
@@ -289,35 +286,34 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 id="PollsManagement"
                 checked={formik.values.Permissions.includes("PollsManagement")}
               />
-              <label htmlFor="PollsManagement">مدير  استطلاعات</label>
+              <label htmlFor="PollsManagement">مدير استطلاعات</label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
                 value="RewardsManagement"
                 onChange={handleCheckboxChange}
                 id="RewardsManagement"
-                checked={formik.values.Permissions.includes("RewardsManagement")}
+                checked={formik.values.Permissions.includes(
+                  "RewardsManagement"
+                )}
               />
-              <label htmlFor="RewardsManagement">مدير  مكافئات</label>
+              <label htmlFor="RewardsManagement">مدير مكافئات</label>
             </div>
-            <div
-              className={styles.checkboxItem}
-            >
+            <div className={styles.checkboxItem}>
               <input
                 type="checkbox"
                 name="Permissions"
                 value="WasteBinManagement"
                 onChange={handleCheckboxChange}
                 id="WasteBinManagement"
-                checked={formik.values.Permissions.includes("WasteBinManagement")}
+                checked={formik.values.Permissions.includes(
+                  "WasteBinManagement"
+                )}
               />
-              <label htmlFor="WasteBinManagement">مدير  صناديق نفايات</label>
+              <label htmlFor="WasteBinManagement">مدير صناديق نفايات</label>
             </div>
-
           </div>
           {formik.touched.Permissions && formik.errors.Permissions && (
             <div className="invalid-feedback">{formik.errors.Permissions}</div>

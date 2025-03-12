@@ -1,4 +1,3 @@
-
 // import React, { useEffect, useState } from "react";
 // import { NavLink } from "react-router-dom";
 // import { FaUserTie, FaBars, FaTimes } from "react-icons/fa"; // Changed icon to manager icon
@@ -30,7 +29,7 @@
 //     "admin",
 //     "ManageTrucks",
 //   ];
-//   const ManageReportsAndDataAnalysis = 
+//   const ManageReportsAndDataAnalysis =
 //     ["admin", "ManageReportsAndDataAnalysis"]
 //   ;
 //   const CommunityEngagementManagement =
@@ -62,7 +61,7 @@
 //     "PollsManagement",
 //     "RewardsManagement",
 //     "WasteBinManagement",
-  
+
 //   ];
 //   const Notifications = [
 //     "admin",
@@ -76,8 +75,7 @@
 //     "WasteBinManagement",
 //   ];
 //   const user=cookies.user.Permissions;
-  
-  
+
 //     // const { fetchManager } = useUser();
 //     // const[manager,setmanagers]=useState({})
 //     // useEffect(() => {
@@ -158,7 +156,7 @@
 //           </li>
 //           <li>
 //             <NavLink to="notifications" className="nav-link" onClick={toggleSidebar}>
-//             Notifications 
+//             Notifications
 //             </NavLink>
 //           </li>
 //           <li>
@@ -182,7 +180,6 @@
 
 // export default CustomNavbar;
 
-
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { FaUserTie, FaBars, FaTimes } from "react-icons/fa";
@@ -198,17 +195,91 @@ const CustomNavbar = () => {
 
   // Define permission-based routes
   const routes = [
-    { path: `/managerDashboard/${id}`, label: "Home", requiredRoles: ["admin", "ManageTrucks", "ManageAnnouncement", "ManageReportsAndDataAnalysis", "CommunityEngagementManagement", "UserManagement", "PollsManagement", "RewardsManagement", "WasteBinManagement"] },
-    { path: "manageAnnouncement", label: "Announcement Management", requiredRoles: ["admin", "ManageAnnouncement"] },
-    { path: "manageTrucks", label: "Trucks Management", requiredRoles: ["admin", "ManageTrucks"] },
-    { path: "wasteBinManagement", label: "Waste Bin Management", requiredRoles: ["admin", "WasteBinManagement"] },
-    { path: "rewardsManagement", label: "Rewards Management", requiredRoles: ["admin", "RewardsManagement"] },
-    { path: "communityEngagementManagement", label: "Community Engagement Management", requiredRoles: ["admin", "CommunityEngagementManagement"] },
-    { path: `userManagement/${id}`, label: "User Management", requiredRoles: ["admin", "UserManagement"] },
-    { path: "pollsManagement", label: "Polls Management", requiredRoles: ["admin", "PollsManagement"] },
-    { path: "notifications", label: "Notifications", requiredRoles: ["admin", "ManageTrucks", "ManageAnnouncement", "ManageReportsAndDataAnalysis", "CommunityEngagementManagement", "UserManagement", "PollsManagement", "RewardsManagement", "WasteBinManagement"] },
-    { path: `settings/${id}`, label: "Settings", requiredRoles: ["admin", "ManageTrucks", "ManageAnnouncement", "ManageReportsAndDataAnalysis", "CommunityEngagementManagement", "UserManagement", "PollsManagement", "RewardsManagement", "WasteBinManagement"] },
-    { path: "manageReportsAndDataAnalysis", label: "Reports & Data Analysis Management", requiredRoles: ["admin", "ManageReportsAndDataAnalysis"] },
+    {
+      path: `/managerDashboard/${id}`,
+      label: "Home",
+      requiredRoles: [
+        "admin",
+        "ManageTrucks",
+        "ManageAnnouncement",
+        "ManageReportsAndDataAnalysis",
+        "CommunityEngagementManagement",
+        "UserManagement",
+        "PollsManagement",
+        "RewardsManagement",
+        "WasteBinManagement",
+      ],
+    },
+    {
+      path: "manageAnnouncement",
+      label: "Announcement Management",
+      requiredRoles: ["admin", "ManageAnnouncement"],
+    },
+    {
+      path: "manageTrucks",
+      label: "Trucks Management",
+      requiredRoles: ["admin", "ManageTrucks"],
+    },
+    {
+      path: "wasteBinManagement",
+      label: "Waste Bin Management",
+      requiredRoles: ["admin", "WasteBinManagement"],
+    },
+    {
+      path: "rewardsManagement",
+      label: "Rewards Management",
+      requiredRoles: ["admin", "RewardsManagement"],
+    },
+    {
+      path: "communityEngagementManagement",
+      label: "Community Engagement Management",
+      requiredRoles: ["admin", "CommunityEngagementManagement"],
+    },
+    {
+      path: `userManagement/${id}`,
+      label: "User Management",
+      requiredRoles: ["admin", "UserManagement"],
+    },
+    {
+      path: "pollsManagement",
+      label: "Polls Management",
+      requiredRoles: ["admin", "PollsManagement"],
+    },
+    {
+      path: "notifications",
+      label: "Notifications",
+      requiredRoles: [
+        "admin",
+        "ManageTrucks",
+        "ManageAnnouncement",
+        "ManageReportsAndDataAnalysis",
+        "CommunityEngagementManagement",
+        "UserManagement",
+        "PollsManagement",
+        "RewardsManagement",
+        "WasteBinManagement",
+      ],
+    },
+    {
+      path: `settings/${id}`,
+      label: "Settings",
+      requiredRoles: [
+        "admin",
+        "ManageTrucks",
+        "ManageAnnouncement",
+        "ManageReportsAndDataAnalysis",
+        "CommunityEngagementManagement",
+        "UserManagement",
+        "PollsManagement",
+        "RewardsManagement",
+        "WasteBinManagement",
+      ],
+    },
+    {
+      path: "manageReportsAndDataAnalysis",
+      label: "Reports & Data Analysis Management",
+      requiredRoles: ["admin", "ManageReportsAndDataAnalysis"],
+    },
   ];
 
   const toggleSidebar = () => {
@@ -228,7 +299,7 @@ const CustomNavbar = () => {
 
         <ul className="sidebar-links">
           {routes.map(({ path, label, requiredRoles }) =>
-            requiredRoles.some(role => userPermissions.includes(role)) ? (
+            requiredRoles.some((role) => userPermissions.includes(role)) ? (
               <li key={path}>
                 <NavLink to={path} className="nav-link" onClick={toggleSidebar}>
                   {label}

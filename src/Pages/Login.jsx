@@ -9,14 +9,13 @@ import { GoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "react-facebook-login";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-
 const schema = object().shape({
   email: string()
     .required("Email or phone number is required")
     .test("email-or-phone", "Enter a valid email or phone number", (value) => {
       const emailRegex =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return emailRegex.test(value) 
+      return emailRegex.test(value);
     }),
   password: string()
     .required("Password is required")
@@ -58,9 +57,13 @@ export default function Login() {
 
       login(user);
       navigate(`/${foundUser.roleName}Dashboard/${user.id}`);
-      toast.success(`Login successful as ${foundUser.roleName}. Welcome ${user.name}`);
+      toast.success(
+        `Login successful as ${foundUser.roleName}. Welcome ${user.name}`
+      );
     } else {
-      toast.error("Login failed. Please check your email or phone and password.");
+      toast.error(
+        "Login failed. Please check your email or phone and password."
+      );
     }
   };
 
@@ -100,12 +103,9 @@ export default function Login() {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   />
-                  {formik.touched.email &&
-                    formik.errors.email && (
-                      <p className="text-danger">
-                        {formik.errors.email}
-                      </p>
-                    )}
+                  {formik.touched.email && formik.errors.email && (
+                    <p className="text-danger">{formik.errors.email}</p>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -141,13 +141,16 @@ export default function Login() {
               </div>
 
               <div className="text-center my-3">
-               
-                <GoogleOAuthProvider clientId="346738253715-2niv19e5d3bdli28jsq05s6ictkk68ib.apps.googleusercontent.com">  {/* ✅ ضع Client ID هنا */}
-      <GoogleLogin
-        onSuccess={(response) => console.log("Login Success!", response)}
-        onError={() => console.log("Login Failed!")}
-      />
-    </GoogleOAuthProvider>
+                <GoogleOAuthProvider clientId="346738253715-2niv19e5d3bdli28jsq05s6ictkk68ib.apps.googleusercontent.com">
+                  {" "}
+                  {/* ✅ ضع Client ID هنا */}
+                  <GoogleLogin
+                    onSuccess={(response) =>
+                      console.log("Login Success!", response)
+                    }
+                    onError={() => console.log("Login Failed!")}
+                  />
+                </GoogleOAuthProvider>
                 <FacebookLogin
                   appId="649672187611943"
                   autoLoad={false}

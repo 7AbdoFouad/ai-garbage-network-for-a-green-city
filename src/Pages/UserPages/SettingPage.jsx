@@ -6,10 +6,9 @@ import EditProfileModal from "./EditProfileModal"; // Import modal component
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 
-
 export default function SettingPage() {
   const { id } = useParams();
-  const { fetchUser,updateUser } = useUser();
+  const { fetchUser, updateUser } = useUser();
   const [user, setUser] = useState({});
   const [profileImage, setProfileImage] = useState("");
   const { logout } = useAuth();
@@ -28,31 +27,30 @@ export default function SettingPage() {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      
+
       reader.onloadend = async () => {
         const newProfileImage = reader.result;
-  
+
         setProfileImage(newProfileImage); // Set preview image
-  
+
         try {
           await updateUser(id, { ...user, profileImage: newProfileImage });
-  
+
           setUser((prevUser) => ({
             ...prevUser,
             profileImage: newProfileImage, // Update state after successful update
           }));
-  
-          toast.success("تم تحديث صورة الملف الشخصي بنجاح!"); 
+
+          toast.success("تم تحديث صورة الملف الشخصي بنجاح!");
         } catch (error) {
           console.error("فشل تحديث صورة الملف الشخصي:", error);
           toast.error("حدث خطأ أثناء تحديث الصورة.");
         }
       };
-  
+
       reader.readAsDataURL(file);
     }
   };
-  
 
   // State for the modal
   const [isEditing, setIsEditing] = useState(false);
@@ -65,7 +63,8 @@ export default function SettingPage() {
       profileImage: profileImage || "",
       email: user.email || "",
       password: user.password || "",
-      numOfAcceptedAnnouncementsCount: user.numOfAcceptedAnnouncementsCount || 0,
+      numOfAcceptedAnnouncementsCount:
+        user.numOfAcceptedAnnouncementsCount || 0,
       numOfCompletedActivitiesCount: user.numOfCompletedActivitiesCount || 0,
       numOfCompletedPollsCount: user.numOfCompletedPollsCount || 0,
     });
@@ -74,11 +73,10 @@ export default function SettingPage() {
   // Handle input change
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
-
   };
 
   // Save data to JSON file
-  const saveData =async (data) => {
+  const saveData = async (data) => {
     await updateUser(id, { ...user, ...data });
     setUser((prevUser) => ({
       ...prevUser,
@@ -91,7 +89,10 @@ export default function SettingPage() {
   return (
     <div className={styles.container}>
       {/* Profile Picture */}
-      <div className={styles.profilePicture} onClick={() => document.getElementById("fileInput").click()}>
+      <div
+        className={styles.profilePicture}
+        onClick={() => document.getElementById("fileInput").click()}
+      >
         <img src={profileImage} alt="Profile" className={styles.profileImage} />
         <input
           type="file"
@@ -152,29 +153,44 @@ export default function SettingPage() {
       <div className={styles.stats}>
         <h4>إحصائيات المستخدم</h4>
         <p>
-          📌 عدد البلاغات المقبولة التي قدمتها: <strong>{userData.numOfAcceptedAnnouncementsCount}</strong>
+          📌 عدد البلاغات المقبولة التي قدمتها:{" "}
+          <strong>{userData.numOfAcceptedAnnouncementsCount}</strong>
         </p>
         <p>
-          📌 عدد الفعاليات الاجتماعية التي سجلت بها وأتممتها بنجاح: <strong>{userData.numOfCompletedActivitiesCount}</strong>
+          📌 عدد الفعاليات الاجتماعية التي سجلت بها وأتممتها بنجاح:{" "}
+          <strong>{userData.numOfCompletedActivitiesCount}</strong>
         </p>
         <p>
-          📌 عدد الاستطلاعات التي أكملتها: <strong>{userData.numOfCompletedPollsCount}</strong>
+          📌 عدد الاستطلاعات التي أكملتها:{" "}
+          <strong>{userData.numOfCompletedPollsCount}</strong>
         </p>
       </div>
 
       {/* Buttons */}
       <div className={styles.buttonContainer}>
-        <button className={`${styles.button} ${styles.editButton}`} onClick={() => setIsEditing(true)}>
+        <button
+          className={`${styles.button} ${styles.editButton}`}
+          onClick={() => setIsEditing(true)}
+        >
           ✏️ تعديل الملف الشخصي
         </button>
-        <button className={`${styles.button} ${styles.logoutButton}`} onClick={logout}>
+        <button
+          className={`${styles.button} ${styles.logoutButton}`}
+          onClick={logout}
+        >
           🚪 تسجيل الخروج
         </button>
       </div>
 
       {/* Edit Profile Modal */}
-      {isEditing && <EditProfileModal userData={userData} handleChange={handleChange} saveData={saveData} closeModal={() => setIsEditing(false)} />}
-
+      {isEditing && (
+        <EditProfileModal
+          userData={userData}
+          handleChange={handleChange}
+          saveData={saveData}
+          closeModal={() => setIsEditing(false)}
+        />
+      )}
     </div>
   );
 }

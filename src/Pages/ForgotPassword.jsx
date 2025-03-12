@@ -70,10 +70,10 @@ export default function ForgotPassword() {
     setError(null);
     setSuccess(null);
     setDisableButton(true);
-    
+
     const newEndTime = Date.now() + 60000; // ✅ حساب وقت انتهاء المؤقت بعد 60 ثانية
     localStorage.setItem("resetEndTime", newEndTime);
-    
+
     setTimer(60); // ✅ تعيين العداد إلى 60 ثانية
 
     try {
@@ -130,15 +130,28 @@ export default function ForgotPassword() {
                   )}
                 </div>
                 <div className="text-center mt-3">
-                  <button type="submit" className="btn btn-primary w-100" disabled={loading || disableButton}>
-                    {loading ? "Sending..." : disableButton ? `Please wait ${timer}s` : "Send Reset Link"}
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-100"
+                    disabled={loading || disableButton}
+                  >
+                    {loading
+                      ? "Sending..."
+                      : disableButton
+                        ? `Please wait ${timer}s`
+                        : "Send Reset Link"}
                   </button>
                   {error && <div className="text-danger mt-2">{error}</div>}
-                  {success && <div className="text-success mt-2">{success}</div>}
+                  {success && (
+                    <div className="text-success mt-2">{success}</div>
+                  )}
                 </div>
               </form>
               <div className="mt-3 text-center">
-                <button className="btn btn-link" onClick={() => navigate("/login")}>
+                <button
+                  className="btn btn-link"
+                  onClick={() => navigate("/login")}
+                >
                   Back to Login
                 </button>
               </div>

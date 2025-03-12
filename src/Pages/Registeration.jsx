@@ -18,7 +18,7 @@ const schema = object().shape({
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       "Email is not valid"
     ),
- 
+
   password: string()
     .required("Password is required")
     .min(8, "Password must be more than 8 characters"),
@@ -29,7 +29,7 @@ const schema = object().shape({
 
 export default function Registeration() {
   const [submitting, setSubmitting] = useState(false);
-  const { registerUser, users,managers,truckDrivers } = useUser();
+  const { registerUser, users, managers, truckDrivers } = useUser();
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
@@ -45,7 +45,9 @@ export default function Registeration() {
         setSubmitting(false);
         return;
       }
-      if (truckDrivers.find((truckDriver) => truckDriver.email === values.email)) {
+      if (
+        truckDrivers.find((truckDriver) => truckDriver.email === values.email)
+      ) {
         toast.error("Email already exists");
         setSubmitting(false);
         return;
@@ -58,7 +60,7 @@ export default function Registeration() {
         password: values.password,
         Address: values.Address,
         profileImage: values.profileImage,
-        numOfAcceptedAnnouncementsCount: values.numOfAcceptedAnnouncementsCount,        
+        numOfAcceptedAnnouncementsCount: values.numOfAcceptedAnnouncementsCount,
         numOfCompletedActivitiesCount: values.numOfCompletedActivitiesCount,
         numOfCompletedPollsCount: values.numOfCompletedPollsCount,
       });
@@ -74,17 +76,17 @@ export default function Registeration() {
   // const handleSubmit = async (values) => {
   //   try {
   //     setSubmitting(true);
-  
+
   //     // Step 1: Send Verification Email
   //     const response = await fetch("http://localhost:5000/register", {
   //       method: "POST",
   //       headers: { "Content-Type": "application/json" },
   //       body: JSON.stringify({ email: values.email, name: values.name }),
   //     });
-  
+
   //     const data = await response.json();
   //     if (!response.ok) throw new Error(data.error);
-  
+
   //     toast.success("Verification email sent! Please check your inbox.");
   //   } catch (e) {
   //     console.log(e);
@@ -93,15 +95,16 @@ export default function Registeration() {
   //     setSubmitting(false);
   //   }
   // };
-  
+
   const formik = useFormik({
     initialValues: {
       name: "",
       email: "",
       password: "",
       repeatPassword: "",
-      Address:"",
-      profileImage: "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
+      Address: "",
+      profileImage:
+        "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
       numOfAcceptedAnnouncementsCount: 0,
       numOfCompletedActivitiesCount: 0,
       numOfCompletedPollsCount: 0,

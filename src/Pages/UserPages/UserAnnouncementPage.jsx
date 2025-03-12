@@ -24,13 +24,15 @@ const schema = object().shape({
       is: (region) => !region, // If `region` is null or empty, description is required
       then: (schema) => schema.required("وصف البلاغ مطلوب"),
     }),
-    
+
   region: string().nullable(), // Allow region to be nullable
 
-  binNumber: string().nullable() .when("region", {
-    is: (region) => region, // If `region` is null or empty, description is required
-    then: (schema) => schema.required("رقم البلاغ مطلوب"),
-  }),
+  binNumber: string()
+    .nullable()
+    .when("region", {
+      is: (region) => region, // If `region` is null or empty, description is required
+      then: (schema) => schema.required("رقم البلاغ مطلوب"),
+    }),
 });
 
 const UserAnnouncementPage = () => {
@@ -40,7 +42,15 @@ const UserAnnouncementPage = () => {
   // const announcementsPerPage = 5;
   const [showModal, setShowModal] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
-  const { usersAnnouncements, regions, bins, fetchUser,addUsersAnnouncements ,deleteUsersAnnouncements, updateUsersAnnouncements } = useUser();
+  const {
+    usersAnnouncements,
+    regions,
+    bins,
+    fetchUser,
+    addUsersAnnouncements,
+    deleteUsersAnnouncements,
+    updateUsersAnnouncements,
+  } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // const announcements = usersAnnouncements.filter(
@@ -55,25 +65,26 @@ const UserAnnouncementPage = () => {
   //   indexOfLastAnnouncement
   // );
 
-
   // const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const inputRef = useRef(); 
+  const inputRef = useRef();
 
+  // Get current page from URL, default to 1
+  const currentPage = Number(searchParams.get("page")) || 1;
+  const announcementsPerPage = 5;
+  // Pagination logic
+  const announcements = usersAnnouncements.filter((a) => a.userId == id);
+  const indexOfLastAnnouncement = currentPage * announcementsPerPage;
+  const indexOfFirstAnnouncement =
+    indexOfLastAnnouncement - announcementsPerPage;
+  const currentAnnouncements = announcements.slice(
+    indexOfFirstAnnouncement,
+    indexOfLastAnnouncement
+  );
 
-    // Get current page from URL, default to 1
-    const currentPage = Number(searchParams.get("page")) || 1;
-    const announcementsPerPage = 5;
-      // Pagination logic
-    const announcements = usersAnnouncements.filter((a) => a.userId == id);
-    const indexOfLastAnnouncement = currentPage * announcementsPerPage;
-    const indexOfFirstAnnouncement = indexOfLastAnnouncement - announcementsPerPage;
-    const currentAnnouncements = announcements.slice(indexOfFirstAnnouncement, indexOfLastAnnouncement);
-  
+  const paginate = (pageNumber) => {
+    setSearchParams({ page: pageNumber }); // Update URL parameter
+  };
 
-    const paginate = (pageNumber) => {
-      setSearchParams({ page: pageNumber }); // Update URL parameter
-    };
-  
   const handleSubmit = async (values) => {
     try {
       setSubmitting(true);
@@ -82,14 +93,13 @@ const UserAnnouncementPage = () => {
       // formik.setFieldValue("photoFile", null);
       inputRef.current.value = null;
       formik.resetForm();
-    } catch (e) { 
+    } catch (e) {
       console.log(e);
       toast.error("Failed to add announcement. Please try again later.");
     } finally {
       setSubmitting(false);
     }
-  }
-
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -118,7 +128,7 @@ const UserAnnouncementPage = () => {
   }, [id, fetchUser, formik]);
 
   const handleEdit = (announcement) => {
-    setSelectedAnnouncement(announcement);    
+    setSelectedAnnouncement(announcement);
     setShowModal(true);
   };
   const handleSave = async (values) => {
@@ -128,7 +138,7 @@ const UserAnnouncementPage = () => {
       ...values, // Spread the values from the form
       siteLocation: values.siteLocation || "", // Ensure siteLocation is included if necessary
     };
-  
+
     try {
       await updateUsersAnnouncements(updatedValues.id, updatedValues);
       toast.success("Announcement updated successfully!");
@@ -144,15 +154,14 @@ const UserAnnouncementPage = () => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-  
+
       reader.onloadend = () => {
-       formik.values.photoFile = reader.result; // Store the actual file, not base64
+        formik.values.photoFile = reader.result; // Store the actual file, not base64
       };
-  
+
       reader.readAsDataURL(file);
     }
   };
-  
 
   const handleDelete = async (announcementId) => {
     try {
@@ -160,11 +169,16 @@ const UserAnnouncementPage = () => {
       toast.success("Announcement deleted successfully!");
 
       // Check if the current page still has announcements
-      const newAnnouncements = announcements.filter(a => a.id !== announcementId);
+      const newAnnouncements = announcements.filter(
+        (a) => a.id !== announcementId
+      );
       const totalAnnouncements = newAnnouncements.length;
 
       // If the current page is now invalid, navigate to the previous page
-      if (totalAnnouncements === 0 || (currentPage > Math.ceil(totalAnnouncements / announcementsPerPage))) {
+      if (
+        totalAnnouncements === 0 ||
+        currentPage > Math.ceil(totalAnnouncements / announcementsPerPage)
+      ) {
         const newPage = Math.max(currentPage - 1, 1); // Ensure the page doesn't go below 1
         setSearchParams({ page: newPage });
       }
@@ -178,8 +192,10 @@ const UserAnnouncementPage = () => {
   const filteredBins = bins.filter(
     (bin) => bin.region === formik.values.region
   );
-  const siteLocation = filteredBins.find((bin) => bin.binNumber===formik.values.binNumber);
-  if(siteLocation)formik.values.siteLocation=siteLocation.binLocation
+  const siteLocation = filteredBins.find(
+    (bin) => bin.binNumber === formik.values.binNumber
+  );
+  if (siteLocation) formik.values.siteLocation = siteLocation.binLocation;
 
   return (
     <div className="container py-5">
@@ -209,39 +225,54 @@ const UserAnnouncementPage = () => {
               <td>{announcement.binNumber}</td>
               <td>{announcement.siteLocation}</td>
               <td>
-                <button className="btn btn-warning me-2" onClick={() => handleEdit(announcement)}>تعديل</button>
-                <button className="btn btn-danger" onClick={() => handleDelete(announcement.id)}>حذف</button>
+                <button
+                  className="btn btn-warning me-2"
+                  onClick={() => handleEdit(announcement)}
+                >
+                  تعديل
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => handleDelete(announcement.id)}
+                >
+                  حذف
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-       {/* Pagination */}
-       {announcements.length > announcementsPerPage && (
+      {/* Pagination */}
+      {announcements.length > announcementsPerPage && (
         <nav className="mt-4">
           <ul className="pagination justify-content-center">
-            {Array.from({ length: Math.ceil(announcements.length / announcementsPerPage) }, (_, index) => (
-              <li key={index + 1} className="page-item">
-                <button
-                  onClick={() => paginate(index + 1)}
-                  className={`page-link ${currentPage === index + 1 ? "active" : ""}`}
-                >
-                  {index + 1}
-                </button>
-              </li>
-            ))}
+            {Array.from(
+              {
+                length: Math.ceil(announcements.length / announcementsPerPage),
+              },
+              (_, index) => (
+                <li key={index + 1} className="page-item">
+                  <button
+                    onClick={() => paginate(index + 1)}
+                    className={`page-link ${currentPage === index + 1 ? "active" : ""}`}
+                  >
+                    {index + 1}
+                  </button>
+                </li>
+              )
+            )}
           </ul>
         </nav>
-      )} 
-            {/* Check if user has reached the announcement limit */}
-            {announcements.length >= 10 && (
+      )}
+      {/* Check if user has reached the announcement limit */}
+      {announcements.length >= 10 && (
         <div className="alert alert-warning" role="alert">
-          لقد وصلت الحد الأقصى من البلاغات (10 بلاغات). لا يمكنك إضافة بلاغات جديدة.
+          لقد وصلت الحد الأقصى من البلاغات (10 بلاغات). لا يمكنك إضافة بلاغات
+          جديدة.
         </div>
       )}
-    <h1>اضافة بلاغ</h1>  
-    <div className="p-4 bg-white shadow-lg rounded">
-        
+      <h1>اضافة بلاغ</h1>
+      <div className="p-4 bg-white shadow-lg rounded">
         <form onSubmit={formik.handleSubmit} className="row g-3">
           {/* <div className="col-md-6">
             <label className="form-label">اسم المستخدم</label>
@@ -337,27 +368,30 @@ const UserAnnouncementPage = () => {
           <div className="col-12">
             <label className="form-label">إرفاق صورة (اختياري)</label>
             <input
-  type="file"
-  className="form-control"
-  ref={inputRef}
-  name="photoFile"
-  onChange={handleChange} // Use the fixed function
-  accept="image/*"
-/>
-{formik.values.photoFile && (
-  <div className="mt-2">
-    <img
-      src={(formik.values.photoFile)}
-      alt="Uploaded"
-      className="img-thumbnail"
-      width="200"
-    />
-  </div>
-)}
+              type="file"
+              className="form-control"
+              ref={inputRef}
+              name="photoFile"
+              onChange={handleChange} // Use the fixed function
+              accept="image/*"
+            />
+            {formik.values.photoFile && (
+              <div className="mt-2">
+                <img
+                  src={formik.values.photoFile}
+                  alt="Uploaded"
+                  className="img-thumbnail"
+                  width="200"
+                />
+              </div>
+            )}
           </div>
           <div className="col-12 d-flex justify-content-between">
-            <button type="submit" className="btn btn-primary" disabled={submitting || announcements.length >= 10}>
-
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={submitting || announcements.length >= 10}
+            >
               {submitting ? "جاري الإرسال..." : ""}
               إرسال البلاغ
             </button>
@@ -366,19 +400,26 @@ const UserAnnouncementPage = () => {
             </button> */}
           </div>
         </form>
-  {/* render the EditAnnouncementModal only if announcementId is provided with a value */}
-        {selectedAnnouncement &&showModal && (
-           <EditAnnouncementModal 
-           show={showModal} 
-           onHide={() => setShowModal(false)} 
-           onSave={handleSave} 
-           announcement={selectedAnnouncement || { AnnouncementType: '', AnnouncementDescription: '', region: '', binNumber: '' }} 
-           regions={regions} 
-           filteredBins={filteredBins} 
-         />
+        {/* render the EditAnnouncementModal only if announcementId is provided with a value */}
+        {selectedAnnouncement && showModal && (
+          <EditAnnouncementModal
+            show={showModal}
+            onHide={() => setShowModal(false)}
+            onSave={handleSave}
+            announcement={
+              selectedAnnouncement || {
+                AnnouncementType: "",
+                AnnouncementDescription: "",
+                region: "",
+                binNumber: "",
+              }
+            }
+            regions={regions}
+            filteredBins={filteredBins}
+          />
           /*
             
-          */ 
+          */
         )}
       </div>
     </div>

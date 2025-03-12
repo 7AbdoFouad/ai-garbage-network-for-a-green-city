@@ -24,16 +24,16 @@ export default function UserManagement() {
 
   const [isEditingManager, setIsEditingManager] = useState(false);
   const [isEditingTruckDriver, setIsEditingTruckDriver] = useState(false);
-    const [selectedManager, setSelectedManager] = useState(null);
+  const [selectedManager, setSelectedManager] = useState(null);
   const [selectedTruckDriver, setSelectedTruckDriver] = useState(null);
 
   const [loadingDeleteUser, setloadingDeleteUser] = useState(false);
   const [loadingDeleteManager, setloadingDeleteManager] = useState(false);
-  const [loadingDeleteTruckDriver, setloadingDeleteTruckDriver] = useState(false);
+  const [loadingDeleteTruckDriver, setloadingDeleteTruckDriver] =
+    useState(false);
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -51,7 +51,8 @@ export default function UserManagement() {
       return !(manager.id === currentUser.id); // Admin see other admins, but not themselves
     } else if (loggedInPermissions.includes("UserManagement")) {
       return (
-        !manager.Permissions.includes("admin") && !(manager.id === currentUser.id)
+        !manager.Permissions.includes("admin") &&
+        !(manager.id === currentUser.id)
       );
     }
     return true;
@@ -130,7 +131,7 @@ export default function UserManagement() {
     //   toast.error("Failed to delete Truck Driver. Please try again later.");
     // }
     //-----------------------------
-        setloadingDeleteTruckDriver(true);
+    setloadingDeleteTruckDriver(true);
     setError(null);
     try {
       const user = truckDrivers.find((user) => user.id === userId);
@@ -198,7 +199,6 @@ export default function UserManagement() {
       console.log(e);
       toast.error("Failed to update Truck Driver. Please try again later.");
     }
-
   };
 
   return (
@@ -238,7 +238,6 @@ export default function UserManagement() {
         </tbody>
       </Table>
 
-
       <div className="container py-4">
         <h2 className="text-center mt-5 mb-4">إدارة حسابات المديرين</h2>
         <Form.Control type="text" placeholder="بحث..." className="mb-3" />
@@ -277,14 +276,13 @@ export default function UserManagement() {
                     variant="danger"
                     onClick={() => handleDeleteManager(manager.id)}
                   >
-                  {loadingDeleteManager ? "جاري الحذف..." : "حذف"}
+                    {loadingDeleteManager ? "جاري الحذف..." : "حذف"}
                   </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
-
       </div>
 
       <h3 className="text-center mt-5">إضافة مدير</h3>
@@ -357,7 +355,7 @@ export default function UserManagement() {
                   className="me-2"
                   onClick={() => handleEditTruckDriver(driver)}
                 >
-                 تعديل
+                  تعديل
                 </Button>
                 <Button
                   variant="danger"
@@ -404,7 +402,6 @@ export default function UserManagement() {
       </Form>
       {selectedManager && isEditingManager && (
         <EditManagerModel
-
           // show={isEditing}
           closeModal={() => setIsEditingManager(false)}
           saveData={handleSaveManagerData}
