@@ -1,0 +1,194 @@
+/* Announcement.css */
+/* Announcement.css */
+.container {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(86, 13, 169, 0.1);
+}
+  /* Announcement.css */
+/* Announcement.css */
+.announcement-container {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(86, 13, 169, 0.1);
+}
+  
+  .table thead th {
+    background-color: #01080e;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .table tbody tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+  }
+  
+  .table tbody td {
+    border-bottom: 1px solid #dddddd;
+  }
+  /* Announcement.css */
+.btn {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+  }
+  
+  .btn-primary {
+    background-color: #3498db;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .btn-warning {
+    background-color: #f39c12;
+    border: none;
+  }
+  
+  .btn-warning:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .btn-danger {
+    background-color: #e74c3c;
+    border: none;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  /* Announcement.css */
+.btn {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+  }
+  
+  .btn-primary {
+    background-color: #3498db;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .btn-warning {
+    background-color: #f39c12;
+    border: none;
+  }
+  
+  .btn-warning:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .btn-danger {
+    background-color: #e74c3c;
+    border: none;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  /* Announcement.css */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+  }
+  
+  .form-label {
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  /* Announcement.css */
+.form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  /* Announcement.css */
+.pagination .page-item .page-link {
+    border-radius: 8px;
+    margin: 0 4px;
+    border: none;
+    color: #3498db;
+    transition: all 0.3s ease;
+  }
+  
+  .pagination .page-item.active .page-link {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .pagination .page-item .page-link:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  /* Announcement.css */
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .table tbody tr {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  /* Announcement.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+/* Announcement.css */
+.alert {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .alert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  /* Announcement.css */
+h2, h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+  }
+  
+  .mt-5 {
+    margin-top: 3rem !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 2rem !important;
+  }

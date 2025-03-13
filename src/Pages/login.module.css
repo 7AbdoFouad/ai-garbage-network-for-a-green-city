@@ -1,0 +1,181 @@
+/* 📌 Login Page Styling - GreenCity Theme */
+.loginContainer {
+    background: linear-gradient(135deg, #d4edda, #a8df8e);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    flex-wrap: wrap;
+  }
+  
+  /* 📌 Layout for Login Form and Image */
+  .loginWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 50px;
+    max-width: 1000px;
+    width: 90%;
+    gap: 40px;
+  }
+  
+  .loginForm {
+    flex: 1;
+    min-width: 320px;
+  }
+  
+  .loginImage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .loginImage img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* 📌 Input Fields */
+  .loginControl {
+    border-radius: 12px;
+    border: 2px solid #8bc34a;
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+  }
+  
+  .loginControl:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  }
+  
+  /* 📌 Button Styling */
+  .btnLogin {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: white;
+    font-weight: bold;
+    padding: 14px 20px;
+    border-radius: 10px;
+    transition: background 0.3s ease-in-out, transform 0.2s ease;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .btnLogin:hover {
+    background: linear-gradient(135deg, #388e3c, #1b5e20);
+    transform: scale(1.05);
+  }
+  
+  .btnLogin:disabled {
+    background: #c8e6c9;
+    cursor: not-allowed;
+  }
+  
+  /* 📌 Additional Info Styling */
+  .loginInfo {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .loginInfo p {
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  /* 📌 Responsive Design */
+  @media (max-width: 992px) {
+    .loginWrapper {
+      flex-direction: column;
+      padding: 30px;
+      text-align: center;
+    }
+  
+    .loginImage {
+      order: -1;
+      margin-bottom: 20px;
+    }
+  
+    .loginImage img {
+      max-width: 80%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .loginWrapper {
+      width: 95%;
+      padding: 20px;
+    }
+  
+    .btnLogin {
+      width: 100%;
+    }
+  
+    .loginControl {
+      font-size: 14px;
+      padding: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .loginContainer {
+      padding: 30px 10px;
+    }
+  
+    .loginWrapper {
+      padding: 20px;
+    }
+  
+    .loginControl {
+      padding: 10px;
+      font-size: 14px;
+    }
+  
+    .btnLogin {
+      padding: 12px;
+    }
+  }
+  
+  @media (max-width: 320px) {
+    .loginContainer {
+      padding: 15px 5px;
+    }
+  
+    .loginWrapper {
+      padding: 10px;
+      width: 100%;
+    }
+  
+    .loginForm {
+      width: 100%;
+    }
+  
+    .loginControl {
+      width: 100%;
+      padding: 8px;
+      font-size: 13px;
+    }
+  
+    .btnLogin {
+      width: 100%;
+      font-size: 13px;
+      padding: 10px;
+    }
+  
+    h2, h3 {
+      font-size: 18px;
+    }
+  }
+  

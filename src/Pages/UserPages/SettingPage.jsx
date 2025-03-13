@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import EditProfileModal from "./EditProfileModal"; // Import modal component
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
+import settingstyle from "./setting.module.css";
 
 export default function SettingPage() {
   const { id } = useParams();
@@ -41,10 +42,10 @@ export default function SettingPage() {
             profileImage: newProfileImage, // Update state after successful update
           }));
 
-          toast.success("تم تحديث صورة الملف الشخصي بنجاح!");
+          toast.success("Profile image updated successfully!");
         } catch (error) {
-          console.error("فشل تحديث صورة الملف الشخصي:", error);
-          toast.error("حدث خطأ أثناء تحديث الصورة.");
+          console.error("Failed to update profile image:", error);
+          toast.error("An error occurred while updating the image.");
         }
       };
 
@@ -59,7 +60,7 @@ export default function SettingPage() {
   useEffect(() => {
     setUserData({
       name: user.name || "",
-      Address: user.Address || "",
+      address: user.Address || "", // Renamed to "address"
       profileImage: profileImage || "",
       email: user.email || "",
       password: user.password || "",
@@ -87,13 +88,13 @@ export default function SettingPage() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={settingstyle.container}>
       {/* Profile Picture */}
       <div
-        className={styles.profilePicture}
+        className={settingstyle.profilePicture}
         onClick={() => document.getElementById("fileInput").click()}
       >
-        <img src={profileImage} alt="Profile" className={styles.profileImage} />
+        <img src={profileImage} alt="Profile" className={settingstyle.profileImage} />
         <input
           type="file"
           id="fileInput"
@@ -104,11 +105,11 @@ export default function SettingPage() {
       </div>
 
       {/* Profile Info */}
-      <div className={styles.profileInfo}>
-        <div className={styles.profileField}>
-          <strong>اسم المستخدم:</strong>{" "}
+      <div className={settingstyle.profileInfo}>
+        <div className={settingstyle.profileField}>
+          <strong>Username:</strong>{" "}
           <input
-            className={styles.inputField}
+            className={settingstyle.inputField}
             name="username"
             value={userData.name}
             // onChange={handleChange}
@@ -116,28 +117,28 @@ export default function SettingPage() {
           />
         </div>
 
-        <div className={styles.profileField}>
-          <strong>العنوان:</strong>{" "}
+        <div className={settingstyle.profileField}>
+          <strong>Address:</strong>{" "}
           <input
-            className={styles.inputField}
+            className={settingstyle.inputField}
             name="address"
-            value={userData.Address}
+            value={userData.address}
             // onChange={handleChange}
             disabled={!isEditing}
           />
         </div>
-        <div className={styles.profileField}>
-          <strong>البريد الإلكتروني:</strong>{" "}
+        <div className={settingstyle.profileField}>
+          <strong>Email:</strong>{" "}
           <input
-            className={styles.inputField}
+            className={settingstyle.inputField}
             name="email"
             value={userData.email}
             // onChange={handleChange}
             disabled
           />
         </div>
-        <div className={styles.profileField}>
-          <strong>كلمة المرور:</strong>{" "}
+        <div className={settingstyle.profileField}>
+          <strong>Password:</strong>{" "}
           <input
             className={styles.inputField}
             type="text"
@@ -150,35 +151,35 @@ export default function SettingPage() {
       </div>
 
       {/* User Statistics */}
-      <div className={styles.stats}>
-        <h4>إحصائيات المستخدم</h4>
+      <div className={settingstyle.stats}>
+        <h4>User Statistics</h4>
         <p>
-          📌 عدد البلاغات المقبولة التي قدمتها:{" "}
+          📌 Number of accepted announcements you have submitted:{" "}
           <strong>{userData.numOfAcceptedAnnouncementsCount}</strong>
         </p>
         <p>
-          📌 عدد الفعاليات الاجتماعية التي سجلت بها وأتممتها بنجاح:{" "}
+          📌 Number of social activities you registered and completed successfully:{" "}
           <strong>{userData.numOfCompletedActivitiesCount}</strong>
         </p>
         <p>
-          📌 عدد الاستطلاعات التي أكملتها:{" "}
+          📌 Number of completed polls:{" "}
           <strong>{userData.numOfCompletedPollsCount}</strong>
         </p>
       </div>
 
       {/* Buttons */}
-      <div className={styles.buttonContainer}>
+      <div className={settingstyle.buttonContainer}>
         <button
           className={`${styles.button} ${styles.editButton}`}
           onClick={() => setIsEditing(true)}
         >
-          ✏️ تعديل الملف الشخصي
+          ✏️ Edit Profile
         </button>
         <button
-          className={`${styles.button} ${styles.logoutButton}`}
+          className={`${settingstyle.button} ${settingstyle.logoutButton}`}
           onClick={logout}
         >
-          🚪 تسجيل الخروج
+          🚪 Log Out
         </button>
       </div>
 

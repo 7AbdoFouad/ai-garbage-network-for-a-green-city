@@ -1,45 +1,35 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Announcement.css";
 import useUser from "../../hooks/useUser";
 import { useFormik } from "formik";
-import { object, string } from "yup"; // Ensure you import Yup correctly
+import { object, string } from "yup";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import EditAnnouncementModal from "./EditAnnouncementModal";
 import { useSearchParams } from "react-router-dom";
+import styles from "./Announcement.module.css";
 
 const schema = object().shape({
-  // userName: string()
-  //   .required("اسم المستخدم مطلوب")
-  //   .min(3, "يجب أن يحتوي الاسم على أكثر من 3 أحرف"),
-
-  AnnouncementType: string().required("يجب إدخال نوع البلاغ"),
-
+  AnnouncementType: string().required("Announcement type is required"),
   AnnouncementDescription: string()
-    .nullable() // First, allow null values
+    .nullable()
     .when("region", {
-      is: (region) => !region, // If `region` is null or empty, description is required
-      then: (schema) => schema.required("وصف البلاغ مطلوب"),
+      is: (region) => !region,
+      then: (schema) => schema.required("Announcement description is required"),
     }),
-
-  region: string().nullable(), // Allow region to be nullable
-
+  region: string().nullable(),
   binNumber: string()
     .nullable()
     .when("region", {
-      is: (region) => region, // If `region` is null or empty, description is required
-      then: (schema) => schema.required("رقم البلاغ مطلوب"),
+      is: (region) => region,
+      then: (schema) => schema.required("Bin number is required"),
     }),
 });
 
 const UserAnnouncementPage = () => {
   const { id } = useParams();
   const [submitting, setSubmitting] = useState(false);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const announcementsPerPage = 5;
   const [showModal, setShowModal] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const {
@@ -52,37 +42,20 @@ const UserAnnouncementPage = () => {
     updateUsersAnnouncements,
   } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // const announcements = usersAnnouncements.filter(
-  //   (announcement) => announcement.userId == id
-  // );
-
-  // const indexOfLastAnnouncement = currentPage * announcementsPerPage;
-  // const indexOfFirstAnnouncement =
-  //   indexOfLastAnnouncement - announcementsPerPage;
-  // const currentAnnouncements = announcements.slice(
-  //   indexOfFirstAnnouncement,
-  //   indexOfLastAnnouncement
-  // );
-
-  // const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const inputRef = useRef();
 
-  // Get current page from URL, default to 1
   const currentPage = Number(searchParams.get("page")) || 1;
   const announcementsPerPage = 5;
-  // Pagination logic
   const announcements = usersAnnouncements.filter((a) => a.userId == id);
   const indexOfLastAnnouncement = currentPage * announcementsPerPage;
-  const indexOfFirstAnnouncement =
-    indexOfLastAnnouncement - announcementsPerPage;
+  const indexOfFirstAnnouncement = indexOfLastAnnouncement - announcementsPerPage;
   const currentAnnouncements = announcements.slice(
     indexOfFirstAnnouncement,
     indexOfLastAnnouncement
   );
 
   const paginate = (pageNumber) => {
-    setSearchParams({ page: pageNumber }); // Update URL parameter
+    setSearchParams({ page: pageNumber });
   };
 
   const handleSubmit = async (values) => {
@@ -90,7 +63,6 @@ const UserAnnouncementPage = () => {
       setSubmitting(true);
       await addUsersAnnouncements(values);
       toast.success("Announcement added successfully!");
-      // formik.setFieldValue("photoFile", null);
       inputRef.current.value = null;
       formik.resetForm();
     } catch (e) {
@@ -114,10 +86,10 @@ const UserAnnouncementPage = () => {
       photoFile: null,
       userId: id,
     },
-
     validationSchema: schema,
     onSubmit: handleSubmit,
   });
+
   useEffect(() => {
     const fetchData = async () => {
       const user = await fetchUser(id);
@@ -131,12 +103,12 @@ const UserAnnouncementPage = () => {
     setSelectedAnnouncement(announcement);
     setShowModal(true);
   };
+
   const handleSave = async (values) => {
-    // values is now the object with form values
     const updatedValues = {
       ...selectedAnnouncement,
-      ...values, // Spread the values from the form
-      siteLocation: values.siteLocation || "", // Ensure siteLocation is included if necessary
+      ...values,
+      siteLocation: values.siteLocation || "",
     };
 
     try {
@@ -154,11 +126,9 @@ const UserAnnouncementPage = () => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-
       reader.onloadend = () => {
-        formik.values.photoFile = reader.result; // Store the actual file, not base64
+        formik.values.photoFile = reader.result;
       };
-
       reader.readAsDataURL(file);
     }
   };
@@ -168,18 +138,14 @@ const UserAnnouncementPage = () => {
       await deleteUsersAnnouncements(announcementId);
       toast.success("Announcement deleted successfully!");
 
-      // Check if the current page still has announcements
-      const newAnnouncements = announcements.filter(
-        (a) => a.id !== announcementId
-      );
+      const newAnnouncements = announcements.filter((a) => a.id !== announcementId);
       const totalAnnouncements = newAnnouncements.length;
 
-      // If the current page is now invalid, navigate to the previous page
       if (
         totalAnnouncements === 0 ||
         currentPage > Math.ceil(totalAnnouncements / announcementsPerPage)
       ) {
-        const newPage = Math.max(currentPage - 1, 1); // Ensure the page doesn't go below 1
+        const newPage = Math.max(currentPage - 1, 1);
         setSearchParams({ page: newPage });
       }
     } catch (e) {
@@ -188,30 +154,27 @@ const UserAnnouncementPage = () => {
     }
   };
 
-  // Filter bins based on the selected region
-  const filteredBins = bins.filter(
-    (bin) => bin.region === formik.values.region
-  );
+  const filteredBins = bins.filter((bin) => bin.region === formik.values.region);
   const siteLocation = filteredBins.find(
     (bin) => bin.binNumber === formik.values.binNumber
   );
   if (siteLocation) formik.values.siteLocation = siteLocation.binLocation;
 
   return (
-    <div className="container py-5">
-      <h2 className="text-center mb-4 fw-bold">📢 عرض البلاغات الخاصة بي</h2>
-      <h3 className="mt-5 text-center fw-semibold">📜 قائمة البلاغات</h3>
-      <table className="table table-striped mt-3">
+    <div className={styles.container}>
+      <h2 className="text-center mb-4 fw-bold">📢 My Announcements</h2>
+      <h3 className="mt-5 text-center fw-semibold">📜 Announcements List</h3>
+      <table className={`table table-striped mt-3 ${styles.table}`}>
         <thead className="table-dark">
           <tr>
-            <th>رقم البلاغ</th>
-            <th>نوع البلاغ</th>
-            <th>وصف البلاغ</th>
-            <th>تاريخ البلاغ</th>
-            <th>المنطقة</th>
-            <th>رقم الصندوق</th>
-            <th>الموقع</th>
-            <th>خيارات</th>
+            <th>Announcement Number</th>
+            <th>Announcement Type</th>
+            <th>Announcement Description</th>
+            <th>Announcement Date</th>
+            <th>Region</th>
+            <th>Bin Number</th>
+            <th>Location</th>
+            <th>Options</th>
           </tr>
         </thead>
         <tbody>
@@ -226,30 +189,28 @@ const UserAnnouncementPage = () => {
               <td>{announcement.siteLocation}</td>
               <td>
                 <button
-                  className="btn btn-warning me-2"
+                  className={`btn btn-warning me-2 ${styles.button}`}
                   onClick={() => handleEdit(announcement)}
                 >
-                  تعديل
+                  Edit
                 </button>
                 <button
-                  className="btn btn-danger"
+                  className={`btn btn-danger ${styles.button}`}
                   onClick={() => handleDelete(announcement.id)}
                 >
-                  حذف
+                  Delete
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {/* Pagination */}
+
       {announcements.length > announcementsPerPage && (
         <nav className="mt-4">
           <ul className="pagination justify-content-center">
             {Array.from(
-              {
-                length: Math.ceil(announcements.length / announcementsPerPage),
-              },
+              { length: Math.ceil(announcements.length / announcementsPerPage) },
               (_, index) => (
                 <li key={index + 1} className="page-item">
                   <button
@@ -264,69 +225,56 @@ const UserAnnouncementPage = () => {
           </ul>
         </nav>
       )}
-      {/* Check if user has reached the announcement limit */}
+
       {announcements.length >= 10 && (
         <div className="alert alert-warning" role="alert">
-          لقد وصلت الحد الأقصى من البلاغات (10 بلاغات). لا يمكنك إضافة بلاغات
-          جديدة.
+          You have reached the maximum number of announcements (10 announcements). You cannot add new announcements.
         </div>
       )}
-      <h1>اضافة بلاغ</h1>
-      <div className="p-4 bg-white shadow-lg rounded">
+
+      <h1>Add Announcement</h1>
+      <div className={`p-4 bg-white shadow-lg rounded ${styles.formContainer}`}>
         <form onSubmit={formik.handleSubmit} className="row g-3">
-          {/* <div className="col-md-6">
-            <label className="form-label">اسم المستخدم</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="أدخل اسم المستخدم"
-              {...formik.getFieldProps("userName")}
-            />
-            {formik.errors.userName && formik.touched.userName && (
-              <p className="text-danger small">{formik.errors.userName}</p>
-            )}
-          </div> */}
           <div className="col-md-6">
-            <label className="form-label">نوع البلاغ</label>
+            <label className="form-label">Announcement Type</label>
             <select
-              className="form-select"
+              className={`form-select ${styles.inputField}`}
               {...formik.getFieldProps("AnnouncementType")}
             >
               <option value="" style={{ display: "none" }}>
-                اختر نوع البلاغ
+                Select announcement type
               </option>
-              <option value="صندوق ممتلئ">صندوق ممتلئ</option>
-              <option value="تلف صندوق">تلف صندوق</option>
-              <option value="نفايات متناثرة">نفايات متناثرة</option>
-              <option value="تسرب مواد خطرة">تسرب مواد خطرة</option>
-              <option value="عدم جمع النفايات">عدم جمع النفايات</option>
+              <option value="Full Bin">Full Bin</option>
+              <option value="Damaged Bin">Damaged Bin</option>
+              <option value="Scattered Waste">Scattered Waste</option>
+              <option value="Hazardous Material Leak">Hazardous Material Leak</option>
+              <option value="Waste Not Collected">Waste Not Collected</option>
             </select>
-            {formik.errors.AnnouncementType &&
-              formik.touched.AnnouncementType && (
-                <p className="text-danger small">
-                  {formik.errors.AnnouncementType}
-                </p>
-              )}
+            {formik.errors.AnnouncementType && formik.touched.AnnouncementType && (
+              <div className="invalid-feedback">{formik.errors.AnnouncementType}</div>
+            )}
           </div>
+
           <div className="col-md-6">
-            <label className="form-label">وصف البلاغ</label>
+            <label className="form-label">Announcement Description</label>
             <textarea
-              className="form-control"
-              placeholder="ادخل وصف البلاغ"
+              className={`form-control ${styles.inputField}`}
+              placeholder="Enter announcement description"
               {...formik.getFieldProps("AnnouncementDescription")}
             ></textarea>
-            {formik.errors.AnnouncementDescription &&
-              formik.touched.AnnouncementDescription && (
-                <p className="text-danger small">
-                  {formik.errors.AnnouncementDescription}
-                </p>
-              )}
+            {formik.errors.AnnouncementDescription && formik.touched.AnnouncementDescription && (
+              <div className="invalid-feedback">{formik.errors.AnnouncementDescription}</div>
+            )}
           </div>
+
           <div className="col-md-6">
-            <label className="form-label">المنطقة</label>
-            <select className="form-select" {...formik.getFieldProps("region")}>
+            <label className="form-label">Region</label>
+            <select
+              className={`form-select ${styles.inputField}`}
+              {...formik.getFieldProps("region")}
+            >
               <option value="" style={{ display: "none" }}>
-                اختر المنطقة
+                Select region
               </option>
               {regions.map((region) => (
                 <option key={region.id} value={region.regionName}>
@@ -335,15 +283,16 @@ const UserAnnouncementPage = () => {
               ))}
             </select>
           </div>
+
           <div className="col-md-6">
-            <label className="form-label">رقم الصندوق</label>
+            <label className="form-label">Bin Number</label>
             <select
-              className="form-select"
+              className={`form-select ${styles.inputField}`}
               {...formik.getFieldProps("binNumber")}
-              disabled={!formik.values.region} // Disable if no region is selected
+              disabled={!formik.values.region}
             >
               <option value="" style={{ display: "none" }}>
-                اختر رقم الصندوق
+                Select bin number
               </option>
               {filteredBins.map((bin) => (
                 <option key={bin.binNumber} value={bin.binNumber}>
@@ -351,28 +300,24 @@ const UserAnnouncementPage = () => {
                 </option>
               ))}
             </select>
-            {/* Show warning if no region is selected */}
             {!formik.values.region && (
-              <p
-                className="small mt-1"
-                style={{ color: "#c6ad13", fontWeight: "600" }}
-              >
-                الرجاء اختيار المنطقة أولاً لتتمكن من تحديد رقم الصندوق
+              <p className="small mt-1" style={{ color: "#c6ad13", fontWeight: "600" }}>
+                Please select a region first to choose a bin number.
               </p>
             )}
             {formik.errors.binNumber && formik.touched.binNumber && (
-              <p className="text-danger small">{formik.errors.binNumber}</p>
+              <div className="invalid-feedback">{formik.errors.binNumber}</div>
             )}
           </div>
 
           <div className="col-12">
-            <label className="form-label">إرفاق صورة (اختياري)</label>
+            <label className="form-label">Attach Image (Optional)</label>
             <input
               type="file"
-              className="form-control"
+              className={`form-control ${styles.inputField}`}
               ref={inputRef}
               name="photoFile"
-              onChange={handleChange} // Use the fixed function
+              onChange={handleChange}
               accept="image/*"
             />
             {formik.values.photoFile && (
@@ -386,42 +331,29 @@ const UserAnnouncementPage = () => {
               </div>
             )}
           </div>
+
           <div className="col-12 d-flex justify-content-between">
             <button
               type="submit"
-              className="btn btn-primary"
+              className={`btn btn-primary ${styles.button}`}
               disabled={submitting || announcements.length >= 10}
             >
-              {submitting ? "جاري الإرسال..." : ""}
-              إرسال البلاغ
+              {submitting ? "Submitting..." : "Submit Announcement"}
             </button>
-            {/* <button type="reset" className="btn btn-secondary">
-              إلغاء
-            </button> */}
           </div>
         </form>
-        {/* render the EditAnnouncementModal only if announcementId is provided with a value */}
-        {selectedAnnouncement && showModal && (
-          <EditAnnouncementModal
-            show={showModal}
-            onHide={() => setShowModal(false)}
-            onSave={handleSave}
-            announcement={
-              selectedAnnouncement || {
-                AnnouncementType: "",
-                AnnouncementDescription: "",
-                region: "",
-                binNumber: "",
-              }
-            }
-            regions={regions}
-            filteredBins={filteredBins}
-          />
-          /*
-            
-          */
-        )}
       </div>
+
+      {selectedAnnouncement && showModal && (
+        <EditAnnouncementModal
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          onSave={handleSave}
+          announcement={selectedAnnouncement}
+          regions={regions}
+          filteredBins={filteredBins}
+        />
+      )}
     </div>
   );
 };
