@@ -4,8 +4,11 @@ import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import useUser from "../hooks/useUser";
 import { useNavigate } from "react-router-dom";
-import { profile } from "@tensorflow/tfjs";
-
+import { GoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "react-facebook-login";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import useAuth from "../hooks/useAuth";
 // 📌 Validation Schema
 const schema = object().shape({
   name: string()
@@ -31,7 +34,69 @@ export default function Registeration() {
   const [submitting, setSubmitting] = useState(false);
   const { registerUser, users, managers, truckDrivers } = useUser();
   const navigate = useNavigate();
-
+    const { login } = useAuth();
+  
+    const handleGoogleLogin = async (response) => {
+      const { credential } = response;
+      const decoded = jwtDecode(credential); // Decode JWT token to extract user info
+    
+      const userData = {
+        id: decoded.sub, // Unique Google ID
+        name: decoded.name,
+        email: decoded.email,
+        password: "google-auth", // No password needed for social login
+        Address: "",
+        profileImage: decoded.picture || "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
+        numOfAcceptedAnnouncementsCount: 0,
+        numOfCompletedActivitiesCount: 0,
+        numOfCompletedPollsCount: 0,
+      };
+      const areadyExist = users.find((user) => user.email === userData.email);
+    
+      if (areadyExist) {
+        login(areadyExist);
+        navigate(`/userDashboard/${areadyExist.id}`);
+        toast.success(`Google Login Successful. Welcome ${areadyExist.name}`);
+        return;
+      }
+    
+      await registerUser(userData); // Store in DB
+      login(userData);
+      navigate(`/userDashboard/${userData.id}`);
+      toast.success(`Google Login Successful. Welcome ${userData.name}`);
+    };
+    
+    // const handleFacebookLogin = (response) => {
+    //   console.log("Facebook Login Success:", response);
+    //   toast.success("Facebook Login Successful");
+    // };
+    const handleFacebookLogin = async (response) => {
+      const userData = {
+        id: response.id, // Unique Facebook ID
+        name: response.name,
+        email: response.email || `${response.id}@facebook.com`, // Facebook sometimes doesn't provide email
+        password: "facebook-auth",
+        Address: "",
+        profileImage: response.picture?.data?.url || "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
+        numOfAcceptedAnnouncementsCount: 0,
+        numOfCompletedActivitiesCount: 0,
+        numOfCompletedPollsCount: 0,
+      };
+    
+      const areadyExist = users.find((user) => user.email === userData.email);
+    
+      if (areadyExist) {
+        login(areadyExist);
+        navigate(`/userDashboard/${areadyExist.id}`);
+        toast.success(`Facebook Login Successful. Welcome ${areadyExist.name}`);
+        return;
+      }
+    
+      await registerUser(userData);
+      login(userData);
+      navigate(`/userDashboard/${userData.id}`);
+      toast.success(`Facebook Login Successful. Welcome ${userData.name}`);
+    };
   const handleSubmit = async (values) => {
     try {
       setSubmitting(true);
@@ -225,6 +290,25 @@ export default function Registeration() {
                 {submitting ? "Registering..." : "Submit"}
               </button>
             </form>
+            <div className="text-center">OR</div>
+                            <div className="text-center my-3">
+                             <GoogleOAuthProvider clientId="346738253715-2niv19e5d3bdli28jsq05s6ictkk68ib.apps.googleusercontent.com">  {/* ✅ ضع Client ID هنا */}
+                              <GoogleLogin
+                                onSuccess={handleGoogleLogin}
+                                onError={() => console.log("Login Failed!")}
+                              />
+                            </GoogleOAuthProvider>
+            
+                              <FacebookLogin
+                                appId="649672187611943"
+                                autoLoad={false}
+                                fields="name,email,picture"
+                                callback={handleFacebookLogin}
+                                textButton="Continue with Facebook"
+                                icon="fa-facebook"
+                                cssClass="btn btn-primary w-100 mt-2"
+                              />
+                            </div>
           </div>
         </div>
       </div>

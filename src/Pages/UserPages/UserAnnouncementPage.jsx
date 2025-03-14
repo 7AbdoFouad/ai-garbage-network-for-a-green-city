@@ -32,6 +32,11 @@ const UserAnnouncementPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+    const [AnnouncementPage, setAnnouncementPage] = useState(
+      parseInt(sessionStorage.getItem("AnnouncementPage")) || 1
+    );
+    const itemsPerPage = 5;
+
   const {
     usersAnnouncements,
     regions,
@@ -41,22 +46,36 @@ const UserAnnouncementPage = () => {
     deleteUsersAnnouncements,
     updateUsersAnnouncements,
   } = useUser();
-  const [searchParams, setSearchParams] = useSearchParams();
+  // const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef();
 
-  const currentPage = Number(searchParams.get("page")) || 1;
-  const announcementsPerPage = 5;
+  // const currentPage = Number(searchParams.get("page")) || 1;
+  // const announcementsPerPage = 5;
   const announcements = usersAnnouncements.filter((a) => a.userId == id);
-  const indexOfLastAnnouncement = currentPage * announcementsPerPage;
-  const indexOfFirstAnnouncement = indexOfLastAnnouncement - announcementsPerPage;
-  const currentAnnouncements = announcements.slice(
-    indexOfFirstAnnouncement,
-    indexOfLastAnnouncement
+  // const indexOfLastAnnouncement = currentPage * announcementsPerPage;
+  // const indexOfFirstAnnouncement = indexOfLastAnnouncement - announcementsPerPage;
+  // const currentAnnouncements = announcements.slice(
+  //   indexOfFirstAnnouncement,
+  //   indexOfLastAnnouncement
+  // );
+
+  // const paginate = (pageNumber) => {
+  //   setSearchParams({ page: pageNumber });
+  // };
+
+  const handleAnnouncementPageChange = (page) => {
+    setAnnouncementPage(page);
+    sessionStorage.setItem("AnnouncementPage", page);
+  };
+
+  const paginatedAnnouncement = announcements.slice(
+    (AnnouncementPage - 1) * itemsPerPage,
+    AnnouncementPage * itemsPerPage
   );
 
-  const paginate = (pageNumber) => {
-    setSearchParams({ page: pageNumber });
-  };
+  const totalAnnouncementPages = Math.ceil(announcements.length / itemsPerPage);
+  // console.log(usersAnnouncements.length);
+  
 
   const handleSubmit = async (values) => {
     try {
@@ -97,7 +116,15 @@ const UserAnnouncementPage = () => {
       formik.setFieldValue("email", user.email);
     };
     fetchData();
-  }, [id, fetchUser, formik]);
+
+ 
+    // if (announcements.length===0||AnnouncementPage > Math.ceil(announcements.length / itemsPerPage)){
+      
+    //   const newPage = Math.max(AnnouncementPage - 1, 1);
+    //   setAnnouncementPage(newPage);
+    //     sessionStorage.setItem("AnnouncementPage", newPage);
+    // }
+  }, [  fetchUser, formik, id]);
 
   const handleEdit = (announcement) => {
     setSelectedAnnouncement(announcement);
@@ -143,10 +170,11 @@ const UserAnnouncementPage = () => {
 
       if (
         totalAnnouncements === 0 ||
-        currentPage > Math.ceil(totalAnnouncements / announcementsPerPage)
+        AnnouncementPage > Math.ceil(totalAnnouncements / itemsPerPage)
       ) {
-        const newPage = Math.max(currentPage - 1, 1);
-        setSearchParams({ page: newPage });
+        const newPage = Math.max(AnnouncementPage - 1, 1);
+        setAnnouncementPage(newPage);
+        sessionStorage.setItem("AnnouncementPage", newPage);
       }
     } catch (e) {
       console.log(e);
@@ -162,8 +190,9 @@ const UserAnnouncementPage = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className="text-center mb-4 fw-bold">📢 My Announcements</h2>
-      <h3 className="mt-5 text-center fw-semibold">📜 Announcements List</h3>
+      {paginatedAnnouncement.length>0 &&(
+        <>
+      <h2 className="text-center mb-4 fw-bold">📜 My Announcements List</h2>
       <table className={`table table-striped mt-3 ${styles.table}`}>
         <thead className="table-dark">
           <tr>
@@ -178,9 +207,9 @@ const UserAnnouncementPage = () => {
           </tr>
         </thead>
         <tbody>
-          {currentAnnouncements.map((announcement, index) => (
+          {paginatedAnnouncement.map((announcement, index) => (
             <tr key={announcement.id}>
-              <td>{index + 1}</td>
+              <td>{ ((AnnouncementPage - 1) * itemsPerPage ) +index + 1 }</td>
               <td>{announcement.AnnouncementType}</td>
               <td>{announcement.AnnouncementDescription}</td>
               <td>{announcement.todayDate}</td>
@@ -204,9 +233,9 @@ const UserAnnouncementPage = () => {
             </tr>
           ))}
         </tbody>
-      </table>
-
-      {announcements.length > announcementsPerPage && (
+      </table></>
+)}
+      {/* {announcements.length > announcementsPerPage && (
         <nav className="mt-4">
           <ul className="pagination justify-content-center">
             {Array.from(
@@ -224,8 +253,17 @@ const UserAnnouncementPage = () => {
             )}
           </ul>
         </nav>
+      )} */}
+      {totalAnnouncementPages > 1 && (
+        <div className={styles.pagination}>
+          {Array.from({ length: totalAnnouncementPages }, (_, i) => (
+            <button key={i} onClick={() => handleAnnouncementPageChange(i + 1)}
+              className={AnnouncementPage === i + 1 ? styles.activePage : styles.pageButton}>
+              {i + 1}
+            </button>
+          ))}
+        </div>
       )}
-
       {announcements.length >= 10 && (
         <div className="alert alert-warning" role="alert">
           You have reached the maximum number of announcements (10 announcements). You cannot add new announcements.
@@ -238,7 +276,7 @@ const UserAnnouncementPage = () => {
           <div className="col-md-6">
             <label className="form-label">Announcement Type</label>
             <select
-              className={`form-select ${styles.inputField}`}
+              className={`form-select `}
               {...formik.getFieldProps("AnnouncementType")}
             >
               <option value="" style={{ display: "none" }}>
@@ -250,27 +288,33 @@ const UserAnnouncementPage = () => {
               <option value="Hazardous Material Leak">Hazardous Material Leak</option>
               <option value="Waste Not Collected">Waste Not Collected</option>
             </select>
-            {formik.errors.AnnouncementType && formik.touched.AnnouncementType && (
-              <div className="invalid-feedback">{formik.errors.AnnouncementType}</div>
-            )}
+            {formik.errors.AnnouncementType &&
+              formik.touched.AnnouncementType && (
+                <p className="text-danger small">
+                  {formik.errors.AnnouncementType}
+                </p>
+              )}
           </div>
 
           <div className="col-md-6">
             <label className="form-label">Announcement Description</label>
             <textarea
-              className={`form-control ${styles.inputField}`}
+              className={`form-control `}
               placeholder="Enter announcement description"
               {...formik.getFieldProps("AnnouncementDescription")}
             ></textarea>
-            {formik.errors.AnnouncementDescription && formik.touched.AnnouncementDescription && (
-              <div className="invalid-feedback">{formik.errors.AnnouncementDescription}</div>
-            )}
+            {formik.errors.AnnouncementDescription &&
+              formik.touched.AnnouncementDescription && (
+                <p className="text-danger small">
+                  {formik.errors.AnnouncementDescription}
+                </p>
+              )}
           </div>
 
           <div className="col-md-6">
             <label className="form-label">Region</label>
             <select
-              className={`form-select ${styles.inputField}`}
+              className={`form-select `}
               {...formik.getFieldProps("region")}
             >
               <option value="" style={{ display: "none" }}>
@@ -287,7 +331,7 @@ const UserAnnouncementPage = () => {
           <div className="col-md-6">
             <label className="form-label">Bin Number</label>
             <select
-              className={`form-select ${styles.inputField}`}
+              className={`form-select `}
               {...formik.getFieldProps("binNumber")}
               disabled={!formik.values.region}
             >
@@ -306,7 +350,7 @@ const UserAnnouncementPage = () => {
               </p>
             )}
             {formik.errors.binNumber && formik.touched.binNumber && (
-              <div className="invalid-feedback">{formik.errors.binNumber}</div>
+              <p className="text-danger small">{formik.errors.binNumber}</p>
             )}
           </div>
 
@@ -314,7 +358,7 @@ const UserAnnouncementPage = () => {
             <label className="form-label">Attach Image (Optional)</label>
             <input
               type="file"
-              className={`form-control ${styles.inputField}`}
+              className={`form-control `}
               ref={inputRef}
               name="photoFile"
               onChange={handleChange}

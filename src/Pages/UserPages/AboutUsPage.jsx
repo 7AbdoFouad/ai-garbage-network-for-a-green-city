@@ -41,15 +41,15 @@ const AboutUs = () => {
                     <h4 className="fw-semibold text-dark mt-4">🔧 Technologies Used:</h4>
                     <ul className={`list-unstyled text-muted fs-5 ${styles.techList}`}>
                         <li className="d-flex align-items-center">
-                            <FaCheckCircle className="text-success me-2 flex-shrink-0" />
+                            <FaCheckCircle className={`text-success me-2 flex-shrink-0 ${styles.techIcon}`} />
                             <strong>.NET</strong> - Backend development
                         </li>
                         <li className="d-flex align-items-center">
-                            <FaCheckCircle className="text-success me-2 flex-shrink-0" />
+                            <FaCheckCircle className={`text-success me-2 flex-shrink-0 ${styles.techIcon}`} />
                             <strong>React</strong> - Frontend development
                         </li>
                         <li className="d-flex align-items-center">
-                            <FaCheckCircle className="text-success me-2 flex-shrink-0" />
+                            <FaCheckCircle className={`text-success me-2 flex-shrink-0 ${styles.techIcon}`} />
                             <strong>Flutter</strong> - Mobile application
                         </li>
                     </ul>

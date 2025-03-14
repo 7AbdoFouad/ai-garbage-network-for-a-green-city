@@ -14,7 +14,6 @@ export default function UserManagement() {
     deleteUser,
     deleteManager,
     deleteTruckDriver,
-
     updateManager,
     updateTruckDriver,
     fetchManager,

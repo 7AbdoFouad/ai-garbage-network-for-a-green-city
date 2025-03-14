@@ -543,7 +543,6 @@ const useUser = () => {
       }
     };
     
-
     fetchUsers();
     fetchmanagers();
     fetchtruckDrivers();

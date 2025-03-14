@@ -113,3 +113,20 @@
 .unsubscribeButton:hover {
   background-color: #c0392b;
 }
+.pageButton {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.activePage {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  padding: 5px 10px;
+  margin: 3px;
+  cursor: pointer;
+  font-weight: bold;
+}

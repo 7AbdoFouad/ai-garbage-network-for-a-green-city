@@ -45,19 +45,24 @@
   }
   
   /* 📌 Input Fields */
-  .loginControl {
-    border-radius: 12px;
-    border: 2px solid #8bc34a;
-    transition: all 0.3s ease-in-out;
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-  }
-  
-  .loginControl:focus {
-    border-color: #4caf50;
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-  }
+.formControl {
+  border-radius: 12px;
+  border: 2px solid #8bc34a;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+}
+
+.formControl:focus {
+  border-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+.formControl:focus-visible{
+  border-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
   
   /* 📌 Button Styling */
   .btnLogin {
@@ -178,4 +183,52 @@
       font-size: 18px;
     }
   }
-  
+/* Google Button */
+.btn-google {
+  background: #ffffff;
+  color: #757575;
+  border: 2px solid #8bc34a;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-google i {
+  color: #db4437;
+  font-size: 20px;
+}
+
+.btn-google:hover {
+  background: #f1f1f1;
+  border-color: #4caf50;
+}
+
+/* Facebook Button */
+.btn-facebook {
+  background: #1877f2;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-facebook i {
+  color: white;
+  font-size: 20px;
+}
+
+.btn-facebook:hover {
+  background: #125baf;
+}

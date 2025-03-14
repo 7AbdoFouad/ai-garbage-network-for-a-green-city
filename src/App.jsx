@@ -16,7 +16,7 @@ import Registeration from "./Pages/Registeration";
 import ForgetPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
 import NotFound from "./Pages/NotFound";
-import VerifyEmail from "./Pages/VerifyEmail";
+// import VerifyEmail from "./Pages/VerifyEmail";
 
 // Manager pages
 import HomePageForManagers from "./Pages/ManagerPages/HomePageForManagers";

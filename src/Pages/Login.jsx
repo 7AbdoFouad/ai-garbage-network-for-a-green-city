@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { object, string } from "yup";
 import { useFormik } from "formik";
 import useUser from "../hooks/useUser";
@@ -8,7 +8,9 @@ import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "react-facebook-login";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import styles from "./login.module.css";
+import { jwtDecode } from "jwt-decode";
+import styles from "./Login.module.css";
+import ForgetPassword from "./ForgotPassword";
 
 const schema = object().shape({
   email: string()
@@ -25,9 +27,10 @@ const schema = object().shape({
 
 export default function Login() {
   const { login } = useAuth();
-  const { users, managers, truckDrivers } = useUser();
+  const { users, managers, truckDrivers,registerUser } = useUser();
   const navigate = useNavigate();
-
+  // State for the modal
+  const [isEditing, setIsEditing] = useState(false);
   const formik = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema: schema,
@@ -68,16 +71,72 @@ export default function Login() {
     }
   };
 
-  const handleGoogleLogin = (response) => {
-    console.log("Google Login Success:", response);
-    toast.success("Google Login Successful");
+  // const handleGoogleLogin = (response) => {
+  //   console.log("Google Login Success:", response);
+  //   toast.success("Google Login Successful");
+  // };
+  const handleGoogleLogin = async (response) => {
+    const { credential } = response;
+    const decoded = jwtDecode(credential); // Decode JWT token to extract user info
+  
+    const userData = {
+      id: decoded.sub, // Unique Google ID
+      name: decoded.name,
+      email: decoded.email,
+      password: "google-auth", // No password needed for social login
+      Address: "",
+      profileImage: decoded.picture || "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
+      numOfAcceptedAnnouncementsCount: 0,
+      numOfCompletedActivitiesCount: 0,
+      numOfCompletedPollsCount: 0,
+    };
+    const areadyExist = users.find((user) => user.email === userData.email);
+  
+    if (areadyExist) {
+      login(areadyExist);
+      navigate(`/userDashboard/${areadyExist.id}`);
+      toast.success(`Google Login Successful. Welcome ${areadyExist.name}`);
+      return;
+    }
+  
+    await registerUser(userData); // Store in DB
+    login(userData);
+    navigate(`/userDashboard/${userData.id}`);
+    toast.success(`Google Login Successful. Welcome ${userData.name}`);
   };
-
-  const handleFacebookLogin = (response) => {
-    console.log("Facebook Login Success:", response);
-    toast.success("Facebook Login Successful");
+  
+  // const handleFacebookLogin = (response) => {
+  //   console.log("Facebook Login Success:", response);
+  //   toast.success("Facebook Login Successful");
+  // };
+  const handleFacebookLogin = async (response) => {
+    const userData = {
+      id: response.id, // Unique Facebook ID
+      name: response.name,
+      email: response.email || `${response.id}@facebook.com`, // Facebook sometimes doesn't provide email
+      password: "facebook-auth",
+      Address: "",
+      profileImage: response.picture?.data?.url || "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
+      numOfAcceptedAnnouncementsCount: 0,
+      numOfCompletedActivitiesCount: 0,
+      numOfCompletedPollsCount: 0,
+    };
+  
+    const areadyExist = users.find((user) => user.email === userData.email);
+  
+    if (areadyExist) {
+      login(areadyExist);
+      navigate(`/userDashboard/${areadyExist.id}`);
+      toast.success(`Facebook Login Successful. Welcome ${areadyExist.name}`);
+      return;
+    }
+  
+    await registerUser(userData);
+    login(userData);
+    navigate(`/userDashboard/${userData.id}`);
+    toast.success(`Facebook Login Successful. Welcome ${userData.name}`);
   };
-
+  
   return (
     <div className={styles.loginContainer}>
       <div className={styles.loginWrapper}>
@@ -93,7 +152,7 @@ export default function Login() {
                     <label>Email address</label>
                     <input
                       type="text"
-                      className={styles.loginControl}
+                      className={`form-control p-3 rounded-3 ${styles.formControl}`}
                       name="email"
                       placeholder="Enter email or phone number"
                       value={formik.values.email}
@@ -109,7 +168,7 @@ export default function Login() {
                     <label>Password</label>
                     <input
                       type="password"
-                      className={styles.loginControl}
+                      className={`form-control p-3 rounded-3 ${styles.formControl}`}
                       name="password"
                       placeholder="Password"
                       value={formik.values.password}
@@ -120,33 +179,30 @@ export default function Login() {
                       <p className="text-danger">{formik.errors.password}</p>
                     )}
                   </div>
-
                   <div className="text-center mt-3">
                     <button type="submit" className="btn btn-success w-100">
                       Login
                     </button>
                   </div>
                 </form>
-
                 <div className="mt-3 text-center">
                   <button
                     className="btn btn-link"
-                    onClick={() => navigate("/forgot-password")}
+                    onClick={() => setIsEditing(true)}
                   >
                     Forgot Password?
                   </button>
                 </div>
-
                 <div className="text-center my-3">
-                  <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
-                    <GoogleLogin
-                      onSuccess={handleGoogleLogin}
-                      onError={() => console.log("Google Login Failed")}
-                    />
-                  </GoogleOAuthProvider>
+                 <GoogleOAuthProvider clientId="346738253715-2niv19e5d3bdli28jsq05s6ictkk68ib.apps.googleusercontent.com">  {/* ✅ ضع Client ID هنا */}
+                  <GoogleLogin
+                    onSuccess={handleGoogleLogin}
+                    onError={() => console.log("Login Failed!")}
+                  />
+                </GoogleOAuthProvider>
 
                   <FacebookLogin
-                    appId="YOUR_FACEBOOK_APP_ID"
+                    appId="649672187611943"
                     autoLoad={false}
                     fields="name,email,picture"
                     callback={handleFacebookLogin}
@@ -172,8 +228,14 @@ export default function Login() {
               }}
             />
           </div>
+
         </div>
       </div>
+            {isEditing && (
+              <ForgetPassword
+                closeModal={() => setIsEditing(false)}
+              />
+            )}
     </div>
   );
 }
