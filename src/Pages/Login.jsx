@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { object, string } from "yup";
 import { useFormik } from "formik";
 import useUser from "../hooks/useUser";

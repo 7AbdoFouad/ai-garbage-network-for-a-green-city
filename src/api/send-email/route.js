@@ -104,7 +104,6 @@ router.post("/delUser", async (req, res) => {
     return res.status(500).json({ error: "Failed to send email" });
   }
 });
-
 router.post("/delMang", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
@@ -151,6 +150,77 @@ router.post("/delTruck", async (req, res) => {
     return res.status(500).json({ error: "Failed to send email" });
   }
 });
+
+router.post("/edMang", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const { email,data } = req.body; // method = "nodemailer" او "resend"
+  const {name,phone,Address,password,Permissions} = data;
+
+  try {
+    // 📩 ارسال الايميل عبر Resend
+    await resend.emails.send({
+      from: "Abdulrahman <onboarding@resend.dev>",
+      to: email,
+      subject: "Edit Account",
+      html:`
+        Your account has been Edited From Clean City Management.
+        Here is the new data:
+        ${
+          `
+          <div>Name: ${name}</div>
+          <div>Email: ${email}</div>
+          <div>Phone: ${phone}</div>
+          <div>Address: ${Address}</div>
+          <div>Password: ${password}</div>
+          <div>Permissions: ${Permissions}</div>
+          `
+        }
+      `,
+    });
+    return res.status(200).json({ message: "📧 Email sent via Resend" });
+  } catch (error) {
+    console.error("❌ Email Sending Error:", error);
+    return res.status(500).json({ error: "Failed to send email" });
+  }
+});
+router.post("/edTruck", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const { email,data } = req.body; // method = "nodemailer" او "resend"
+  const {name,phone,Address,password,truckNumber} = data;
+  try {
+    // 📩 ارسال الايميل عبر Resend
+    await resend.emails.send({
+      from: "Abdulrahman <onboarding@resend.dev>",
+      to: email,
+      subject: "Edit Account",
+      html:`
+        Your account has been Edited From Clean City Management.
+        Here is the new data:
+        ${
+          `
+          <div>Name: ${name}</div>
+          <div>Email: ${email}</div>
+          <div>Phone: ${phone}</div>
+          <div>Address: ${Address}</div>
+          <div>Password: ${password}</div>
+          <div>truckNumber: ${truckNumber}</div>
+          `
+        }
+      `,
+    });
+    return res.status(200).json({ message: "📧 Email sent via Resend" });
+  } catch (error) {
+    console.error("❌ Email Sending Error:", error);
+    return res.status(500).json({ error: "Failed to send email" });
+  }
+});
+
 // __________________________________________________________________________
 // import express from "express";
 // import cors from "cors";

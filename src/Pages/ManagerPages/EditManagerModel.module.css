@@ -1,0 +1,58 @@
+.modalContainer {
+    width: 50%; /* عرض النافذة المنبثقة */
+    max-width: 600px; /* أقصى عرض */
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    max-height: 80vh; /* ✅ لا تجعل النافذة تمتد لكل الشاشة */
+    overflow-y: auto; /* ✅ تمكين التمرير إذا زاد المحتوى عن الارتفاع المحدد */
+  }
+  
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* تأثير تغبيش الخلفية */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* ✅ لتجنب أن تكون النافذة ملتصقة بالحواف عند التمرير */
+  }
+  
+  .label {
+    display: block;
+    margin: 10px 0 5px;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .modalButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  
+  .button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .saveButton {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .cancelButton {
+    background-color: #dc3545;
+    color: white;
+  }
+  

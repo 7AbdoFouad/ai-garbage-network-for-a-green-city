@@ -7,11 +7,11 @@ const teamMembers = [
     { name: "Abdulrahman Muhammad Fouad Muhammad", role: "Project Manager,Frontend Developer" },
     { name: "Moataz Muhammad Mustafa Youssef Abdul Hadi", role: "Frontend Developer" },
     { name: "Khaled Gamal Rashad Bahlol", role: "Mobile App Developer" },
-    { name: "Omar Al Sayed Sheikh Al Arab", role: "Backend Developer" },
     { name: "Youssef Ihab Ali Salama", role: "Backend Developer" },
-    { name: "Amr Muhammad Youssef Ibrahim", role: "Mobile App Developer" },
+    { name: "Omar Al Sayed Sheikh Al Arab", role: "Backend Developer" },
+    { name: "Essam Abdul Badawi Abdo Saleh", role: "UI,UX Designer" },
     { name: "Ahmed Muhammad Mahmoud Ali Abdulrahman", role: "Mobile App Developer" },
-    { name: "Essam Abdul Badawi Abdo Saleh", role: "UI,UX Designer" }
+    { name: "Amr Muhammad Youssef Ibrahim", role: "Mobile App Developer" },
 ]; 
 
 const getImage = (idx) => {

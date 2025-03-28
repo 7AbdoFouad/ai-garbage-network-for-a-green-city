@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import PropTypes from "prop-types";
-import styles from "./EditProfileModal.module.css";
+import styles from "./EditManagerModel.module.css";
 import { object, string, array } from "yup";
 import { useFormik } from "formik";
 import { useParams } from "react-router-dom";
@@ -12,6 +12,7 @@ const schema = object().shape({
     .required("Name is required")
     .min(3, "Name must be more than 3 characters")
     .matches(/^[a-zA-Z\s]+$/, "Invalid Name, must contain letters only"),
+  
   phone: string()
     .required("Phone number is required")
     .matches(/^\d+$/, "Phone number must contain only numbers")
@@ -26,8 +27,8 @@ const schema = object().shape({
     .required("Password is required")
     .min(8, "Password must be at least 8 characters "),
   Address: string().min(3, "Address must be more than 3 characters"),
-  Permissions: array().of(string().required("Permission is required")),
-});
+  Permissions: array()
+  .min(1, "At least one permission is required"),});
 // {
 //   "name": "Mohamed zeid",
 //   "email": "Hb6mW@example.com",
@@ -43,7 +44,13 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
   const { fetchManager } = useUser();
   const [currentManager, setCurrentManager] = useState(null);
   const { id } = useParams();
-
+  useEffect(() => {
+    document.body.style.overflow = "hidden"; // 🚫 منع تمرير الصفحة الرئيسية
+  
+    return () => {
+      document.body.style.overflow = "auto"; // ✅ إعادة التمرير عند إغلاق الـ popup
+    };
+  }, []);
   useEffect(() => {
     const fetchmanager = async () => {
       const manager = await fetchManager(id);
@@ -51,6 +58,7 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
     };
     fetchmanager();
   });
+  const [submiting , setSubmiting] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -62,11 +70,17 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
       Permissions: [],
     },
     validationSchema: schema,
-    onSubmit: (data) => {
-      console.log(data);
-      saveData(data);
-    },
-  });
+    onSubmit: async (data) => {  // ✅ Make it async
+      setSubmiting(true); // ✅ Set submitting to true before saving
+      try {
+        await saveData(data); // ✅ Ensure saveData is awaited
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setSubmiting(false); // ✅ This will now execute correctly after awaiting saveData
+      }
+    }
+  }); 
   useEffect(() => {
     formik.setValues({
       name: userData.name,
@@ -74,7 +88,7 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
       phone: userData.phone,
       password: userData.password,
       Address: userData.Address,
-      Permissions: userData.Permissions,
+      Permissions: userData.Permissions||[],
     });
   }, []);
   const handleCheckboxChange = (e) => {
@@ -82,9 +96,10 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
     const updatedPermissions = checked
       ? [...formik.values.Permissions, value] // Add if checked
       : formik.values.Permissions.filter((perm) => perm !== value); // Remove if unchecked
-
     formik.setFieldValue("Permissions", updatedPermissions);
-  };
+    if(updatedPermissions.length==0)
+    formik.touched.Permissions = true;
+  }
   return (
     <div className={styles.overlay} onClick={closeModal}>
       <div
@@ -93,13 +108,13 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
       >
         <h3 className={styles.title}>✏️ تعديل معلومات المدير</h3>
         <form onSubmit={formik.handleSubmit}>
-          <label htmlFor="username" className={styles.label}>
+          <label htmlFor="UserName" className={styles.label}>
             اسم المدير:
           </label>
           <input
             type="text"
             name="name"
-            id="username"
+            id="UserName"
             placeholder="Enter Your Name"
             value={formik.values.name}
             onChange={formik.handleChange}
@@ -111,13 +126,13 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
           {formik.touched.name && formik.errors.name && (
             <div className="invalid-feedback">{formik.errors.name}</div>
           )}
-          <label htmlFor="email" className={styles.label}>
+          <label htmlFor="Email" className={styles.label}>
             البريد الإلكتروني:
           </label>
           <input
             type="email"
             name="email"
-            id="email"
+            id="Email"
             placeholder="Enter Your Email"
             value={formik.values.email}
             onChange={formik.handleChange}
@@ -130,13 +145,13 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
             <div className="invalid-feedback">{formik.errors.email}</div>
           )}
 
-          <label htmlFor="phone" className={styles.label}>
+          <label htmlFor="Phone" className={styles.label}>
             رقم الهاتف:
           </label>
           <input
             type="text"
             name="phone"
-            id="phone"
+            id="Phone"
             placeholder="Enter Your Phone Number"
             value={formik.values.phone}
             onChange={formik.handleChange}
@@ -149,13 +164,13 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
             <div className="invalid-feedback">{formik.errors.phone}</div>
           )}
 
-          <label htmlFor="Address" className={styles.label}>
+          <label htmlFor="ADdress" className={styles.label}>
             العنوان:
           </label>
           <input
             type="text"
             name="Address"
-            id="Address"
+            id="ADdress"
             placeholder="Enter Your Address"
             value={formik.values.Address}
             onChange={formik.handleChange}
@@ -169,13 +184,13 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
           {formik.touched.Address && formik.errors.Address && (
             <div className="invalid-feedback">{formik.errors.Address}</div>
           )}
-          <label htmlFor="password" className={styles.label}>
+          <label htmlFor="Password" className={styles.label}>
             كلمة المرور:
           </label>
           <input
             type="text"
             name="password"
-            id="password"
+            id="Password"
             placeholder="Enter Your Password"
             value={formik.values.password}
             onChange={formik.handleChange}
@@ -189,11 +204,15 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
           {formik.touched.password && formik.errors.password && (
             <div className="invalid-feedback">{formik.errors.password}</div>
           )}
-          <label htmlFor="Permissions" className={styles.label}>
+          <label htmlFor="permissions" className={styles.label}>
             الصلاحيات:
           </label>
           {/* chexkbox */}
-          <div className={styles.checkboxContainer}>
+          <div className={`${styles.checkboxContainer}   ${
+                        formik.touched.Permissions && formik.errors.Permissions
+                          ? "is-invalid"
+                          : ""
+                      }`}>
             <div
               className={styles.checkboxItem}
               style={{
@@ -207,10 +226,11 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="admin"
                 onChange={handleCheckboxChange}
-                id="admin"
+                id="Admin"
+                
                 checked={formik.values.Permissions.includes("admin")}
               />
-              <label htmlFor="admin">مدير عام</label>
+              <label htmlFor="Admin">مدير عام</label>
             </div>
             <div className={styles.checkboxItem}>
               <input
@@ -218,10 +238,10 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="ManageTrucks"
                 onChange={handleCheckboxChange}
-                id="ManageTrucks"
+                id="manageTrucks"
                 checked={formik.values.Permissions.includes("ManageTrucks")}
               />
-              <label htmlFor="ManageTrucks">مدير شاحنات</label>
+              <label htmlFor="manageTrucks">مدير شاحنات</label>
             </div>
             <div className={styles.checkboxItem}>
               <input
@@ -229,12 +249,12 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="ManageAnnouncement"
                 onChange={handleCheckboxChange}
-                id="ManageAnnouncement"
+                id="manageAnnouncement"
                 checked={formik.values.Permissions.includes(
                   "ManageAnnouncement"
                 )}
               />
-              <label htmlFor="ManageAnnouncement">مدير بلاغات</label>
+              <label htmlFor="manageAnnouncement">مدير بلاغات</label>
             </div>
             <div className={styles.checkboxItem}>
               <input
@@ -242,12 +262,12 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="ManageReportsAndDataAnalysis"
                 onChange={handleCheckboxChange}
-                id="ManageReportsAndDataAnalysis"
+                id="manageReportsAndDataAnalysis"
                 checked={formik.values.Permissions.includes(
                   "ManageReportsAndDataAnalysis"
                 )}
               />
-              <label htmlFor="ManageReportsAndDataAnalysis">
+              <label htmlFor="manageReportsAndDataAnalysis">
                 مدير تقارير وتحليل البيانات
               </label>
             </div>
@@ -257,12 +277,12 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="CommunityEngagementManagement"
                 onChange={handleCheckboxChange}
-                id="CommunityEngagementManagement"
+                id="communityEngagementManagement"
                 checked={formik.values.Permissions.includes(
                   "CommunityEngagementManagement"
                 )}
               />
-              <label htmlFor="CommunityEngagementManagement">
+              <label htmlFor="communityEngagementManagement">
                 مدير فعاليات
               </label>
             </div>
@@ -272,10 +292,10 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="UserManagement"
                 onChange={handleCheckboxChange}
-                id="UserManagement"
+                id="userManagement"
                 checked={formik.values.Permissions.includes("UserManagement")}
               />
-              <label htmlFor="UserManagement">مدير مستخدمين</label>
+              <label htmlFor="userManagement">مدير مستخدمين</label>
             </div>
             <div className={styles.checkboxItem}>
               <input
@@ -283,10 +303,10 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="PollsManagement"
                 onChange={handleCheckboxChange}
-                id="PollsManagement"
+                id="pollsManagement"
                 checked={formik.values.Permissions.includes("PollsManagement")}
               />
-              <label htmlFor="PollsManagement">مدير استطلاعات</label>
+              <label htmlFor="pollsManagement">مدير استطلاعات</label>
             </div>
             <div className={styles.checkboxItem}>
               <input
@@ -294,12 +314,12 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="RewardsManagement"
                 onChange={handleCheckboxChange}
-                id="RewardsManagement"
+                id="rewardsManagement"
                 checked={formik.values.Permissions.includes(
                   "RewardsManagement"
                 )}
               />
-              <label htmlFor="RewardsManagement">مدير مكافئات</label>
+              <label htmlFor="rewardsManagement">مدير مكافئات</label>
             </div>
             <div className={styles.checkboxItem}>
               <input
@@ -307,24 +327,21 @@ export default function EditManagerModel({ userData, saveData, closeModal }) {
                 name="Permissions"
                 value="WasteBinManagement"
                 onChange={handleCheckboxChange}
-                id="WasteBinManagement"
+                id="wasteBinManagement"
                 checked={formik.values.Permissions.includes(
                   "WasteBinManagement"
                 )}
               />
-              <label htmlFor="WasteBinManagement">مدير صناديق نفايات</label>
+              <label htmlFor="wasteBinManagement">مدير صناديق نفايات</label>
             </div>
           </div>
           {formik.touched.Permissions && formik.errors.Permissions && (
-            <div className="invalid-feedback">{formik.errors.Permissions}</div>
-          )}
+  <div className="invalid-feedback ">{formik.errors.Permissions}</div>
+)}
           <div className={styles.modalButtons}>
-            <button
-              className={`${styles.button} ${styles.saveButton}`}
-              type="submit"
-            >
-              💾 حفظ المعلومات
-            </button>
+          <button className={`${styles.button} ${submiting ? styles.disabled : styles.saveButton}`} type="submit" disabled={submiting}>
+            {submiting ? "...جاري الحفظ" : " 💾 حفظ المعلومات"}
+          </button>
             <button
               className={`${styles.button} ${styles.cancelButton}`}
               onClick={closeModal}

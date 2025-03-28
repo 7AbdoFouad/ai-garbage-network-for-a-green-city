@@ -86,6 +86,19 @@
     transition: 0.3s;
     margin-top: 10px;
   }
+  .disabledButton {
+    background: rgba(243, 193, 193, 0.5);
+    color: #a8a5a5;
+    font-size: 1rem;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    cursor: not-allowed;
+    transition: 0.3s;
+    margin-top: 10px;
+
+  }
   
   .claimButton:hover {
     background: linear-gradient(135deg, #ff5470, #ff3366);
