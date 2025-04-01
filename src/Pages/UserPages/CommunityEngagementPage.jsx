@@ -38,33 +38,50 @@ export default function CommunityEngagementPage() {
 
   // Fetch user and update activities when the component mounts
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await fetchUser(id);
-      setUser(data);
+ const fetchData = async () => {
+  const data = await fetchUser(id);
+  setUser(data);
 
-      // Get activities the user is subscribed to
-      const userSubscriptions = SubscribersOfCommunityActivities.filter(
-        (sub) => sub.userId === data.id
-      ).map((sub) => sub.ActivityId);
-      console.log(userSubscriptions);
-      
-      // Filter activities based on subscription, required subscribers, and start date
-      const subscribed = CommunityActivities.filter(
-        (activity) =>
-          userSubscriptions.includes(activity.id) &&
-          activity.NumOfSubscribers < activity.NumOfRequiredSubscribers 
-          // activity.actIntervalDate.split(" - ")[0] > today
-      );
-      setSubscribedActivities(subscribed);
+  if (!CommunityActivities || CommunityActivities.length === 0) {
+    console.warn("No activities found.");
+    return;
+  }
 
-      const available = CommunityActivities.filter(
-        (activity) =>
-          !userSubscriptions.includes(activity.id) &&
-          activity.NumOfSubscribers < activity.NumOfRequiredSubscribers &&
-          activity.actIntervalDate.split(" - ")[0] > today
-      );
-      setAvailableActivities(available);
-    };
+  if (!SubscribersOfCommunityActivities) {
+    console.warn("No subscriber data available.");
+    return;
+  }
+
+  const userSubscriptions = SubscribersOfCommunityActivities
+    .filter((sub) => sub.userId === data.id)
+    .map((sub) => sub.ActivityId);
+
+  console.log("User Subscriptions:", userSubscriptions);
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const subscribed = CommunityActivities.filter(
+    (activity) =>
+      userSubscriptions.includes(activity.id) &&
+      activity.NumOfSubscribers < activity.NumOfRequiredSubscribers &&
+      activity.actIntervalDate?.split(" - ")[0] > today
+  );
+
+  console.log("Subscribed Activities:", subscribed);
+
+  const available = CommunityActivities.filter(
+    (activity) =>
+      !userSubscriptions.includes(activity.id) &&
+      activity.NumOfSubscribers < activity.NumOfRequiredSubscribers &&
+      activity.actIntervalDate?.split(" - ")[0] > today
+  );
+
+  console.log("Available Activities:", available);
+
+  setSubscribedActivities(subscribed);
+  setAvailableActivities(available);
+};
+
      
     fetchData();
     // if (availableActivities.length===0||availablePage > Math.ceil(availableActivities.length / itemsPerPage)){
@@ -162,10 +179,11 @@ export default function CommunityEngagementPage() {
     setSubscribedPage(page);
     sessionStorage.setItem("subscribedPage", page);
   };
+  
 
   const paginatedAvailable = availableActivities.slice(
     (availablePage - 1) * itemsPerPage,
-    availablePage * itemsPerPage
+    Math.min(availablePage * itemsPerPage, availableActivities.length)
   );
 
   const paginatedSubscribed = subscribedActivities.slice(
@@ -177,8 +195,11 @@ export default function CommunityEngagementPage() {
   
   const totalSubscribedPages = Math.ceil(subscribedActivities.length / itemsPerPage);
   return (
+    <div className={styles.maincont}> 
     <div className={styles.container}>
       {/* Available Activities Section */}
+      {availableActivities.length > 0 && (
+        <>
       <h2 className={styles.title}>الأنشطة الاجتماعية المتاحة</h2>
       <div className={styles.activitiesGrid}>
         {paginatedAvailable.map((activity, index) => (
@@ -212,6 +233,7 @@ export default function CommunityEngagementPage() {
           ))}
         </div>
       )}
+   </> )}
       {/* Subscribed Activities Section */}
       {subscribedActivities.length > 0 && (
         <>
@@ -250,6 +272,7 @@ export default function CommunityEngagementPage() {
           )}
         </>
       )}
+    </div>
     </div>
   );
 }

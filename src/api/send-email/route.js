@@ -220,6 +220,31 @@ router.post("/edTruck", async (req, res) => {
     return res.status(500).json({ error: "Failed to send email" });
   }
 });
+router.post("/community", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const { email,data } = req.body; // method = "nodemailer" او "resend"
+  const {name,actName} = data;
+  try {
+    // 📩 ارسال الايميل عبر Resend
+    await resend.emails.send({
+      from: "Abdulrahman <onboarding@resend.dev>",
+      to: email,
+      subject: "activity Accepted",
+      html:`
+       <div> Hi ${name} </div>
+       <div> Your activity ${actName} has been Accepted as completed From Clean City Management. </div>
+       and numOfCompletedActivitiesCount is increased by 1.
+      `,
+    });
+    return res.status(200).json({ message: "📧 Email sent via Resend" });
+  } catch (error) {
+    console.error("❌ Email Sending Error:", error);
+    return res.status(500).json({ error: "Failed to send email" });
+  }
+});
 
 // __________________________________________________________________________
 // import express from "express";

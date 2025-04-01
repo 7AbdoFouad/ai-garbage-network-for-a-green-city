@@ -68,7 +68,13 @@ export default function PollsManagement() {
     validationSchema: Yup.object({
       pollName: Yup.string().required("Poll name is required").min(3, "Poll name must be at least 3 characters"),
       pollDesc: Yup.string().required("Poll description is required").min(5, "Description must be at least 5 characters"),
-      pollEndDate: Yup.date().required("End date is required"),
+      pollEndDate: Yup.date().required("End date is required")
+      .test(
+        "is-future",
+        "يجب أن تكون تاريخ الانتهاء في المستقبل",
+        function (value) {
+          return value > new Date();
+        }),
       pollFormLink: Yup.string().url("Invalid URL format").required("Form link is required"),
       imgFile: Yup.mixed().required("Image is required"),
     }),

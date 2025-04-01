@@ -1,3 +1,7 @@
+.maincont{
+  background: linear-gradient(135deg, #d4edda, #a8df8e);
+
+}
 /* General Styles */
 .container {
   max-width: 1200px;
@@ -5,7 +9,7 @@
   padding: 20px;
   font-family: 'Cairo', sans-serif;
   text-align: center;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #d4edda, #a8df8e);
 }
 
 /* Title */
