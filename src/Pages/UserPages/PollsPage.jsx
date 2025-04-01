@@ -74,7 +74,7 @@ export default function PollsPage() {
           {filteredPolls.map((poll, index) => (
             <div key={poll.id} className={styles.pollCard}>
               <img
-                src={`/src/Pages/UserPages/${index + 12}.jpg`}
+                src={poll.imgFile}
                 alt={poll.pollName}
                 className={styles.pollImage}
               />
