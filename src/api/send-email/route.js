@@ -224,9 +224,7 @@ router.post("/community", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  const { email,data } = req.body; // method = "nodemailer" او "resend"
-  const {name,actName} = data;
+  const { email,actName,name} = req.body; // method = "nodemailer" او "resend"
   try {
     // 📩 ارسال الايميل عبر Resend
     await resend.emails.send({

@@ -26,8 +26,7 @@ export default function PollEditPopup({ poll, onSave, onClose }) {
         ...data,
         pollFormLink: correctFormLink,
       };
-
-        console.log("Form data:", updatedData); // Debugging log
+      console.log("Form data:", updatedData); // Debugging log
       onSave(updatedData);
     },
   });

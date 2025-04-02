@@ -305,7 +305,9 @@ const useUser = () => {
   // Delete a SubscribersOfCommunityActivity
   const deleteSubscribersOfCommunityActivity = async (id) => {
     await axios.delete(`http://localhost:3000/SubscribersOfCommunityActivities/${id}`); 
-    setSubscribersOfCommunityActivities(SubscribersOfCommunityActivities.filter((SubscribersOfCommunityActivity) => SubscribersOfCommunityActivity.id !== id));
+    // setSubscribersOfCommunityActivities(SubscribersOfCommunityActivities.filter((SubscribersOfCommunityActivity) => SubscribersOfCommunityActivity.id !== id));
+    setSubscribersOfCommunityActivities((prev) => prev.filter((sub) => sub.id !== id));
+
   }
   // Fetch a single SubscribersOfCommunityActivity
   const fetchSubscribersOfCommunityActivity = async (id) => {

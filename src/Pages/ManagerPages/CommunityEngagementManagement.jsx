@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import styles from "./CommunityEngagementManagement.module.css";
+import EditCommunityActivity from "./EditCommunityActivity";
 
 export default function CommunityEngagementManagement() {
   const {
@@ -12,6 +13,7 @@ export default function CommunityEngagementManagement() {
     addCommunityActivity,
     deleteCommunityActivity,
     deleteSubscribersOfCommunityActivity,
+    updateCommunityActivity,
     SubscribersOfCommunityActivities,
     users,
     updateUser
@@ -23,7 +25,10 @@ export default function CommunityEngagementManagement() {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  
   const itemsPerPage = 3;
+    const [selectedCommunity, setselectedCommunity] = useState(null);
+    const [showEditCommunity, setShowEditCommunity] = useState(false);
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -157,22 +162,67 @@ export default function CommunityEngagementManagement() {
     }
   };
 
-  const handleAcceptAll = () => {
-    // Handle accepting all users, updating activity count, sending message, deleting users and activity
-    // filteredSubscribers , users to get users in activity
+  const  [handleAcceptAllWaiting, setHandleAcceptAllWaiting] = useState(false);
+  const handleAcceptAll = async(ActName) => {
+ 
+    setHandleAcceptAllWaiting(true);
     const acceptedUsers = users.filter((user) => filteredSubscribers.some((sub) => sub.userId === user.id));
     try{
-      acceptedUsers.forEach((user)  => {
-         updateUser(user.id, {
+      acceptedUsers.forEach(async (user) => {
+        await updateUser(user.id, {
           ...user,
           numOfCompletedActivitiesCount: user.numOfCompletedActivitiesCount + 1
         })
-      });
+        console.log(user);
+       
+        const res = await fetch("http://localhost:5000/community", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: user.email,actName:ActName,name:user.name }),
+              });
+              console.log("okey");
+              
+              const data = await res.json();
+              if (!res.ok) {
+                throw new Error(data.message || "Failed to send email.");
+              }
+            });
+            filteredSubscribers.forEach(async (sub) => {
+              await deleteSubscribersOfCommunityActivity(sub.id);
+            })
+            await deleteCommunityActivity(selectedActivity.id);
+
+            setSelectedActivity(null); // Close the modal to refresh state
+      toast.success("تم قبول جميع المشتركين بنجاح");
+      setHandleAcceptAllWaiting(false);
+      closeModal();
+
     }
     catch(error){
       console.log(error);
     }
+    finally{
+      setHandleAcceptAllWaiting(false);
+    }
   };
+    const handleEdit = (activtiy) => {
+      setselectedCommunity(activtiy);
+      console.log(activtiy);
+      
+      setShowEditCommunity(true);
+    };
+    const handleSave = (updatedCommunity) => {
+      try {
+        updateCommunityActivity(updatedCommunity.id, updatedCommunity);
+        toast.success("Poll updated successfully!");
+        setShowEditCommunity(false);
+      } catch (error) {
+        toast.error("Failed to update poll. Please try again later.");
+      }
+    };
+  
 
   const activitiesTable = (status) => {
     return (CommunityActivities || [])
@@ -198,6 +248,8 @@ export default function CommunityEngagementManagement() {
         actions: (
           <>
           {status === "مكتملة"? <Button onClick={() => openModal(activity)}>عرض المشتركين</Button>: null} 
+          {status === "متاحة"? <Button onClick={() => handleEdit(activity)}>تعديل</Button>: null} 
+
             <Button danger onClick={() => deleteCommunityActivity(activity.id)}>
               حذف
             </Button>
@@ -417,10 +469,14 @@ export default function CommunityEngagementManagement() {
           total={filteredSubscribers.length}
           onChange={setCurrentPage}
         />
-        <Button type="primary" danger onClick={handleAcceptAll}>
-          قبول الجميع
+        {/* pass activity name to handleAcceptAll */}
+        <Button type="primary" danger onClick={() => handleAcceptAll(selectedActivity.ActName)} disabled={handleAcceptAllWaiting||filteredSubscribers.length===0} className="mt-2">
+          {handleAcceptAllWaiting ? "جاري القبول" : "قبول جميع المشتركين"}
         </Button>
       </Modal>
+      {showEditCommunity&&selectedCommunity&&
+      ( <EditCommunityActivity activity={selectedCommunity} onClose={()=>setShowEditCommunity(false)} onSave={handleSave} />)
+      }
     </div>
   );
 }
