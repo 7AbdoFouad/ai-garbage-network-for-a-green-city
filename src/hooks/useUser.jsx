@@ -15,6 +15,9 @@ const useUser = () => {
   const [SubscribersOfPolls, setSubscribersOfPolls] = useState([]);
   const [Rewards, setRewards] = useState([]);
   const [UsersSignedUpForRewards, setUsersSignedUpForRewards] = useState([]);
+  const [UserNotifications, setUserNotifications] = useState([]);
+  const [PublicNotifications, setPublicNotifications] = useState([]);
+  const [UserNotificationsMarkedPublic, setUserNotificationsMarkedPublic] = useState([]);
   // const [user, setUse
   // r] = useState({});
 
@@ -432,6 +435,87 @@ const useUser = () => {
     setUsersSignedUpForRewards(UsersSignedUpForRewards.map((UsersSignedUpForReward) => UsersSignedUpForReward.id === id ? res.data : UsersSignedUpForReward));
     return res.data;
   }
+  // ____________________________ UserNotifications --------------------------------------
+  // Add a UserNotification
+  const addUserNotification = async (values) => {
+    const res = await axios.post("http://localhost:3000/UserNotifications", values);
+    setUserNotifications([...UserNotifications, res.data]); // Assuming the server returns the created user object
+    return res.data;
+  }
+  // Delete a UserNotification
+  const deleteUserNotification = async (id) => {
+    await axios.delete(`http://localhost:3000/UserNotifications/${id}`);
+    setUserNotifications(UserNotifications.filter((UserNotification) => UserNotification.id !== id));
+  }
+  // Fetch a single UserNotification
+  const fetchUserNotification = async (id) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/UserNotifications/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // Update a UserNotification
+  const updateUserNotification = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/UserNotifications/${id}`, values);
+    setUserNotifications(UserNotifications.map((UserNotification) => UserNotification.id === id ? res.data : UserNotification));
+    return res.data;
+  }
+  // ____________________________ PublicNotifications --------------------------------------
+  // Add a PublicNotification
+  const addPublicNotification = async (values) => {
+    const res = await axios.post("http://localhost:3000/PublicNotifications", values);
+    setPublicNotifications([...PublicNotifications, res.data]); // Assuming the server returns the created user object
+    return res.data;
+  }
+  // Delete a PublicNotification
+  const deletePublicNotification = async (id) => {
+    await axios.delete(`http://localhost:3000/PublicNotifications/${id}`);
+    setPublicNotifications(PublicNotifications.filter((PublicNotification) => PublicNotification.id !== id));
+  }
+  // Fetch a single PublicNotification
+  const fetchPublicNotification = async (id) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/PublicNotifications/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // Update a PublicNotification
+  const updatePublicNotification = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/PublicNotifications/${id}`, values);
+    setPublicNotifications(PublicNotifications.map((PublicNotification) => PublicNotification.id === id ? res.data : PublicNotification));
+    return res.data;
+  }
+  // ____________________________ UserNotificationsMarkedPublic --------------------------------------
+  // Add a UserNotificationMarkedPublic
+  const addUserNotificationMarkedPublic = async (values) => {
+    const res = await axios.post("http://localhost:3000/UserNotificationsMarkedPublic", values);
+    setUserNotificationsMarkedPublic([...UserNotificationsMarkedPublic, res.data]); // Assuming the server returns the created user object
+    return res.data;
+  }
+  // Delete a UserNotificationMarkedPublic
+  const deleteUserNotificationMarkedPublic = async (id) => {
+    await axios.delete(`http://localhost:3000/UserNotificationsMarkedPublic/${id}`);
+    setUserNotificationsMarkedPublic(UserNotificationsMarkedPublic.filter((UserNotificationMarkedPublic) => UserNotificationMarkedPublic.id !== id));
+  }
+  // Fetch a single UserNotificationMarkedPublic
+  const fetchUserNotificationMarkedPublic = async (id) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/UserNotificationsMarkedPublic/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // Update a UserNotificationMarkedPublic
+  const updateUserNotificationMarkedPublic = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/UserNotificationsMarkedPublic/${id}`, values);
+    setUserNotificationsMarkedPublic(UserNotificationsMarkedPublic.map((UserNotificationMarkedPublic) => UserNotificationMarkedPublic.id === id ? res.data : UserNotificationMarkedPublic));
+    return res.data;
+  }
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -544,6 +628,30 @@ const useUser = () => {
         console.error(error);
       }
     };
+    const fetchUserNotifications = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3000/UserNotifications");
+        setUserNotifications(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const fetchPublicNotifications = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3000/PublicNotifications");
+        setPublicNotifications(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const fetchUserNotificationsMarkedPublic = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3000/UserNotificationsMarkedPublic");
+        setUserNotificationsMarkedPublic(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     
     fetchUsers();
     fetchmanagers();
@@ -558,6 +666,9 @@ const useUser = () => {
     fetchSubscribersOfPolls();
     fetchRewards();
     fetchUsersSignedUpForRewards();
+    fetchUserNotifications();
+    fetchPublicNotifications();
+    fetchUserNotificationsMarkedPublic();
   }, []);
 
   return {
@@ -574,6 +685,9 @@ const useUser = () => {
     SubscribersOfPolls,
     Rewards,
     UsersSignedUpForRewards,
+    UserNotifications,
+    PublicNotifications,
+    UserNotificationsMarkedPublic,
     registerUser,
     deleteUser,
     fetchUser,
@@ -625,7 +739,19 @@ const useUser = () => {
     addUsersSignedUpForReward,
     deleteUsersSignedUpForReward,
     fetchUsersSignedUpForReward,
-    updateUsersSignedUpForReward
+    updateUsersSignedUpForReward,
+    addUserNotification,
+    deleteUserNotification,
+    fetchUserNotification,
+    updateUserNotification,
+    addPublicNotification,
+    deletePublicNotification,
+    fetchPublicNotification,
+    updatePublicNotification,
+    addUserNotificationMarkedPublic,
+    deleteUserNotificationMarkedPublic,
+    fetchUserNotificationMarkedPublic,
+    updateUserNotificationMarkedPublic
   };
 };
 
