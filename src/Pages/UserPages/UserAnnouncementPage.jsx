@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import useUser from "../../hooks/useUser";
 import { useFormik } from "formik";
-import { object, string } from "yup";
+import { mixed, object, string } from "yup";
 import { toast } from "react-toastify";
 import { useEffect, useRef } from "react";
 import EditAnnouncementModal from "./EditAnnouncementModal";
@@ -25,6 +25,7 @@ const schema = object().shape({
       is: (region) => region,
       then: (schema) => schema.required("Bin number is required"),
     }),
+    photoFile:mixed().required("photo is required"),
 });
 
 const UserAnnouncementPage = () => {
@@ -285,7 +286,7 @@ const UserAnnouncementPage = () => {
               <option value="Full Bin">Full Bin</option>
               <option value="Damaged Bin">Damaged Bin</option>
               <option value="Scattered Waste">Scattered Waste</option>
-              <option value="Hazardous Material Leak">Hazardous Material Leak</option>
+              <option value="hazardous garbage">Hazardous garbage</option>
               <option value="Waste Not Collected">Waste Not Collected</option>
             </select>
             {formik.errors.AnnouncementType &&
@@ -355,7 +356,7 @@ const UserAnnouncementPage = () => {
           </div>
 
           <div className="col-12">
-            <label className="form-label">Attach Image (Optional)</label>
+            <label className="form-label">Attach Image</label>
             <input
               type="file"
               className={`form-control `}
@@ -364,6 +365,9 @@ const UserAnnouncementPage = () => {
               onChange={handleChange}
               accept="image/*"
             />
+            {formik.errors.photoFile && formik.touched.photoFile && (
+              <p className="text-danger small">{formik.errors.photoFile}</p>
+            )}
             {formik.values.photoFile && (
               <div className="mt-2">
                 <img
@@ -382,7 +386,7 @@ const UserAnnouncementPage = () => {
               className={`btn btn-primary ${styles.button}`}
               disabled={submitting || announcements.length >= 10}
             >
-              {submitting ? "Submitting..." : "Submit Announcement"}
+              {submitting ? "Adding..." : " Add Announcement"}
             </button>
           </div>
         </form>

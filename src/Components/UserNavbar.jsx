@@ -62,7 +62,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to="contactUs"
+              to={`contactUs/${id}`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -85,7 +85,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to="notifications"
+              to={`notifications/${id}`}
               className="nav-link"
               onClick={toggleSidebar}
             >

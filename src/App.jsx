@@ -221,10 +221,10 @@ const router = createBrowserRouter(
       <Route path="/userDashboard/:id" element={<LayoutUser />}>
         <Route index element={<ProtectedHomePageForUsers/>} />
         <Route path="aboutUs" element={<ProtectedAboutUsPage />} />
-        <Route path="contactUs" element={<ProtectedContactUsPage />} />
+        <Route path="contactUs/:id" element={<ProtectedContactUsPage />} />
         <Route path="faq" element={<ProtectedFAQPage />} />
         <Route path="communityEngagement/:id" element={<ProtectedCommunityEngagementManagemen />} />
-        <Route path="notifications" element={<ProtectedNotificationPage />} />
+        <Route path="notifications/:id" element={<ProtectedNotificationPage />} />
         <Route path="settings/:id" element={<ProtectedSettingsPage />} />
         <Route path="polls/:id" element={<ProtectedPollsPage />} />
         <Route path="rewards/:id" element={<ProtectedRewardsPage />} />

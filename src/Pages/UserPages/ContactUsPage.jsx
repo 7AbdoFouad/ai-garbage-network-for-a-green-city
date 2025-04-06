@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
 import styles from "../../Pages/UserPages/Contact.module.css";
 import useUser from "../../hooks/useUser";
+import { useParams } from "react-router-dom";
 
 // 📌 Validation Schema
 const schema = object().shape({
@@ -19,6 +20,8 @@ export default function ContactUsPage() {
   const todayDate = new Date().toISOString().split("T")[0];
   const [submitting, setSubmitting] = useState(false);
   const { addContactUs } = useUser();
+  const {id}=useParams();
+  
 
   const handleSubmit = async (values) => {
     try {
@@ -35,7 +38,7 @@ export default function ContactUsPage() {
   };
 
   const formik = useFormik({
-    initialValues: { name: "", email: "", message: "", todayDate: todayDate },
+    initialValues: { name: "", email: "", message: "", todayDate: todayDate,userId:id },
     validationSchema: schema,
     onSubmit: handleSubmit,
   });
