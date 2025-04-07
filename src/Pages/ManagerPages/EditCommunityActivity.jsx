@@ -188,7 +188,7 @@ export default function EditCommunityActivity({ activity, onSave, onClose }) {
             />
           )}
           <div className={styles.modalButtons}>
-            <button className={styles.saveButton} type="submit">
+            <button className={styles.saveButton} type="submit" style={{marginRight:"5px",marginTop:"5px"}}>
               💾 Save
             </button>
             <button

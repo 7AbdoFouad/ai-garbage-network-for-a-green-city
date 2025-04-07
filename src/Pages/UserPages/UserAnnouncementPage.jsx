@@ -1,14 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import useUser from "../../hooks/useUser";
 import { useFormik } from "formik";
 import { mixed, object, string } from "yup";
 import { toast } from "react-toastify";
-import { useEffect, useRef } from "react";
 import EditAnnouncementModal from "./EditAnnouncementModal";
-import { useSearchParams } from "react-router-dom";
-import styles from "./Announcement.module.css";
+import styles from "./UserAnnouncementPage.module.css";
 
 const schema = object().shape({
   AnnouncementType: string().required("Announcement type is required"),
@@ -16,7 +14,8 @@ const schema = object().shape({
     .nullable()
     .when("region", {
       is: (region) => !region,
-      then: (schema) => schema.required("Announcement description is required"),
+      then: (schema) =>
+        schema.required("Announcement description is required"),
     }),
   region: string().nullable(),
   binNumber: string()
@@ -25,7 +24,7 @@ const schema = object().shape({
       is: (region) => region,
       then: (schema) => schema.required("Bin number is required"),
     }),
-    photoFile:mixed().required("photo is required"),
+  photoFile: mixed().required("Photo is required"),
 });
 
 const UserAnnouncementPage = () => {
@@ -33,10 +32,10 @@ const UserAnnouncementPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
-    const [AnnouncementPage, setAnnouncementPage] = useState(
-      parseInt(sessionStorage.getItem("AnnouncementPage")) || 1
-    );
-    const itemsPerPage = 5;
+  const [AnnouncementPage, setAnnouncementPage] = useState(
+    parseInt(sessionStorage.getItem("AnnouncementPage")) || 1
+  );
+  const itemsPerPage = 5;
 
   const {
     usersAnnouncements,
@@ -47,27 +46,9 @@ const UserAnnouncementPage = () => {
     deleteUsersAnnouncements,
     updateUsersAnnouncements,
   } = useUser();
-  // const [searchParams, setSearchParams] = useSearchParams();
+
   const inputRef = useRef();
-
-  // const currentPage = Number(searchParams.get("page")) || 1;
-  // const announcementsPerPage = 5;
-  const announcements = usersAnnouncements.filter((a) => a.userId == id);
-  // const indexOfLastAnnouncement = currentPage * announcementsPerPage;
-  // const indexOfFirstAnnouncement = indexOfLastAnnouncement - announcementsPerPage;
-  // const currentAnnouncements = announcements.slice(
-  //   indexOfFirstAnnouncement,
-  //   indexOfLastAnnouncement
-  // );
-
-  // const paginate = (pageNumber) => {
-  //   setSearchParams({ page: pageNumber });
-  // };
-
-  const handleAnnouncementPageChange = (page) => {
-    setAnnouncementPage(page);
-    sessionStorage.setItem("AnnouncementPage", page);
-  };
+  const announcements = usersAnnouncements.filter((a) => a.userId === id);
 
   const paginatedAnnouncement = announcements.slice(
     (AnnouncementPage - 1) * itemsPerPage,
@@ -75,8 +56,11 @@ const UserAnnouncementPage = () => {
   );
 
   const totalAnnouncementPages = Math.ceil(announcements.length / itemsPerPage);
-  // console.log(usersAnnouncements.length);
-  
+
+  const handleAnnouncementPageChange = (page) => {
+    setAnnouncementPage(page);
+    sessionStorage.setItem("AnnouncementPage", page);
+  };
 
   const handleSubmit = async (values) => {
     try {
@@ -86,7 +70,7 @@ const UserAnnouncementPage = () => {
       inputRef.current.value = null;
       formik.resetForm();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Failed to add announcement. Please try again later.");
     } finally {
       setSubmitting(false);
@@ -117,15 +101,8 @@ const UserAnnouncementPage = () => {
       formik.setFieldValue("email", user.email);
     };
     fetchData();
-
- 
-    // if (announcements.length===0||AnnouncementPage > Math.ceil(announcements.length / itemsPerPage)){
-      
-    //   const newPage = Math.max(AnnouncementPage - 1, 1);
-    //   setAnnouncementPage(newPage);
-    //     sessionStorage.setItem("AnnouncementPage", newPage);
-    // }
-  }, [  fetchUser, formik, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchUser, id]);
 
   const handleEdit = (announcement) => {
     setSelectedAnnouncement(announcement);
@@ -145,7 +122,7 @@ const UserAnnouncementPage = () => {
       setShowModal(false);
       setSelectedAnnouncement(null);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Failed to update announcement. Please try again later.");
     }
   };
@@ -155,7 +132,7 @@ const UserAnnouncementPage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        formik.values.photoFile = reader.result;
+        formik.setFieldValue("photoFile", reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -178,106 +155,104 @@ const UserAnnouncementPage = () => {
         sessionStorage.setItem("AnnouncementPage", newPage);
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Failed to delete announcement. Please try again later.");
     }
   };
 
   const filteredBins = bins.filter((bin) => bin.region === formik.values.region);
-  const siteLocation = filteredBins.find(
-    (bin) => bin.binNumber === formik.values.binNumber
-  );
-  if (siteLocation) formik.values.siteLocation = siteLocation.binLocation;
-
+  useEffect(() => {
+    const siteLocation = filteredBins.find(
+      (bin) => bin.binNumber === formik.values.binNumber
+    );
+  
+    if (
+      siteLocation &&
+      formik.values.siteLocation !== siteLocation.binLocation
+    ) {
+      formik.setFieldValue("siteLocation", siteLocation.binLocation);
+    }
+  }, [formik.values.binNumber, filteredBins]);
   return (
     <div className={styles.container}>
-      {paginatedAnnouncement.length>0 &&(
+      {paginatedAnnouncement.length > 0 && (
         <>
-      <h2 className="text-center mb-4 fw-bold">📜 My Announcements List</h2>
-      <table className={`table table-striped mt-3 ${styles.table}`}>
-        <thead className="table-dark">
-          <tr>
-            <th>Announcement Number</th>
-            <th>Announcement Type</th>
-            <th>Announcement Description</th>
-            <th>Announcement Date</th>
-            <th>Region</th>
-            <th>Bin Number</th>
-            <th>Location</th>
-            <th>Options</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedAnnouncement.map((announcement, index) => (
-            <tr key={announcement.id}>
-              <td>{ ((AnnouncementPage - 1) * itemsPerPage ) +index + 1 }</td>
-              <td>{announcement.AnnouncementType}</td>
-              <td>{announcement.AnnouncementDescription}</td>
-              <td>{announcement.todayDate}</td>
-              <td>{announcement.region}</td>
-              <td>{announcement.binNumber}</td>
-              <td>{announcement.siteLocation}</td>
-              <td>
-                <button
-                  className={`btn btn-warning me-2 ${styles.button}`}
-                  onClick={() => handleEdit(announcement)}
-                >
-                  Edit
-                </button>
-                <button
-                  className={`btn btn-danger ${styles.button}`}
-                  onClick={() => handleDelete(announcement.id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table></>
-)}
-      {/* {announcements.length > announcementsPerPage && (
-        <nav className="mt-4">
-          <ul className="pagination justify-content-center">
-            {Array.from(
-              { length: Math.ceil(announcements.length / announcementsPerPage) },
-              (_, index) => (
-                <li key={index + 1} className="page-item">
-                  <button
-                    onClick={() => paginate(index + 1)}
-                    className={`page-link ${currentPage === index + 1 ? "active" : ""}`}
-                  >
-                    {index + 1}
-                  </button>
-                </li>
-              )
-            )}
-          </ul>
-        </nav>
-      )} */}
+          <h2 className={styles.header}>📜 My Announcements List</h2>
+          <div className={`table-responsive ${styles.tableResponsive}`}>
+            <table className={`table ${styles.table}`}>
+              <thead>
+                <tr>
+                  <th>Announcement No.</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                  <th>Region</th>
+                  <th>Bin No.</th>
+                  <th>Location</th>
+                  <th>Options</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedAnnouncement.map((announcement, index) => (
+                  <tr key={announcement.id}>
+                    <td>{(AnnouncementPage - 1) * itemsPerPage + index + 1}</td>
+                    <td>{announcement.AnnouncementType}</td>
+                    <td>{announcement.AnnouncementDescription}</td>
+                    <td>{announcement.todayDate}</td>
+                    <td>{announcement.region}</td>
+                    <td>{announcement.binNumber}</td>
+                    <td>{announcement.siteLocation}</td>
+                    <td>
+                      <button
+                        className={`btn ${styles.button} ${styles.editButton} me-2`}
+                        onClick={() => handleEdit(announcement)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className={`btn ${styles.button} ${styles.deleteButton}`}
+                        onClick={() => handleDelete(announcement.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
       {totalAnnouncementPages > 1 && (
         <div className={styles.pagination}>
           {Array.from({ length: totalAnnouncementPages }, (_, i) => (
-            <button key={i} onClick={() => handleAnnouncementPageChange(i + 1)}
-              className={AnnouncementPage === i + 1 ? styles.activePage : styles.pageButton}>
+            <button
+              key={i}
+              onClick={() => handleAnnouncementPageChange(i + 1)}
+              className={
+                AnnouncementPage === i + 1 ? styles.activePage : styles.pageButton
+              }
+            >
               {i + 1}
             </button>
           ))}
         </div>
       )}
+
       {announcements.length >= 10 && (
-        <div className="alert alert-warning" role="alert">
+        <div className="alert alert-warning" role="alert" style={{color:"#1b5e20",backgroundColor:"rgb(232 245 233)",borderColor:"rgb(232 245 233)"}}>
           You have reached the maximum number of announcements (10 announcements). You cannot add new announcements.
         </div>
       )}
 
-      <h1>Add Announcement</h1>
-      <div className={`p-4 bg-white shadow-lg rounded ${styles.formContainer}`}>
+      <h1 className={styles.header}>Add Announcement</h1>
+      <div className={`p-4 shadow-lg rounded ${styles.formContainer}`}>
         <form onSubmit={formik.handleSubmit} className="row g-3">
           <div className="col-md-6">
             <label className="form-label">Announcement Type</label>
             <select
-              className={`form-select `}
+              className="form-select"
               {...formik.getFieldProps("AnnouncementType")}
             >
               <option value="" style={{ display: "none" }}>
@@ -286,7 +261,7 @@ const UserAnnouncementPage = () => {
               <option value="Full Bin">Full Bin</option>
               <option value="Damaged Bin">Damaged Bin</option>
               <option value="Scattered Waste">Scattered Waste</option>
-              <option value="hazardous garbage">Hazardous garbage</option>
+              <option value="Hazardous Garbage">Hazardous Garbage</option>
               <option value="Waste Not Collected">Waste Not Collected</option>
             </select>
             {formik.errors.AnnouncementType &&
@@ -300,9 +275,10 @@ const UserAnnouncementPage = () => {
           <div className="col-md-6">
             <label className="form-label">Announcement Description</label>
             <textarea
-              className={`form-control `}
+              className="form-control"
               placeholder="Enter announcement description"
               {...formik.getFieldProps("AnnouncementDescription")}
+              style={{ height: "100px", resize: "none" }}
             ></textarea>
             {formik.errors.AnnouncementDescription &&
               formik.touched.AnnouncementDescription && (
@@ -314,10 +290,7 @@ const UserAnnouncementPage = () => {
 
           <div className="col-md-6">
             <label className="form-label">Region</label>
-            <select
-              className={`form-select `}
-              {...formik.getFieldProps("region")}
-            >
+            <select className="form-select" {...formik.getFieldProps("region")}>
               <option value="" style={{ display: "none" }}>
                 Select region
               </option>
@@ -332,7 +305,7 @@ const UserAnnouncementPage = () => {
           <div className="col-md-6">
             <label className="form-label">Bin Number</label>
             <select
-              className={`form-select `}
+              className="form-select"
               {...formik.getFieldProps("binNumber")}
               disabled={!formik.values.region}
             >
@@ -346,8 +319,8 @@ const UserAnnouncementPage = () => {
               ))}
             </select>
             {!formik.values.region && (
-              <p className="small mt-1" style={{ color: "#c6ad13", fontWeight: "600" }}>
-                Please select a region first to choose a bin number.
+              <p className="small mt-1" style={{ color: "#1b5e20", fontWeight: "600",marginLeft:"2px" }}>
+                Please select a region first to choose a bin number
               </p>
             )}
             {formik.errors.binNumber && formik.touched.binNumber && (
@@ -359,7 +332,7 @@ const UserAnnouncementPage = () => {
             <label className="form-label">Attach Image</label>
             <input
               type="file"
-              className={`form-control `}
+              className="form-control"
               ref={inputRef}
               name="photoFile"
               onChange={handleChange}
@@ -385,8 +358,9 @@ const UserAnnouncementPage = () => {
               type="submit"
               className={`btn btn-primary ${styles.button}`}
               disabled={submitting || announcements.length >= 10}
+              style={{width:"18%",backgroundColor:"#1b5e20"}}
             >
-              {submitting ? "Adding..." : " Add Announcement"}
+              {submitting ? "Adding..." : "Add Announcement"}
             </button>
           </div>
         </form>

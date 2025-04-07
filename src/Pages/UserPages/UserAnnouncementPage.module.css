@@ -1,0 +1,137 @@
+/* UserAnnouncementPage.module.css */
+
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #e0f7fa, #a5d6a7);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(46, 125, 50, 0.2);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1b5e20;
+  font-weight: 700;
+  font-size: 2.25rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tableResponsive {
+  margin-bottom: 2rem;
+}
+
+.table {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.table thead {
+  background-color: #2e7d32;
+  color: #fff;
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+  text-align: center;
+  padding: 1rem;
+  border: 1px solid #c8e6c9;
+}
+
+.button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  font-weight: 600;
+}
+
+/* .button:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+} */
+
+.editButton {
+  background-color: #2e7d32;
+  color: #fff;
+  width: 88.03px;
+}
+
+.deleteButton {
+  background-color: #d32f2f;
+  color: #fff;
+}
+.editButton:hover {
+  background-color: #388e3c;
+  color: #fff;
+
+}
+.deleteButton:hover {
+  background-color: #b71c1c;
+  color: #fff;
+}
+
+.formContainer {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: #e8f5e9;
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(46, 125, 50, 0.2);
+}
+
+.formContainer label {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.formContainer .form-control,
+.formContainer .form-select {
+  border: 1px solid #a5d6a7;
+  border-radius: 4px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.pageButton {
+  background: #c8e6c9;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  margin: 0 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+/* .pageButton:hover {
+  background: #a5d6a7;
+} */
+
+.activePage {
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  margin: 0 0.25rem;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+  .formContainer {
+    padding: 1.5rem;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+}

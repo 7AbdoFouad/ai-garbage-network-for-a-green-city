@@ -71,7 +71,7 @@ export default function PollsManagement() {
       pollEndDate: Yup.date().required("End date is required")
       .test(
         "is-future",
-        "يجب أن تكون تاريخ الانتهاء في المستقبل",
+        "The expiry date must be in the future",
         function (value) {
           return value > new Date();
         }),
@@ -91,17 +91,17 @@ export default function PollsManagement() {
 
   return (
     <div className={styles.container}>
-      <h2>📊 إدارة الاستطلاعات</h2>
+      <h2>📊 Manage surveys</h2>
       <table className={styles.pollTable}>
         <thead>
           <tr>
-            <th>اسم الاستطلاع</th>
-            <th>وصف الاستطلاع</th>
-            <th>تاريخ الانتهاء</th>
-            <th>عدد المشاركين</th>
-            <th>حالة الاستطلاع</th>
-            <th>نسبة المشاركة</th>
-            <th>إجراءات</th>
+          <th>Poll Name</th>
+            <th>Poll Description</th>
+            <th>End Date</th>
+            <th>Number of Participants</th>
+            <th>Poll Status</th>
+            <th>Participation Rate</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -113,11 +113,11 @@ export default function PollsManagement() {
                 <td>{poll.pollDesc}</td>
                 <td>{poll.pollEndDate}</td>
                 <td>{participantsCount}</td>
-                <td>{new Date(poll.pollEndDate) > new Date() ? "جاري" : "منتهي"}</td>
+                <td>{new Date(poll.pollEndDate) > new Date() ? "underway" : "over"}</td>
                 <td>{(participantsCount * 100) / users.length}%</td>
                 <td>
-                  <button className={styles.editButton} onClick={() => handleEdit(poll)}>✏️ تعديل</button>
-                  <button className={styles.deleteButton} onClick={() => handleDelete(poll.id)}>🗑️ حذف</button>
+                  <button className={styles.editButton} onClick={() => handleEdit(poll)}>✏ Edit</button>
+                  <button className={styles.deleteButton} onClick={() => handleDelete(poll.id)}>🗑 Delete</button>
                 </td>
               </tr>
             );
@@ -126,14 +126,14 @@ export default function PollsManagement() {
       </table>
 
       {/* 📌 Form for adding a new poll */}
-      <h2>➕ إضافة استطلاع جديد</h2>
+      <h2>➕ Add a new survey</h2>
       <form onSubmit={formik.handleSubmit} className={styles.pollForm}>
-        <label htmlFor="pollName">📌 اسم الاستطلاع:</label>
+        <label htmlFor="pollName">📌  Enter survey name:</label>
         <input
           type="text"
           id="pollName"
           name="pollName"
-          placeholder="أدخل اسم الاستطلاع"
+          placeholder="Enter survey name"
           value={formik.values.pollName}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -143,11 +143,11 @@ export default function PollsManagement() {
           <div className="invalid-feedback">{formik.errors.pollName}</div>
         )}
 
-        <label htmlFor="pollDesc">📄 وصف الاستطلاع:</label>
+        <label htmlFor="pollDesc">📄 Survey Description:</label>
         <textarea
           id="pollDesc"
           name="pollDesc"
-          placeholder="أدخل وصف الاستطلاع"
+          placeholder="Enter survey description"
           value={formik.values.pollDesc}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -157,7 +157,7 @@ export default function PollsManagement() {
           <div className="invalid-feedback">{formik.errors.pollDesc}</div>
         )}
 
-        <label htmlFor="pollEndDate">📅 تاريخ الانتهاء:</label>
+        <label htmlFor="pollEndDate">📅 Expiry Date:</label>
         <input
           type="date"
           id="pollEndDate"
@@ -171,12 +171,12 @@ export default function PollsManagement() {
           <div className="invalid-feedback">{formik.errors.pollEndDate}</div>
         )}
 
-        <label htmlFor="pollFormLink">🔗 رابط النموذج:</label>
+        <label htmlFor="pollFormLink">🔗 Form link:</label>
         <input
           type="text"
           id="pollFormLink"
           name="pollFormLink"
-          placeholder="أدخل رابط نموذج الاستطلاع"
+          placeholder="Enter the link to the survey form"
           value={formik.values.pollFormLink}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -185,7 +185,7 @@ export default function PollsManagement() {
         {formik.touched.pollFormLink && formik.errors.pollFormLink && (
           <div className="invalid-feedback">{formik.errors.pollFormLink}</div>
         )}
-        <label htmlFor="imgFile">🖼️ صورة الاستطلاع:</label>
+        <label htmlFor="imgFile">🖼 Survey image:</label>
         <input
           type="file"
           id="imgFile"
@@ -209,17 +209,17 @@ export default function PollsManagement() {
               </div>
             )}
 
-        <button type="submit" className={styles.submitButton}> ➕ إضافة الاستطلاع</button>
+        <button type="submit" className={styles.submitButton}> ➕ Add survey</button>
       </form>
 
       {/* 📈 Past polls results */}
-      <h2>📈 الاستطلاعات السابقة والنتائج</h2>
+      <h2>📈 Previous surveys and results</h2>
       <div className={styles.pollResults}>
         {Polls.map((poll) =>
           new Date(poll.pollEndDate) < new Date() ? (
             <div key={poll.id} className={styles.pollResultCard}>
               <h3>{poll.pollName}</h3>
-              <button className={styles.viewResultsButton}>📊 عرض النتائج</button>
+              <button className={styles.viewResultsButton}>📊 View Results</button>
             </div>
           ) : null
         )}
@@ -228,6 +228,6 @@ export default function PollsManagement() {
       {showEditPopup && selectedPoll && (
         <PollEditPopup poll={selectedPoll} onSave={handleSave} onClose={() => setShowEditPopup(false)} />
       )}
-    </div>
-  );
+</div>
+);
 }

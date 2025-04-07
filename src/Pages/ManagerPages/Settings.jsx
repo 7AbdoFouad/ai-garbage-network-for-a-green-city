@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import useUser from "../../hooks/useUser";
-import styles from "../UserPages/SettingPage.module.css";
+import styles from "./SettingPage.module.css";
 import { useParams } from "react-router-dom";
-import EditProfileModal from "../UserPages/EditProfileModal"; // Import modal component
+import EditProfileModal from "../UserPages/EditProfileModal";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 
@@ -17,7 +17,7 @@ export default function Settings() {
     const fetchData = async () => {
       const data = await fetchManager(id);
       setManager(data);
-      setProfileImage(data.profileImage); // Set initial profile image
+      setProfileImage(data.profileImage);
     };
     fetchData();
   }, [id]);
@@ -31,7 +31,7 @@ export default function Settings() {
       reader.onloadend = async () => {
         const newProfileImage = reader.result;
 
-        setProfileImage(newProfileImage); // Set preview image
+        setProfileImage(newProfileImage);
 
         try {
           await updateManager(id, {
@@ -41,13 +41,13 @@ export default function Settings() {
 
           setManager((prevUser) => ({
             ...prevUser,
-            profileImage: newProfileImage, // Update state after successful update
+            profileImage: newProfileImage,
           }));
 
-          toast.success("تم تحديث صورة الملف الشخصي بنجاح!");
+          toast.success("Profile picture updated successfully!");
         } catch (error) {
-          console.error("فشل تحديث صورة الملف الشخصي:", error);
-          toast.error("حدث خطأ أثناء تحديث الصورة.");
+          console.error("Failed to update profile picture:", error);
+          toast.error("An error occurred while updating the image.");
         }
       };
 
@@ -63,22 +63,20 @@ export default function Settings() {
     setUserData({
       name: manager.name || "",
       phone: manager.phone || "",
-      Address: manager.Address || "",
+      address: manager.address || "",
       profileImage: profileImage || "",
       email: manager.email || "",
       password: manager.password || "",
-      Permissions: manager.Permissions || "",
+      Permissions: manager.Permissions || [],
     });
   }, [manager, profileImage]);
 
-  // Handle input change
-
-  // Save data to JSON file
+  // Save updated data
   const saveData = async (data) => {
     await updateManager(id, { ...manager, ...data });
     setManager((prevUser) => ({
       ...prevUser,
-      ...data, // Update state after successful update
+      ...data,
     }));
     toast.success("Data saved successfully!");
     setIsEditing(false);
@@ -104,64 +102,59 @@ export default function Settings() {
       {/* Profile Info */}
       <div className={styles.profileInfo}>
         <div className={styles.profileField}>
-          <strong>اسم المدير:</strong>{" "}
+          <strong>Manager Name:</strong>{" "}
           <input
             className={styles.inputField}
-            name="username"
+            name="name"
             value={userData.name}
-            //  onChange={handleChange}
             disabled={!isEditing}
           />
         </div>
         <div className={styles.profileField}>
-          <strong>رقم الهاتف:</strong>{" "}
+          <strong>Phone Number:</strong>{" "}
           <input
             className={styles.inputField}
             name="phone"
             value={userData.phone}
-            //  onChange={handleChange}
             disabled={!isEditing}
           />
         </div>
         <div className={styles.profileField}>
-          <strong>العنوان:</strong>{" "}
+          <strong>Address:</strong>{" "}
           <input
             className={styles.inputField}
             name="address"
-            value={userData.Address}
-            //  onChange={handleChange}
+            value={userData.address}
             disabled={!isEditing}
           />
         </div>
         <div className={styles.profileField}>
-          <strong>البريد الإلكتروني:</strong>{" "}
+          <strong>Email:</strong>{" "}
           <input
             className={styles.inputField}
             name="email"
             value={userData.email}
-            //  onChange={handleChange}
             disabled
           />
         </div>
         <div className={styles.profileField}>
-          <strong>كلمة المرور:</strong>{" "}
+          <strong>Password:</strong>{" "}
           <input
             className={styles.inputField}
             type="text"
             name="password"
             value={userData.password}
-            //  onChange={handleChange}
             disabled={!isEditing}
           />
         </div>
       </div>
 
-      {/* User Statistics */}
-      <div className={styles.stats}>
-        <h4>📌 صلاحيات المدير</h4>
+      {/* Manager Permissions */}
+      <div className={styles.permissions}>
+        <h4>Manager Permissions</h4>
         {userData.Permissions &&
           userData.Permissions.map((permission, index) => (
-            <p key={index}>📌 {permission}</p>
+            <p key={index}> {permission}</p>
           ))}
       </div>
 
@@ -171,13 +164,13 @@ export default function Settings() {
           className={`${styles.button} ${styles.editButton}`}
           onClick={() => setIsEditing(true)}
         >
-          ✏️ تعديل الملف الشخصي
+          Edit Profile
         </button>
         <button
           className={`${styles.button} ${styles.logoutButton}`}
           onClick={logout}
         >
-          🚪 تسجيل الخروج
+          Logout
         </button>
       </div>
 

@@ -35,6 +35,7 @@ export default function EditAnnouncementModal({ show, onHide, onSave, announceme
       region: "",
       binNumber: "",
       photoFile: null,
+      siteLocation: "",
     },
     validationSchema: schema,
     onSubmit: async (values) => {
@@ -56,6 +57,7 @@ export default function EditAnnouncementModal({ show, onHide, onSave, announceme
         AnnouncementDescription: announcement.AnnouncementDescription || "",
         region: announcement.region || "",
         binNumber: announcement.binNumber || "",
+        siteLocation: announcement.siteLocation || "",
         photoFile: announcement.photoFile || "",
       });
     }
@@ -89,7 +91,19 @@ export default function EditAnnouncementModal({ show, onHide, onSave, announceme
   };
 
   const filteredBins = bins.filter((bin) => bin.region === formik.values.region);
-
+  useEffect(() => {
+    const siteLocation = filteredBins.find(
+      (bin) => bin.binNumber === formik.values.binNumber
+    );
+  
+    if (
+      siteLocation &&
+      formik.values.siteLocation !== siteLocation.binLocation
+    ) {
+      formik.setFieldValue("siteLocation", siteLocation.binLocation);
+    }
+  }, [formik.values.binNumber, filteredBins]);
+  
   return (
     <div className={`${styles.overlay} ${show ? styles.show : ""}`} onClick={onHide}>
       <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()} ref={modalRef}>
@@ -201,10 +215,13 @@ export default function EditAnnouncementModal({ show, onHide, onSave, announceme
           )}
 
           <div className={styles.modalButtons}>
-            <button className={`${styles.button} ${styles.saveButton}`} type="submit" disabled={submitting}>
+            <button className={`${styles.button} ${styles.saveButton}`} type="submit"
+             disabled={submitting}>
               {submitting ? "Updating..." : "💾 Update"}
             </button>
-            <button className={`${styles.button} ${styles.cancelButton}`} type="button" onClick={onHide}>
+            <button className={`${styles.button} ${styles.cancelButton}`}
+            
+            type="button"  onClick={onHide}>
               ❌ Cancel
             </button>
           </div>
@@ -224,6 +241,7 @@ EditAnnouncementModal.propTypes = {
     region: PropTypes.string,
     binNumber: PropTypes.string,
     photoFile: PropTypes.any,
+    siteLocation: PropTypes.string,
   }),
   regions: PropTypes.array.isRequired,
 };

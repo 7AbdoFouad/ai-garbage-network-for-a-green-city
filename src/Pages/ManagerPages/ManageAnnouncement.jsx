@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useMemo,useRef  } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Button, Table, Modal, Form } from "react-bootstrap";
 import useUser from "../../hooks/useUser";
 import { string, object } from "yup";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
+import styles from "./ManageAnnouncement.module.css";
 
+// Yup schemas
 const rejectSchema = object().shape({
   reason: string()
     .required("Rejection reason is required")
@@ -25,7 +27,7 @@ export default function ManageAnnouncement() {
     regions,
     addUserNotification,
     updateUser,
-    fetchUser
+    fetchUser,
   } = useUser();
 
   const [filterType, setFilterType] = useState("");
@@ -49,6 +51,7 @@ export default function ManageAnnouncement() {
   useEffect(() => {
     sessionStorage.setItem("currentPage", currentPage);
   }, [currentPage]);
+
   useEffect(() => {
     sessionStorage.setItem("currentPageContact", currentPageContact);
   }, [currentPageContact]);
@@ -56,7 +59,6 @@ export default function ManageAnnouncement() {
   // Dummy NLP function to analyze report description and return a priority level
   const analyzePriority = (report) => {
     const text = (report.AnnouncementDescription || "").toLowerCase();
-
     const highPriorityKeywords = [
       "urgent",
       "immediately",
@@ -75,7 +77,6 @@ export default function ManageAnnouncement() {
       "injury",
       "collapse",
     ];
-
     const mediumPriorityKeywords = [
       "notice",
       "soon",
@@ -106,22 +107,23 @@ export default function ManageAnnouncement() {
     }
   };
 
-  const handleAccept = async(report) => {
+  const handleAccept = async (report) => {
     addUserNotification({
       userId: report.userId,
       notificationContent: `Report accepted: ${report.AnnouncementType}`,
       notificationDate: new Date().toISOString().split("T")[0],
     });
-    const user =await fetchUser(report.userId);
-    updateUser(report.userId, { ...user, numOfAcceptedAnnouncementsCount: user.numOfAcceptedAnnouncementsCount + 1 });
-
+    const user = await fetchUser(report.userId);
+    updateUser(report.userId, {
+      ...user,
+      numOfAcceptedAnnouncementsCount: user.numOfAcceptedAnnouncementsCount + 1,
+    });
     deleteUsersAnnouncements(report.id);
     toast.success("Report accepted successfully");
     setSelectedReport(null);
-    // 🛠 Fix Pagination: If the page is now empty, go to the previous page
-    const newTotalPages = Math.ceil(
-      (usersAnnouncements.length - 1) / reportsPerPage
-    );
+
+    // Fix pagination if page becomes empty
+    const newTotalPages = Math.ceil((usersAnnouncements.length - 1) / reportsPerPage);
     if (currentPage > newTotalPages) {
       const newPage = Math.max(newTotalPages - 1, 1);
       setCurrentPage(newPage);
@@ -139,7 +141,7 @@ export default function ManageAnnouncement() {
     setModalShowNotify(true);
   };
 
-  // Use useMemo to compute filteredReports so it only recalculates when dependencies change
+  // Filter reports using useMemo for performance
   const filteredReports = useMemo(() => {
     let reports = usersAnnouncements;
     if (filterType) {
@@ -163,22 +165,20 @@ export default function ManageAnnouncement() {
     return reports;
   }, [usersAnnouncements, filterType, filterRegion, filterPriority, filterDate]);
 
-  // Adjust currentPage if needed when filteredReports change
+  // Adjust currentPage if filteredReports changes
   const isFirstRender = useRef(true);
-
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      return; // Skip running the effect on initial render
+      return;
     }
-    const newTotalPages = Math.ceil((filteredReports.length) / reportsPerPage) ;    
+    const newTotalPages = Math.ceil(filteredReports.length / reportsPerPage);
     if (currentPage > newTotalPages) {
       const newPage = Math.max(newTotalPages - 1, 1);
-          setCurrentPage(newPage);
-          sessionStorage.setItem("currentPage", newPage);
+      setCurrentPage(newPage);
+      sessionStorage.setItem("currentPage", newPage);
     }
   }, [filteredReports, currentPage, reportsPerPage]);
-
 
   // Filter and sort contact us messages
   let filteredContactUs = contactUs;
@@ -192,13 +192,12 @@ export default function ManageAnnouncement() {
     );
   }
 
+  // Pagination logic
   const indexOfLastReport = currentPage * reportsPerPage;
   const indexOfFirstReport = indexOfLastReport - reportsPerPage;
-  const currentReports = filteredReports.slice(
-    indexOfFirstReport,
-    indexOfLastReport
-  );
+  const currentReports = filteredReports.slice(indexOfFirstReport, indexOfLastReport);
   const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
+
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const indexOfLastContact = currentPageContact * contactsPerPage;
@@ -207,15 +206,13 @@ export default function ManageAnnouncement() {
     indexOfFirstContact,
     indexOfLastContact
   );
-  const totalPagesContact = Math.ceil(
-    filteredContactUs.length / contactsPerPage
-  );
+  const totalPagesContact = Math.ceil(filteredContactUs.length / contactsPerPage);
+
   const paginateContact = (pageNumber) => setcurrentPageContact(pageNumber);
 
+  // Formik for reject modal
   const formikReject = useFormik({
-    initialValues: {
-      reason: "",
-    },
+    initialValues: { reason: "" },
     validationSchema: rejectSchema,
     onSubmit: (values) => {
       if (selectedReport) {
@@ -229,10 +226,9 @@ export default function ManageAnnouncement() {
         setModalShow(false);
         setSelectedReport(null);
         formikReject.resetForm();
-        // 🛠 Fix Pagination: If the page is now empty, go to the previous page
-        const newTotalPages = Math.ceil(
-          (usersAnnouncements.length - 1) / reportsPerPage
-        );
+
+        // Fix pagination if page becomes empty
+        const newTotalPages = Math.ceil((usersAnnouncements.length - 1) / reportsPerPage);
         if (currentPage > newTotalPages) {
           const newPage = Math.max(newTotalPages - 1, 1);
           setCurrentPage(newPage);
@@ -242,27 +238,25 @@ export default function ManageAnnouncement() {
     },
   });
 
+  // Formik for notify modal
   const formikNotify = useFormik({
-    initialValues: {
-      reason: "",
-    },
+    initialValues: { reason: "" },
     validationSchema: notifySchema,
     onSubmit: (values) => {
       if (selectedContactUs) {
         addUserNotification({
           userId: selectedContactUs.userId,
-          notificationContent: `Reply of your message "${selectedContactUs.message}" : ${values.reason}`,
+          notificationContent: `Reply: "${selectedContactUs.message}" - ${values.reason}`,
           notificationDate: new Date().toISOString().split("T")[0],
         });
         deleteContactUs(selectedContactUs.id);
-        toast.success("Reply message sent successfully");
+        toast.success("Reply sent successfully");
         setModalShowNotify(false);
         setselectedContactUs(null);
         formikNotify.resetForm();
-        // 🛠 Fix Pagination: If the page is now empty, go to the previous page
-        const newTotalPagesContact = Math.ceil(
-          (contactUs.length - 1) / contactsPerPage
-        );
+
+        // Fix pagination if page becomes empty
+        const newTotalPagesContact = Math.ceil((contactUs.length - 1) / contactsPerPage);
         if (currentPageContact > newTotalPagesContact) {
           const newPage = Math.max(newTotalPagesContact - 1, 1);
           setcurrentPageContact(newPage);
@@ -273,222 +267,229 @@ export default function ManageAnnouncement() {
   });
 
   return (
-    <div className="container mt-4">
-      <h2 className="text-center mb-4">User Reports</h2>
-      <div className="d-flex gap-2 mb-3">
-      <div style={{width: "25%",marginLeft: "5px"}}>Filter by: Report Type</div>
-      <div style={{width: "25%",marginLeft: "5px"}}>Filter by: Date</div>
-      <div style={{width:"25%",marginLeft: "5px"}}>Filter by: Region</div>
-      <div style={{width:"25%",marginLeft: "5px"}}>Filter by: Priority</div>
-      </div>
-      <div className="d-flex gap-2 mb-3">
-        <Form.Select
-          onChange={(e) => {
-            setFilterType(e.target.value);
-            
-          }}
-        >
-          
-          <option style={{ display: "none" }} value="">
-          Select Report Type
-          </option>
-          <option value="">All</option>
-          <option value="Full Bin">Full Bin</option>
-          <option value="Damaged Bin">Damaged Bin</option>
-          <option value="Scattered Waste">Scattered Waste</option>
-          <option value="Hazardous Material Leak">
-            Hazardous Material Leak
-          </option>
-          <option value="Waste Not Collected">Waste Not Collected</option>
-        </Form.Select>
-        <Form.Select
-          onChange={(e) => {
-            setFilterDate(e.target.value);
-          }}
-        >
-          <option style={{ display: "none" }} value="">
-          Select Date Order
-          </option>
-          <option value="oldest">Oldest to Newest</option>
-          <option value="newest">Newest to Oldest</option>
-        </Form.Select>
-        <Form.Select
-          onChange={(e) => {
-            setFilterRegion(e.target.value);
-          }}
-        >
-          <option style={{ display: "none" }} value="">
-          Select Region
-          </option>
-          <option value="">All</option>
-          {regions.map((region) => (
-            <option key={region.id} value={region.regionName}>
-              {region.regionName}
-            </option>
-          ))}
-        </Form.Select>
-        <Form.Select
-          onChange={(e) => {
-            setFilterPriority(e.target.value); 
-          }}
-        >
-          <option style={{ display: "none" }} value="">
-          Select Priority
-          </option>
-          <option value="">All</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-          <option value="unknown">Unknown Priority</option>
-        </Form.Select>
+    <div className={styles.container}>
+      <h2 className={styles.header}>User Reports</h2>
+
+      {/* FILTERS for User Reports */}
+      <div className={styles.filterGrid}>
+        <div className={styles.filterBlock}>
+          <label className={styles.filterLabel}>Report Type</label>
+          <Form.Select
+            onChange={(e) => setFilterType(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="">All Report Types</option>
+            <option value="Full Bin">Full Bin</option>
+            <option value="Damaged Bin">Damaged Bin</option>
+            <option value="Scattered Waste">Scattered Waste</option>
+            <option value="Hazardous Material Leak">Hazardous Material Leak</option>
+            <option value="Waste Not Collected">Waste Not Collected</option>
+          </Form.Select>
+        </div>
+
+        <div className={styles.filterBlock}>
+          <label className={styles.filterLabel}>Date Order</label>
+          <Form.Select
+            onChange={(e) => setFilterDate(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="">Select Date Order</option>
+            <option value="oldest">Oldest to Newest</option>
+            <option value="newest">Newest to Oldest</option>
+          </Form.Select>
+        </div>
+
+        <div className={styles.filterBlock}>
+          <label className={styles.filterLabel}>Region</label>
+          <Form.Select
+            onChange={(e) => setFilterRegion(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="">All Regions</option>
+            {regions.map((region) => (
+              <option key={region.id} value={region.regionName}>
+                {region.regionName}
+              </option>
+            ))}
+          </Form.Select>
+        </div>
+
+        <div className={styles.filterBlock}>
+          <label className={styles.filterLabel}>Priority</label>
+          <Form.Select
+            onChange={(e) => setFilterPriority(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="">All Priorities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+            <option value="unknown">Unknown</option>
+          </Form.Select>
+        </div>
       </div>
 
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Date</th>
-            <th>User</th>
-            <th>Message</th>
-            <th>Location</th>
-            <th>Bin Number</th>
-            <th>Region</th>
-            <th>Priority</th>
-            <th>Image</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentReports.map((report) => (
-            <tr key={report.id}>
-              <td>{report.AnnouncementType || "—"}</td>
-              <td>{report.todayDate || "—"}</td>
-              <td>{report.userName || "—"}</td>
-              <td>{report.AnnouncementDescription || "—"}</td>
-              <td>{report.siteLocation}</td>
-              <td>{report.binNumber || "—"}</td>
-              <td>{report.region || "—"}</td>
-              <td>{analyzePriority(report)}</td>
-              <td>
-                {report.photoFile ? (
-                  <img
-                    src={report.photoFile}
-                    alt="Report"
-                    width="80"
-                    height="80"
-                    style={{ objectFit: "cover",borderRadius: "3px" }}
-                
-                  />
-                ) : (
-                  "—"
-                )}
-              </td>
-              <td>
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => handleAccept(report)}
-                >
-                  Accept
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="ms-2"
-                  onClick={() => handleReject(report)}
-                >
-                  Reject
-                </Button>
-              </td>
+      {/* TABLE for User Reports */}
+      <div className={styles.tableWrapper}>
+        <Table striped bordered hover responsive className={styles.table}>
+          <thead className={styles.tableHeader}>
+            <tr>
+              <th>Type</th>
+              <th>Date</th>
+              <th>User</th>
+              <th>Message</th>
+              <th>Location</th>
+              <th>BinNumber</th>
+              <th>Region</th>
+              <th>Priority</th>
+              <th>Image</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {currentReports.map((report) => (
+              <tr key={report.id}>
+                <td>{report.AnnouncementType || "—"}</td>
+                <td>{report.todayDate || "—"}</td>
+                <td>{report.userName || "—"}</td>
+                <td>{report.AnnouncementDescription || "—"}</td>
+                <td>{report.siteLocation}</td>
+                <td>{report.binNumber || "—"}</td>
+                <td>{report.region || "—"}</td>
+                <td>{analyzePriority(report)}</td>
+                <td>
+                  {report.photoFile ? (
+                    <img
+                      src={report.photoFile}
+                      alt="Report"
+                      className={styles.reportImage}
+                    />
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => handleAccept(report)}
+                    className={styles.acceptButton}
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleReject(report)}
+                    className={`${styles.rejectButton} ms-2`}
+                  >
+                    Reject
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
 
-      <div className="d-flex justify-content-between align-items-center">
-        <p>Total Reports: {filteredReports.length}</p>
+      {/* Pagination for User Reports */}
+      <div className={styles.paginationContainer}>
         <div>
           {Array.from({ length: totalPages }, (_, i) => (
             <Button
               key={i + 1}
               variant={currentPage === i + 1 ? "primary" : "light"}
+              style={{backgroundColor:currentPage === i + 1 ? "#2e7d32" : "white",
+                color:currentPage === i + 1 ? "white" : "black",
+                border:currentPage === i + 1 ? "#2e7d32" : "white",
+              }}
               onClick={() => paginate(i + 1)}
-              className="me-1"
+              className={styles.paginationButton}
             >
               {i + 1}
             </Button>
           ))}
         </div>
+        <p style={{color:"rgb(21 87 36)",fontWeight:"bold"}}>Total Reports: {filteredReports.length}</p>
       </div>
 
-      <hr className="my-4" />
-      <h3 className="text-center">Reports from Contact Us Page</h3>
-      <div className="d-flex gap-2 mb-3">
+      <hr className={styles.divider} />
+      <h3 className={styles.subHeader}>Contact Us Reports</h3>
 
-      <div style={{width: "25%",marginLeft: "5px"}}>Filter by: Date</div>
-
+      {/* FILTERS for Contact Us Reports */}
+      <div className={styles.filterGrid}>
+        <div className={styles.filterBlock}>
+          <label className={styles.filterLabel}>Date Order</label>
+          <Form.Select
+            onChange={(e) => setfilterContactUsByDate(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="">Select Date Order</option>
+            <option value="oldest">Oldest to Newest</option>
+            <option value="newest">Newest to Oldest</option>
+          </Form.Select>
+        </div>
       </div>
-      <div className="d-flex gap-2 mb-3">
-        <Form.Select onChange={(e) => setfilterContactUsByDate(e.target.value)}>
-          <option style={{ display: "none" }} value="">
-          Select Date Order
-          </option>
-          <option value="oldest">Oldest to Newest</option>
-          <option value="newest">Newest to Oldest</option>
-        </Form.Select>
-      </div>
 
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Email</th>
-            <th>Message</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentContacts.map((report) => (
-            <tr key={report.id}>
-              <td>{report.name}</td>
-              <td>{report.email}</td>
-              <td>{report.message}</td>
-              <td>{report.todayDate}</td>
-              <td>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="ms-2"
-                  onClick={() => handleNotify(report)}
-                >
-                  Notify
-                </Button>
-              </td>
+      {/* TABLE for Contact Us Reports */}
+      <div className={styles.tableWrapper}>
+        <Table striped bordered hover responsive className={styles.table}>
+          <thead className={styles.tableHeader}>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Message</th>
+              <th>Date</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
-      <div className="d-flex justify-content-between align-items-center">
-        <p className="text-end">
-          Total reports from Contact Us: {contactUs.length}
-        </p>
+          </thead>
+          <tbody>
+            {currentContacts.map((report) => (
+              <tr key={report.id}>
+                <td>{report.name}</td>
+                <td>{report.email}</td>
+                <td>{report.message}</td>
+                <td>{report.todayDate}</td>
+                <td>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleNotify(report)}
+                    className={styles.notifyButton}
+                  >
+                    Notify
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+
+      {/* Pagination for Contact Us Reports */}
+      <div className={styles.paginationContainer}>
         <div>
           {Array.from({ length: totalPagesContact }, (_, i) => (
             <Button
               key={i + 1}
               variant={currentPageContact === i + 1 ? "primary" : "light"}
+              style={{backgroundColor:currentPageContact === i + 1 ? "#2e7d32" : "white",
+                color:currentPageContact === i + 1 ? "white" : "black",
+                border:currentPageContact === i + 1 ? "#2e7d32" : "white",
+              }}
               onClick={() => paginateContact(i + 1)}
-              className="me-1"
+              className={styles.paginationButton}
             >
               {i + 1}
             </Button>
           ))}
         </div>
+        <p style={{color:"rgb(21 87 36)",fontWeight:"bold"}}>Total Contact Us Reports: {contactUs.length}</p>
       </div>
 
-      <Modal show={modalShow} onHide={() => setModalShow(false)}>
-        <Modal.Header closeButton>
+      {/* Reject Modal */}
+      <Modal show={modalShow} onHide={() => setModalShow(false)} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
           <Modal.Title>Reject Report</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -508,14 +509,19 @@ export default function ManageAnnouncement() {
                     : ""
                 }`}
                 style={{ height: "100px", resize: "none" }}
+                // onFocus={()=>{document.activeElement.blur()}}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#ced4da";
+                }}
+
               />
               {formikReject.touched.reason && formikReject.errors.reason && (
-                <div className="invalid-feedback">
-                  {formikReject.errors.reason}
-                </div>
+                <div className="invalid-feedback">{formikReject.errors.reason}</div>
               )}
             </Form.Group>
-            <Modal.Footer className="mt-3">
+            <Modal.Footer className={styles.modalFooter}>
               <Button variant="secondary" onClick={() => setModalShow(false)}>
                 Cancel
               </Button>
@@ -527,8 +533,9 @@ export default function ManageAnnouncement() {
         </Modal.Body>
       </Modal>
 
-      <Modal show={modalShowNotify} onHide={() => setModalShowNotify(false)}>
-        <Modal.Header closeButton>
+      {/* Notify Modal */}
+      <Modal show={modalShowNotify} onHide={() => setModalShowNotify(false)} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
           <Modal.Title>Notify User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -542,24 +549,25 @@ export default function ManageAnnouncement() {
                 value={formikNotify.values.reason}
                 onChange={formikNotify.handleChange}
                 onBlur={formikNotify.handleBlur}
-                className={`form-control ${
+                className={`form-control  ${
                   formikNotify.touched.reason && formikNotify.errors.reason
                     ? "is-invalid"
                     : ""
                 }`}
-                style={{ height: "100px", resize: "none" }}
+                style={{ height: "100px", resize: "none", }}
+                // onFocus={()=>{document.activeElement.blur()}}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#ced4da";
+                }}
               />
               {formikNotify.touched.reason && formikNotify.errors.reason && (
-                <div className="invalid-feedback">
-                  {formikNotify.errors.reason}
-                </div>
+                <div className="invalid-feedback">{formikNotify.errors.reason}</div>
               )}
             </Form.Group>
-            <Modal.Footer className="mt-3">
-              <Button
-                variant="secondary"
-                onClick={() => setModalShowNotify(false)}
-              >
+            <Modal.Footer className={styles.modalFooter}>
+              <Button variant="secondary" onClick={() => setModalShowNotify(false)}>
                 Cancel
               </Button>
               <Button variant="danger" type="submit">

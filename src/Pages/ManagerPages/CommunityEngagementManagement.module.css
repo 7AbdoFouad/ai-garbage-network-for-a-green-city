@@ -1,70 +1,285 @@
+/* Container and Global Styles */
 .container {
-    padding: 20px;
-    text-align: center;
-    background: linear-gradient(135deg, #d4edda, #a8df8e)
-  }
-  
-  .submitButton {
-    background-color: #bed8f4;
-    color: #333;
-    padding: 10px 15px;
-    border: none;
-    cursor: pointer;
-    margin-bottom: 20px;
-    font-size: 16px;
-  }
-  
-  .pollTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-  
-  .pollTable th, .pollTable td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
-  }
-  
-  .pollTable th {
-    background-color: #f4f4f4;
-  }
-  
-  button {
-    padding: 5px 10px;
-    margin: 5px;
-    border: none;
-    cursor: pointer;
-  }
-  
+  padding: 40px;
+  margin: 30px auto;
+  max-width: 1200px;
+  background: linear-gradient(135deg, #e6f9ed, #c4f1de);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 100, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.4s ease;
+}
+.container:hover {
+  box-shadow: 0 12px 35px rgba(0, 100, 0, 0.15);
+}
+h2, h3 {
+  color: #247a44;
+  text-align: center;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+p {
+  color: #3c3c3c;
+  text-align: center;
+  font-size: 1rem;
+}
 
-  .pollResults {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    margin-top: 20px;
-  }
+/* Form Styling */
+.activityForm {
+  margin-top: 40px;
+  background: #f0fff6;
+  padding: 30px;
+  border-radius: 14px;
+  border: 1px solid #b8eac3;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: fadeIn 0.8s ease-in;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.activityForm label {
+  font-weight: 600;
+  color: #206a2f;
+  font-size: 1.05rem;
+}
+.activityForm input,
+.activityForm textarea {
+  padding: 12px 16px;
+  border: 1px solid #a6d9b1;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
+  background-color: #ffffff;
+}
+.activityForm input:focus,
+.activityForm textarea:focus {
+  border-color: #45b97c;
+  outline: none;
+  box-shadow: 0 0 8px rgba(69, 185, 124, 0.2);
+}
+.invalid-feedback {
+  color: #e74c3c;
+  font-size: 0.9rem;
+}
+
+/* Submit Button */
+.submitButton {
+  background: #2e7d32;
+  color: #fff;
+  padding: 14px 22px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 20%;
   
-  .pollResultCard {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 250px;
+  align-self: center
+}
+.submitButton:hover {
+  background: linear-gradient(45deg, #34a263, #248c4b);
+  transform: scale(1.03);
+}
+
+/* Table Wrapper */
+.tableWrapper {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+/* Table Styling */
+.table {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border-collapse: collapse;
+  transition: all 0.3s ease;
+}
+.tableHeader {
+  background-color: #2e7d32;
+  color: #fff;
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: bold;
+}
+.tableHeader th {
+  padding: 1rem;
+  vertical-align: middle;
+  text-align: center;
+  border: 1px solid #c8e6c9;
+}
+.table tbody tr td {
+  padding: 1rem;
+  vertical-align: middle;
+  text-align: center;
+  border: 1px solid #c8e6c9;
+}
+/* Zebra Stripes */
+.table tbody tr:nth-child(odd) td {
+  background-color: #f6fff6;
+}
+.table tbody tr:nth-child(even) td {
+  background-color: #ffffff;
+}
+
+/* Pagination Styling */
+.paginationContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+.paginationButton {
+  margin: 0 6px;
+  padding: 8px 16px;
+  border: 1px solid #2e7d32;
+  border-radius: 6px;
+  background-color: #f4fdf6;
+  color: #2e7d32;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+.paginationButton:hover {
+  background-color: #c8f5d4;
+  transform: scale(1.08);
+}
+.paginationButton.active {
+  background-color: #2e7d32 !important;
+  color: #fff !important;
+  border-color: #2e7d32 !important;
+}
+
+/* Custom Button Styles inside Table */
+.viewButton,
+.editButton,
+.deleteButton {
+  width: 100px;
+  margin: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+.viewButton {
+  background-color: #2e7d32 !important;
+  color: #fff !important;
+}
+.viewButton:hover {
+  background-color: #0f3d16 !important;
+}
+.editButton {
+  background-color: #2e7d32 !important;
+  color: #fff !important;
+}
+.editButton:hover {
+  background-color: #0f3d16 !important;
+}
+.deleteButton {
+  background-color: #d32f2f !important;
+  color: #fff !important;
+}
+.deleteButton:hover {
+  background-color: #b71c1c !important;
+}
+
+
+/* Accept Button inside Modal */
+.acceptButton {
+  width: 100%;
+  margin-top: 25px;
+  padding: 14px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.acceptButton:hover {
+  background: #086716;
+}
+
+/* Image Preview */
+.img-thumbnail {
+  border-radius: 8px;
+  margin-top: 10px;
+  border: 2px solid #a7e0b7;
+  box-shadow: 0 3px 8px rgba(0, 100, 0, 0.1);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
   }
-  
-  .viewResultsButton {
-    background-color: #007bff;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-    font-size: 14px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  .ant-table-wrapper .ant-table-pagination {
-    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 25px;
+    margin: 15px;
   }
-  
+  .activityForm {
+    padding: 25px;
+  }
+  .submitButton,
+  .acceptButton {
+    font-size: 0.95rem;
+    padding: 12px 18px;
+  }
+  .paginationButton {
+    padding: 6px 12px;
+    margin: 0 4px;
+  }
+  .viewButton,
+  .editButton,
+  .deleteButton {
+    width: 80px;
+    margin: 2px;
+    padding: 4px 8px;
+  }
+}
+/* Pagination Styling */
+.paginationContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+.paginationButton {
+  margin: 0 6px;
+  padding: 8px 16px;
+  border: 1px solid #2e7d32;
+  border-radius: 6px;
+  background-color: #f4fdf6;
+  color: #2e7d32;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+.paginationButton:hover {
+  background-color: #c8f5d4;
+  transform: scale(1.08);
+}
+.paginationButton.active {
+  background-color: #2e7d32 !important;
+  color: #fff !important;
+  border-color: #2e7d32 !important;
+}

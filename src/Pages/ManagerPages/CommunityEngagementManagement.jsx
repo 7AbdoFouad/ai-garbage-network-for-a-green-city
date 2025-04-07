@@ -1,6 +1,6 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useUser from "../../hooks/useUser";
-import { Table, Button, Modal, Form, Input, Pagination } from "antd";
+import { Table, Button, Modal, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -16,134 +16,132 @@ export default function CommunityEngagementManagement() {
     updateCommunityActivity,
     SubscribersOfCommunityActivities,
     users,
-    updateUser
-
+    updateUser,
   } = useUser();
 
-  const [visible, setVisible] = useState(false);
+  // Subscribers Modal Pagination
+  const [currentSubscriberPage, setCurrentSubscriberPage] = useState(
+    parseInt(sessionStorage.getItem("currentSubscriberPage")) || 1
+  );
+  const subscriberItemsPerPage = 5;
+
+  // Activities Pagination for Available and Completed Activities
+  const [availableCurrentPage, setAvailableCurrentPage] = useState(
+    parseInt(sessionStorage.getItem("availableCurrentPage")) || 1
+  );
+  const [completedCurrentPage, setCompletedCurrentPage] = useState(
+    parseInt(sessionStorage.getItem("completedCurrentPage")) || 1
+  );
+  const activitiesItemsPerPage = 5;
+
+  const [showSubscribersModal, setShowSubscribersModal] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  
-  const itemsPerPage = 3;
-    const [selectedCommunity, setselectedCommunity] = useState(null);
-    const [showEditCommunity, setShowEditCommunity] = useState(false);
-  const handleImageChange = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
+  const [selectedCommunity, setSelectedCommunity] = useState(null);
+  const [showEditCommunity, setShowEditCommunity] = useState(false);
+  const inputRef = useRef();
 
-      reader.onloadend = async () => {
-        const newProfileImage = reader.result;
-
-        try {
-          formik.setFieldValue("imgFile", newProfileImage);
-        } catch (error) {
-          console.error("Failed to update profile image:", error);
-          toast.error("An error occurred while updating the image.");
-        }
-      };
-
-      reader.readAsDataURL(file);
-    }
-  };
-    const inputRef = useRef();
-  
+  // Yup form validation
   const formik = useFormik({
     initialValues: {
       ActName: "",
       ActDescription: "",
       actIntervalDate: "",
-      actstate: "متاحة",
+      actstate: "Available",
       imgFile: "",
       NumOfSubscribers: 0,
       NumOfRequiredSubscribers: "",
     },
     validationSchema: Yup.object({
-      ActName: Yup.string().required("اسم النشاط مطلوب"),
+      ActName: Yup.string().required("Activity name is required"),
       ActDescription: Yup.string()
-        .required("الوصف مطلوب")
-        .min(10, "الوصف يجب ان يكون على الاقل 10 حروف"),
+        .required("Description is required")
+        .min(10, "Description must be at least 10 characters"),
       actIntervalDate: Yup.string()
-        .required("الفترة الزمنية مطلوبة")
+        .required("Time interval is required")
         .matches(
           /^\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}$/,
-          "يجب أن تكون الفترة الزمنية بالتنسيق YYYY-MM-DD - YYYY-MM-DD"
+          "Time interval must be in the format YYYY-MM-DD - YYYY-MM-DD"
         )
-        .test(
-          "is-future",
-          "يجب أن تكون الفترة الزمنية في المستقبل",
-          function (value) {
-            const [start, end] = value
-              .split(" - ")
-              .map((date) => new Date(date));
-            const today = new Date();
-            return start > today && end > today;
-          }
-        ),
-      imgFile: Yup.mixed().required("صورة النشاط مطلوبة"),
+        .test("is-future", "Time interval must be in the future", function (value) {
+          const [start, end] = value.split(" - ").map((date) => new Date(date));
+          const today = new Date();
+          return start > today && end > today;
+        }),
+      imgFile: Yup.mixed().required("Activity image is required"),
       NumOfRequiredSubscribers: Yup.number().required(
-        "عدد المشتركين المطلوبين مطلوب"
+        "Required subscribers count is required"
       ),
     }),
     onSubmit: (values) => {
       addCommunityActivity(values);
-      toast.success("تم اضافة النشاط بنجاح");
+      toast.success("Activity added successfully!");
       setFormVisible(false);
       inputRef.current.value = null;
-
       formik.resetForm();
     },
   });
-  const [savedPage, setSavedPage] = useState(null);
 
-  useEffect(() => {
-    if (searchTerm.length > 0) {
-      if (savedPage === null) {
-        setSavedPage(currentPage); // Save the page only once when starting a search
-      }
-      setCurrentPage(1); // Move to page 1 when searching
-    } else {
-      if (savedPage !== null) {
-        setCurrentPage(savedPage); // Restore previous page
-        setSavedPage(null); // Reset saved page after restoring
-      }
+  // Handle image change
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const newProfileImage = reader.result;
+        try {
+          formik.setFieldValue("imgFile", newProfileImage);
+        } catch (error) {
+          console.error("Failed to update image:", error);
+          toast.error("An error occurred while updating the image.");
+        }
+      };
+      reader.readAsDataURL(file);
     }
-  }, [searchTerm]);
-  
-
-  const openModal = (activity) => {
-    setSelectedActivity(activity);
-    setVisible(true);
   };
 
-  const closeModal = () => {
-    setVisible(false);
+  // Pagination handlers
+  const handleSubscriberPageChange = (page) => {
+    setCurrentSubscriberPage(page);
+    sessionStorage.setItem("currentSubscriberPage", page);
+  };
+
+  const handleAvailablePageChange = (page) => {
+    setAvailableCurrentPage(page);
+    sessionStorage.setItem("availableCurrentPage", page);
+  };
+
+  const handleCompletedPageChange = (page) => {
+    setCompletedCurrentPage(page);
+    sessionStorage.setItem("completedCurrentPage", page);
+  };
+
+  // Open subscribers modal
+  const openSubscribersModal = (activity) => {
+    setSelectedActivity(activity);
+    setShowSubscribersModal(true);
+    setCurrentSubscriberPage(1);
+    sessionStorage.setItem("currentSubscriberPage", 1);
+  };
+
+  const closeSubscribersModal = () => {
+    setShowSubscribersModal(false);
     setSelectedActivity(null);
   };
 
-  const openFormModal = () => {
-    setFormVisible(true);
-  };
-
-  const closeFormModal = () => {
-    setFormVisible(false);
-  };
-
+  // Filter subscribers for selected activity
   const filteredSubscribers = SubscribersOfCommunityActivities.filter(
     (sub) =>
       selectedActivity &&
       sub.ActivityId === selectedActivity.id &&
-      sub.name.includes(searchTerm)
+      sub.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
-  // Apply pagination after filtering
+
   const paginatedSubscribers = filteredSubscribers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    (currentSubscriberPage - 1) * subscriberItemsPerPage,
+    currentSubscriberPage * subscriberItemsPerPage
   );
-  
 
   const handleDeleteSubscriber = (userId) => {
     try {
@@ -151,107 +149,121 @@ export default function CommunityEngagementManagement() {
         (sub) => sub.userId === userId && sub.ActivityId === selectedActivity.id
       );
       if (!subscriberEntry) {
-        toast.error("لم يتم العثور على الاشتراك!");
+        toast.error("Subscriber not found!");
         return;
       }
       deleteSubscribersOfCommunityActivity(subscriberEntry.id);
-      toast.success("تم إلغاء الاشتراك بنجاح!");
+      toast.success("Subscription deleted successfully!");
     } catch (error) {
       console.error("Failed to delete subscriber:", error);
       toast.error("Failed to delete subscriber. Please try again.");
     }
   };
 
-  const  [handleAcceptAllWaiting, setHandleAcceptAllWaiting] = useState(false);
-  const handleAcceptAll = async(ActName) => {
- 
+  const [handleAcceptAllWaiting, setHandleAcceptAllWaiting] = useState(false);
+  const handleAcceptAll = async (ActName) => {
     setHandleAcceptAllWaiting(true);
-    const acceptedUsers = users.filter((user) => filteredSubscribers.some((sub) => sub.userId === user.id));
-    try{
-      acceptedUsers.forEach(async (user) => {
+    const acceptedUsers = users.filter((user) =>
+      filteredSubscribers.some((sub) => sub.userId === user.id)
+    );
+    try {
+      for (const user of acceptedUsers) {
         await updateUser(user.id, {
           ...user,
-          numOfCompletedActivitiesCount: user.numOfCompletedActivitiesCount + 1
-        })
-        console.log(user);
-       
+          numOfCompletedActivitiesCount: user.numOfCompletedActivitiesCount + 1,
+        });
         const res = await fetch("http://localhost:5000/community", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email: user.email,actName:ActName,name:user.name }),
-              });
-              console.log("okey");
-              
-              const data = await res.json();
-              if (!res.ok) {
-                throw new Error(data.message || "Failed to send email.");
-              }
-            });
-            filteredSubscribers.forEach(async (sub) => {
-              await deleteSubscribersOfCommunityActivity(sub.id);
-            })
-            await deleteCommunityActivity(selectedActivity.id);
-
-            setSelectedActivity(null); // Close the modal to refresh state
-      toast.success("تم قبول جميع المشتركين بنجاح");
-      setHandleAcceptAllWaiting(false);
-      closeModal();
-
-    }
-    catch(error){
-      console.log(error);
-    }
-    finally{
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: user.email,
+            actName: ActName,
+            name: user.name,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to send email.");
+        }
+      }
+      for (const sub of filteredSubscribers) {
+        await deleteSubscribersOfCommunityActivity(sub.id);
+      }
+      await deleteCommunityActivity(selectedActivity.id);
+      setSelectedActivity(null);
+      toast.success("All subscribers accepted successfully!");
+      closeSubscribersModal();
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while accepting subscribers.");
+    } finally {
       setHandleAcceptAllWaiting(false);
     }
   };
-    const handleEdit = (activtiy) => {
-      setselectedCommunity(activtiy);
-      console.log(activtiy);
-      
-      setShowEditCommunity(true);
-    };
-    const handleSave = (updatedCommunity) => {
-      try {
-        updateCommunityActivity(updatedCommunity.id, updatedCommunity);
-        toast.success("Poll updated successfully!");
-        setShowEditCommunity(false);
-      } catch (error) {
-        toast.error("Failed to update poll. Please try again later.");
-      }
-    };
-  
 
-  const activitiesTable = (status) => {
+  const handleEdit = (activity) => {
+    setSelectedCommunity(activity);
+    setShowEditCommunity(true);
+  };
+
+  const handleSave = (updatedCommunity) => {
+    try {
+      updateCommunityActivity(updatedCommunity.id, updatedCommunity);
+      toast.success("Activity updated successfully!");
+      setShowEditCommunity(false);
+    } catch (error) {
+      toast.error("Failed to update activity. Please try again later.");
+    }
+  };
+
+  // Generate activity objects for available and completed statuses
+  const generateActivities = (status) => {
     return (CommunityActivities || [])
       .filter((activity) => {
         if (!activity || !activity.actIntervalDate) return false;
-        const intervalParts = activity.actIntervalDate.split(" - ");
-        if (intervalParts.length !== 2) return false;
-
-        const [start, end] = intervalParts.map((date) => new Date(date));
+        const [startStr, endStr] = activity.actIntervalDate.split(" - ");
+        if (!startStr || !endStr) return false;
+        const start = new Date(startStr);
+        const end = new Date(endStr);
         const currentDate = new Date();
-
-        return (
-          (status === "متاحة" && currentDate <= end) ||
-          (status === "مكتملة" && currentDate > end)
-        );
+        return status === "Available" ? currentDate <= end : currentDate > end;
       })
       .map((activity) => ({
-        key: activity.id,
+        id: activity.id,
         name: activity.ActName,
         description: activity.ActDescription,
         interval: activity.actIntervalDate,
         state: status,
+        // Render buttons with consistent style using our CSS classes
         actions: (
           <>
-          {status === "مكتملة"? <Button onClick={() => openModal(activity)}>عرض المشتركين</Button>: null} 
-          {status === "متاحة"? <Button onClick={() => handleEdit(activity)}>تعديل</Button>: null} 
-
-            <Button danger onClick={() => deleteCommunityActivity(activity.id)}>
-              حذف
+            {status === "Completed" && (
+              <Button
+                variant="outline-success"
+                size="sm"
+                onClick={() => openSubscribersModal(activity)}
+                className={styles.viewButton}
+              >
+                View Subscribers
+              </Button>
+            )}
+            {status === "Available" && (
+              <Button
+                variant="outline-warning"
+                size="sm"
+                onClick={() => handleEdit(activity)}
+                className={styles.editButton}
+              >
+                Edit
+              </Button>
+            )}
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={() => deleteCommunityActivity(activity.id)}
+              className={styles.deleteButton}
+            >
+              Delete
             </Button>
           </>
         ),
@@ -259,116 +271,248 @@ export default function CommunityEngagementManagement() {
         required: activity.NumOfRequiredSubscribers,
       }));
   };
-  const columns = [
-    {
-      title: "اسم النشاط",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "الوصف",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "الفترة الزمنية",
-      dataIndex: "interval",
-      key: "interval",
-    },
-    {
-      title: "الحالة",
-      dataIndex: "state",
-      key: "state",
-    },
-    {
-      title: "الإجراءات",
-      dataIndex: "actions",
-      key: "actions",
-    },
-    {
-      title: "عدد المشتركين",
-      dataIndex: "subscribers",
-      key: "subscribers",
-    },
-    {
-      title: "المطلوب",
-      dataIndex: "required",
-      key: "required",
-    },
-  ];
+
+  // Pagination for available activities
+  const availableActivities = generateActivities("Available");
+  const paginatedAvailableActivities = availableActivities.slice(
+    (availableCurrentPage - 1) * activitiesItemsPerPage,
+    availableCurrentPage * activitiesItemsPerPage
+  );
+  const totalAvailablePages = Math.ceil(
+    availableActivities.length / activitiesItemsPerPage
+  );
+
+  // Pagination for completed activities
+  const completedActivities = generateActivities("Completed");
+  const paginatedCompletedActivities = completedActivities.slice(
+    (completedCurrentPage - 1) * activitiesItemsPerPage,
+    completedCurrentPage * activitiesItemsPerPage
+  );
+  const totalCompletedPages = Math.ceil(
+    completedActivities.length / activitiesItemsPerPage
+  );
 
   return (
-    <div>
-      <h2>إدارة الفعاليات الاجتماعية</h2>
-      <p>عدد الفعاليات المتاحة: {activitiesTable("متاحة").length}</p>
-      <p>عدد الفعاليات المكتملة: {activitiesTable("مكتملة").length}</p>
+    <div className={styles.container}>
+      <h2>Social Events Management</h2>
 
-      <h3>الأنشطة الاجتماعية المتاحة</h3>
-      <Table columns={columns} dataSource={activitiesTable("متاحة")} />
-      <h3>الأنشطة الاجتماعية المكتملة</h3>
-      <Table columns={columns} dataSource={activitiesTable("مكتملة")} />
+      {/* Available Activities Table */}
+      <h3>Available Social Activities</h3>
+      <div className={styles.tableWrapper}>
+        <Table striped bordered hover responsive className={styles.table}>
+          <thead className={styles.tableHeader}>
+            <tr>
+              <th style={{width: "13%"}}>Activity Name</th>
+              <th>Description</th>
+              <th style={{width: "12%"}}>Time Interval</th>
+              <th>Status</th>
+              <th>Actions</th>
+              <th>Subscribers</th>
+              <th>Required</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedAvailableActivities.map((activity) => (
+              <tr key={activity.id}>
+                <td>{activity.name}</td>
+                <td>{activity.description}</td>
+                <td>{activity.interval}</td>
+                <td>{activity.state}</td>
+                <td>{activity.actions}</td>
+                <td>{activity.subscribers}</td>
+                <td>{activity.required}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+      <div className={styles.paginationContainer}>
+ 
+                <div>
+                  {Array.from({ length: totalAvailablePages }, (_, i) => (
+                    <Button
+                      key={i + 1}
+                      variant={availableCurrentPage === i + 1 ? "primary" : "light"}
+                      style={{backgroundColor:availableCurrentPage === i + 1 ? "#2e7d32" : "white",
+                        color:availableCurrentPage === i + 1 ? "white" : "black",
+                        border:availableCurrentPage === i + 1 ? "#2e7d32" : "white",
+                      }}
+                      onClick={() =>  handleAvailablePageChange(i + 1)}
+                      className={styles.paginationButton}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                </div>
+        <p style={{fontWeight: "bold"}}>Available Activities: {availableActivities.length}</p>
+      </div>
 
-      <Modal
-        visible={visible}
-        onCancel={closeModal}
-        footer={null}
-        title="المشتركين"
-      >
-        <Input
-          placeholder="بحث عن مشترك"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <Table
-          dataSource={filteredSubscribers.slice(
-            (currentPage - 1) * itemsPerPage,
-            currentPage * itemsPerPage
-          )}
-          columns={[{ title: "الاسم", dataIndex: "name" }]}
-        />
-        <Pagination
-          current={currentPage}
-          pageSize={itemsPerPage}
-          total={filteredSubscribers.length}
-          onChange={setCurrentPage}
-        />
+      {/* Completed Activities Table */}
+      <h3 style={{marginTop: "40px"}}>Completed Social Activities</h3>
+      <div className={styles.tableWrapper}>
+        <Table striped bordered hover responsive className={styles.table}>
+          <thead className={styles.tableHeader}>
+            <tr>
+              <th style={{width: "13%"}}>Activity Name</th>
+              <th>Description</th>
+              <th style={{width: "12%"}}>Time Interval</th>
+              <th>Status</th>
+              <th>Actions</th>
+              <th>Subscribers</th>
+              <th>Required</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedCompletedActivities.map((activity) => (
+              <tr key={activity.id}>
+                <td>{activity.name}</td>
+                <td>{activity.description}</td>
+                <td>{activity.interval}</td>
+                <td>{activity.state}</td>
+                <td>{activity.actions}</td>
+                <td>{activity.subscribers}</td>
+                <td>{activity.required}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+      <div className={styles.paginationContainer}>
+        <div>
+                  {Array.from({ length: totalCompletedPages }, (_, i) => (
+                    <Button
+                      key={i + 1}
+                      variant={completedCurrentPage === i + 1 ? "primary" : "light"}
+                      style={{backgroundColor:completedCurrentPage === i + 1 ? "#2e7d32" : "white",
+                        color:completedCurrentPage === i + 1 ? "white" : "black",
+                        border:completedCurrentPage === i + 1 ? "#2e7d32" : "white",
+                      }}
+                      onClick={() =>  handleCompletedPageChange(i + 1)}
+                      className={styles.paginationButton}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                </div>
+        <p style={{fontWeight: "bold"}}>Completed Activities: {completedActivities.length}</p>
+      </div>
+
+      {/* Subscribers Modal */}
+      <Modal show={showSubscribersModal} onHide={closeSubscribersModal} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
+          <Modal.Title>Subscribers</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Control
+            type="text"
+            placeholder="Search Subscriber"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+            // onFocus={()=>{document.activeElement.blur()}}
+                  style={{marginTop: "20px", marginBottom: "20px"}}
+                  //onfocus remove outline
+                  onFocus={(e) => {
+                    e.target.style.outline = "none";
+                    e.target.style.boxShadow = "none";
+                    e.target.style.borderColor = "#ced4da";
+                  }}
+          />
+          <div className={styles.tableWrapper}>
+            <Table striped bordered hover responsive className={styles.table}>
+              <thead className={styles.tableHeader}>
+                <tr>
+                  <th>Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedSubscribers.map((subscriber) => (
+                  <tr key={subscriber.id}>
+                    <td>{subscriber.name}</td>
+                    <td>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDeleteSubscriber(subscriber.userId)}
+                        className={styles.deleteButton}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+
+           <div>
+                  {Array.from({ length: Math.ceil(filteredSubscribers.length / subscriberItemsPerPage) }, (_, i) => (
+                    <Button
+                      key={i + 1}
+                      variant={currentSubscriberPage === i + 1 ? "primary" : "light"}
+                      style={{backgroundColor:currentSubscriberPage === i + 1 ? "#2e7d32" : "white",
+                        color:currentSubscriberPage === i + 1 ? "white" : "black",
+                        border:currentSubscriberPage === i + 1 ? "#2e7d32" : "white",
+                      }}
+                      onClick={() =>   handleSubscriberPageChange(i + 1)}
+                      className={styles.paginationButton}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                </div>
+          <Button
+            variant="danger"
+            className={styles.acceptButton}
+            onClick={() => handleAcceptAll(selectedActivity?.ActName)}
+            disabled={handleAcceptAllWaiting || filteredSubscribers.length === 0}
+          >
+            {handleAcceptAllWaiting ? "Accepting..." : "Accept All Subscribers"}
+          </Button>
+        </Modal.Body>
       </Modal>
 
-      <h2>➕ إضافة نشاط جديد</h2>
-      <form onSubmit={formik.handleSubmit} className={styles.pollForm}>
-        {/* اسم النشاط */}
-        <label htmlFor="ActName">📌 اسم النشاط:</label>
+      {/* Add New Activity Form */}
+      <h2 style={{marginTop: "40px"}}>➕ Add New Activity</h2>
+      <form onSubmit={formik.handleSubmit} className={styles.activityForm} >
+        <label htmlFor="ActName">📌 Activity Name:</label>
         <input
           type="text"
           id="ActName"
           name="ActName"
-          placeholder="أدخل اسم النشاط"
+          placeholder="Enter activity name"
           value={formik.values.ActName}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.ActName && formik.errors.ActName ? "is-invalid" : ""}`}
+          className={`form-control ${
+            formik.touched.ActName && formik.errors.ActName ? "is-invalid" : ""
+          }`}
         />
         {formik.touched.ActName && formik.errors.ActName && (
           <div className="invalid-feedback">{formik.errors.ActName}</div>
         )}
 
-        {/* وصف النشاط */}
-        <label htmlFor="ActDescription">📄 وصف النشاط:</label>
+        <label htmlFor="ActDescription">📄 Activity Description:</label>
         <textarea
           id="ActDescription"
           name="ActDescription"
-          placeholder="أدخل وصف النشاط"
+          placeholder="Enter activity description"
           value={formik.values.ActDescription}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.ActDescription && formik.errors.ActDescription ? "is-invalid" : ""}`}
+          className={`form-control ${
+            formik.touched.ActDescription && formik.errors.ActDescription
+              ? "is-invalid"
+              : ""
+          }`}
+          style={{ height: "100px", resize: "none" }}
         />
         {formik.touched.ActDescription && formik.errors.ActDescription && (
           <div className="invalid-feedback">{formik.errors.ActDescription}</div>
         )}
 
-        {/* الفترة الزمنية */}
-        <label htmlFor="actIntervalDate">📅 الفترة الزمنية:</label>
+        <label htmlFor="actIntervalDate">📅 Time Interval:</label>
         <input
           type="text"
           id="actIntervalDate"
@@ -377,17 +521,18 @@ export default function CommunityEngagementManagement() {
           value={formik.values.actIntervalDate}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.actIntervalDate && formik.errors.actIntervalDate ? "is-invalid" : ""}`}
+          className={`form-control ${
+            formik.touched.actIntervalDate && formik.errors.actIntervalDate
+              ? "is-invalid"
+              : ""
+          }`}
         />
         {formik.touched.actIntervalDate && formik.errors.actIntervalDate && (
-          <div className="invalid-feedback">
-            {formik.errors.actIntervalDate}
-          </div>
+          <div className="invalid-feedback">{formik.errors.actIntervalDate}</div>
         )}
 
-        {/* عدد المشتركين المطلوبين */}
         <label htmlFor="NumOfRequiredSubscribers">
-          📋 عدد المشتركين المطلوبين:
+          📋 Required Subscribers Count:
         </label>
         <input
           type="number"
@@ -396,7 +541,12 @@ export default function CommunityEngagementManagement() {
           value={formik.values.NumOfRequiredSubscribers}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.NumOfRequiredSubscribers && formik.errors.NumOfRequiredSubscribers ? "is-invalid" : ""}`}
+          className={`form-control ${
+            formik.touched.NumOfRequiredSubscribers &&
+            formik.errors.NumOfRequiredSubscribers
+              ? "is-invalid"
+              : ""
+          }`}
         />
         {formik.touched.NumOfRequiredSubscribers &&
           formik.errors.NumOfRequiredSubscribers && (
@@ -405,8 +555,7 @@ export default function CommunityEngagementManagement() {
             </div>
           )}
 
-        {/* صورة النشاط */}
-        <label htmlFor="imgFile">🖼️ صورة النشاط:</label>
+        <label htmlFor="imgFile">🖼️ Activity Image:</label>
         <input
           type="file"
           id="imgFile"
@@ -414,7 +563,9 @@ export default function CommunityEngagementManagement() {
           ref={inputRef}
           accept="image/*"
           onChange={handleImageChange}
-          className={`form-control ${formik.touched.imgFile && formik.errors.imgFile ? "is-invalid" : ""}`}
+          className={`form-control ${
+            formik.touched.imgFile && formik.errors.imgFile ? "is-invalid" : ""
+          }`}
         />
         {formik.touched.imgFile && formik.errors.imgFile && (
           <div className="invalid-feedback">{formik.errors.imgFile}</div>
@@ -423,60 +574,26 @@ export default function CommunityEngagementManagement() {
         {formik.values.imgFile && (
           <div className="mt-2">
             <img
-              src={formik.values.imgFile} // Directly use the base64 string
+              src={formik.values.imgFile}
               alt="Uploaded"
               className="img-thumbnail"
-
               width="200"
             />
           </div>
         )}
 
         <button type="submit" className={styles.submitButton}>
-          ➕ إضافة النشاط
+           Add Activity
         </button>
       </form>
 
-      <Modal
-        visible={visible}
-        onCancel={closeModal}
-        footer={null}
-        title="المشتركين"
-      >
-        <Input
-          placeholder="بحث عن مشترك"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+      {showEditCommunity && selectedCommunity && (
+        <EditCommunityActivity
+          activity={selectedCommunity}
+          onClose={() => setShowEditCommunity(false)}
+          onSave={handleSave}
         />
-       <Table
-  dataSource={paginatedSubscribers}
-  pagination={false} // Disable pagination
-  columns={[
-    { title: "الاسم", dataIndex: "name" },
-    {
-      title: "الإجراء",
-      render: (_, record) => (
-        <Button danger onClick={() => handleDeleteSubscriber(record.userId)}>
-          حذف
-        </Button>
-      ),
-    },
-  ]}
-/>
-        <Pagination
-          current={currentPage}
-          pageSize={itemsPerPage}
-          total={filteredSubscribers.length}
-          onChange={setCurrentPage}
-        />
-        {/* pass activity name to handleAcceptAll */}
-        <Button type="primary" danger onClick={() => handleAcceptAll(selectedActivity.ActName)} disabled={handleAcceptAllWaiting||filteredSubscribers.length===0} className="mt-2">
-          {handleAcceptAllWaiting ? "جاري القبول" : "قبول جميع المشتركين"}
-        </Button>
-      </Modal>
-      {showEditCommunity&&selectedCommunity&&
-      ( <EditCommunityActivity activity={selectedCommunity} onClose={()=>setShowEditCommunity(false)} onSave={handleSave} />)
-      }
+      )}
     </div>
   );
 }

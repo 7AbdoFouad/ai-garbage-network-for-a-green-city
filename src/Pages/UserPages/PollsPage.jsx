@@ -48,7 +48,7 @@ export default function PollsPage() {
         pollId: poll.id,
       };
 
-      addSubscribersOfPoll(newSubscriber); // ✅ إضافة المستخدم إلى `SubscribersOfPolls`
+      addSubscribersOfPoll(newSubscriber); // ✅ إضافة المستخدم إلى SubscribersOfPolls
 
       // تحديث حالة المستخدم
       const updatedUser = {
@@ -64,11 +64,12 @@ export default function PollsPage() {
   };
 
   return (
+    
     <div className={styles.container}>
-      <h2>🗳️ استطلاعات الرأي 🗳️</h2>
+      <h2>🗳 Opinion polls 🗳</h2>
 
       {filteredPolls.length === 0 ? (
-        <p className={styles.noPollsMessage}>لا يوجد استطلاعات متاحة حاليًا</p>
+        <p className={styles.noPollsMessage}>There are no surveys currently available</p>
       ) : (
         <div className={styles.pollGrid}>
           {filteredPolls.map((poll, index) => (
@@ -82,13 +83,13 @@ export default function PollsPage() {
                 <h3 className={styles.pollTitle}>{poll.pollName}</h3>
                 <p className={styles.pollDescription}>{poll.pollDesc}</p>
                 <p className={styles.pollDate}>
-                  🗓️ <strong>تاريخ انتهاء الاستطلاع:</strong> {poll.pollEndDate}
+                  🗓 <strong>Survey end date:</strong> {poll.pollEndDate}
                 </p>
                 <button
                   className={styles.pollButton}
                   onClick={() => setSelectedPoll(poll)}
                 >
-                  🎯 استطلاع الآن
+                  🎯 Poll Now
                 </button>
               </div>
             </div>
@@ -99,6 +100,6 @@ export default function PollsPage() {
       {selectedPoll && (
         <PollPopup poll={selectedPoll} closePopup={() => setSelectedPoll(null)} onSubmit={() => handlePollSubmit(selectedPoll)} />
       )}
-    </div>
-  );
+</div>
+);
 }

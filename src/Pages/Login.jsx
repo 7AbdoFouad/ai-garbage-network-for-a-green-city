@@ -154,7 +154,7 @@ export default function Login() {
                       type="text"
                       className={`form-control p-3 rounded-3 ${styles.formControl}`}
                       name="email"
-                      placeholder="Enter email or phone number"
+                      placeholder="Enter email"
                       value={formik.values.email}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
