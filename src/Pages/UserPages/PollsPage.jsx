@@ -10,8 +10,20 @@ export default function PollsPage() {
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [user, setUser] = useState(null);
   const [filteredPolls, setFilteredPolls] = useState([]);
+  const [PollsPage, setPollsPage] = useState(
+    parseInt(sessionStorage.getItem("PollsPage")) || 1
+  );
+  const itemsPerPage = 6;
+  const paginatedPolls = filteredPolls.slice(
+    (PollsPage - 1) * itemsPerPage,
+    PollsPage * itemsPerPage
+  );
+  const totalPollsPages = Math.ceil(filteredPolls.length / itemsPerPage);
 
-
+  const handlePollsPageChange = (page) => {
+    setPollsPage(page);
+    sessionStorage.setItem("PollsPage", page);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -21,16 +33,30 @@ export default function PollsPage() {
       }
     };
     fetchUserData();
-  }, [id]);
+  }, [id, fetchUser]);
 
   useEffect(() => {
-    // تصفية الاستطلاعات بحيث لا تظهر الاستطلاعات التي قام المستخدم بالتصويت فيها
     if (user) {
+      // Get polls the user already participated in
       const userPolls = SubscribersOfPolls
         .filter((sub) => sub.userId === user.id)
         .map((sub) => sub.pollId);
 
-      setFilteredPolls(Polls.filter((poll) => !userPolls.includes(poll.id)));
+      // Set today's date with time zeroed out for accurate comparison
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Only include polls the user hasn't participated in and where poll end date is in the past.
+      const availablePolls = Polls.filter((poll) => {
+        // Convert poll end date string to a Date object.
+        const pollEndDate = new Date(poll.pollEndDate);
+        return (
+          !userPolls.includes(poll.id) &&
+          pollEndDate > today // Hide polls if end date is >= today.
+        );
+      });
+
+      setFilteredPolls(availablePolls);
     }
   }, [Polls, SubscribersOfPolls, user]);
 
@@ -38,9 +64,8 @@ export default function PollsPage() {
     setSelectedPoll(null);
 
     if (user) {
-      // تحديث قائمة المشاركين في الاستطلاع
       const newSubscriber = {
-        id: `${user.id}-${poll.id}`, // تحديد ID فريد بناءً على المستخدم والاستطلاع
+        id: `${user.id}-${poll.id}`,
         userId: user.id,
         name: user.name,
         email: user.email,
@@ -48,9 +73,8 @@ export default function PollsPage() {
         pollId: poll.id,
       };
 
-      addSubscribersOfPoll(newSubscriber); // ✅ إضافة المستخدم إلى SubscribersOfPolls
+      addSubscribersOfPoll(newSubscriber);
 
-      // تحديث حالة المستخدم
       const updatedUser = {
         ...user,
         numOfCompletedPollsCount: user.numOfCompletedPollsCount + 1,
@@ -58,48 +82,68 @@ export default function PollsPage() {
       setUser(updatedUser);
       updateUser(user.id, updatedUser);
 
-      // تحديث القائمة بحيث لا يظهر الاستطلاع الذي تم التصويت عليه
       setFilteredPolls((prevPolls) => prevPolls.filter((p) => p.id !== poll.id));
     }
   };
 
   return (
-    
-    <div className={styles.container}>
-      <h2>🗳 Opinion polls 🗳</h2>
+    <div className={styles.maincont}>
+      <div className={styles.container}>
+        <h2 className={styles.title}>🗳 Opinion Polls</h2>
 
-      {filteredPolls.length === 0 ? (
-        <p className={styles.noPollsMessage}>There are no surveys currently available</p>
-      ) : (
-        <div className={styles.pollGrid}>
-          {filteredPolls.map((poll, index) => (
-            <div key={poll.id} className={styles.pollCard}>
-              <img
-                src={poll.imgFile}
-                alt={poll.pollName}
-                className={styles.pollImage}
-              />
-              <div className={styles.pollContent}>
-                <h3 className={styles.pollTitle}>{poll.pollName}</h3>
-                <p className={styles.pollDescription}>{poll.pollDesc}</p>
-                <p className={styles.pollDate}>
-                  🗓 <strong>Survey end date:</strong> {poll.pollEndDate}
-                </p>
-                <button
-                  className={styles.pollButton}
-                  onClick={() => setSelectedPoll(poll)}
-                >
-                  🎯 Poll Now
-                </button>
+        {filteredPolls.length === 0 ? (
+          <p className={styles.noPollsMessage}>There are no surveys currently available</p>
+        ) : (
+          <div className={styles.pollsGrid}>
+            {paginatedPolls.map((poll) => (
+              <div key={poll.id} className={styles.pollCard}>
+                <img
+                  src={poll.imgFile}
+                  alt={poll.pollName}
+                  className={styles.pollImage}
+                />
+                <div className={styles.pollContent}>
+                  <h3 className={styles.pollTitle}>{poll.pollName}</h3>
+                  <p className={styles.pollDescription}>{poll.pollDesc}</p>
+                  <p className={styles.pollDate}>
+                    <strong>Survey end date:</strong> {poll.pollEndDate}
+                  </p>
+                  <button
+                    className={styles.pollButton}
+                    onClick={() => setSelectedPoll(poll)}
+                  >
+                    🎯 Poll Now
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+        {totalPollsPages > 1 && (
+          <div className={styles.pagination}>
+            {Array.from({ length: totalPollsPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => handlePollsPageChange(i + 1)}
+                className={
+                  PollsPage === i + 1 ? styles.activePage : styles.pageButton
+                }
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {selectedPoll && (
-        <PollPopup poll={selectedPoll} closePopup={() => setSelectedPoll(null)} onSubmit={() => handlePollSubmit(selectedPoll)} />
-      )}
-</div>
-);
+        {selectedPoll && (
+          <PollPopup 
+            poll={selectedPoll} 
+            closePopup={() => setSelectedPoll(null)} 
+            onSubmit={() => handlePollSubmit(selectedPoll)} 
+          />
+        )}
+      </div>
+
+    </div>
+  );
 }

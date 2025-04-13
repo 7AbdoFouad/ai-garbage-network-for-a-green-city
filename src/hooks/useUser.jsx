@@ -18,6 +18,7 @@ const useUser = () => {
   const [UserNotifications, setUserNotifications] = useState([]);
   const [PublicNotifications, setPublicNotifications] = useState([]);
   const [UserNotificationsMarkedPublic, setUserNotificationsMarkedPublic] = useState([]);
+  const [DrivierNotifications, setDrivierNotifications] = useState([]);
   // const [user, setUse
   // r] = useState({});
 
@@ -516,6 +517,33 @@ const useUser = () => {
     setUserNotificationsMarkedPublic(UserNotificationsMarkedPublic.map((UserNotificationMarkedPublic) => UserNotificationMarkedPublic.id === id ? res.data : UserNotificationMarkedPublic));
     return res.data;
   }
+  // ____________________________ DrivierNotifications --------------------------------------
+  // Add a DrivierNotification
+  const addDrivierNotification = async (values) => {
+    const res = await axios.post("http://localhost:3000/DrivierNotifications", values);
+    setDrivierNotifications([...DrivierNotifications, res.data]); // Assuming the server returns the created user object
+    return res.data;
+  }
+  // Delete a DrivierNotification
+  const deleteDrivierNotification = async (id) => {
+    await axios.delete(`http://localhost:3000/DrivierNotifications/${id}`); 
+    setDrivierNotifications(DrivierNotifications.filter((DrivierNotification) => DrivierNotification.id !== id));
+  }
+  // Fetch a single DrivierNotification
+  const fetchDrivierNotification = async (id) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/DrivierNotifications/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // Update a DrivierNotification
+  const updateDrivierNotification = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/DrivierNotifications/${id}`, values);
+    setDrivierNotifications(DrivierNotifications.map((DrivierNotification) => DrivierNotification.id === id ? res.data : DrivierNotification));
+    return res.data;
+  }
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -652,6 +680,14 @@ const useUser = () => {
         console.error(error);
       }
     };
+    const fetchDrivierNotifications = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3000/DrivierNotifications");
+        setDrivierNotifications(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     
     fetchUsers();
     fetchmanagers();
@@ -669,6 +705,7 @@ const useUser = () => {
     fetchUserNotifications();
     fetchPublicNotifications();
     fetchUserNotificationsMarkedPublic();
+    fetchDrivierNotifications();
   }, []);
 
   return {
@@ -688,6 +725,7 @@ const useUser = () => {
     UserNotifications,
     PublicNotifications,
     UserNotificationsMarkedPublic,
+    DrivierNotifications,
     registerUser,
     deleteUser,
     fetchUser,
@@ -751,7 +789,11 @@ const useUser = () => {
     addUserNotificationMarkedPublic,
     deleteUserNotificationMarkedPublic,
     fetchUserNotificationMarkedPublic,
-    updateUserNotificationMarkedPublic
+    updateUserNotificationMarkedPublic,
+    addDrivierNotification,
+    deleteDrivierNotification,
+    fetchDrivierNotification,
+    updateDrivierNotification
   };
 };
 

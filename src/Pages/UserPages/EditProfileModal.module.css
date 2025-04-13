@@ -1,38 +1,57 @@
-/* Prevent scrolling on the body when modal is open */
-body.modal-open {
-  overflow: hidden;
-}
-
-/* Modal container */
-.modalContainer {
-  background: linear-gradient(135deg, #d4edda, #a8df8e);
-  border-radius: 15px;
-  padding: 25px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 80vh; /* Limit modal height */
-  overflow-y: auto; /* Enable scrolling inside modal */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  animation: slideIn 0.3s ease forwards;
-}
-
-/* Overlay for the modal */
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  overflow: hidden; /* Prevents scrolling */
 }
 
-/* Ensure textarea has a fixed height and cannot be resized */
-.textareaFixed {
-  height: 150px;
-  resize: none;
+.modalContainer {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+/* .modalButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+} */
+
+.button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.saveButton {
+  background-color: #28a745;
+  color: white;
+}
+
+.cancelButton {
+  /* background-color: #dc3545; */
+  background-color: #a90b1b;
+
+  color: white;
 }

@@ -64,4 +64,22 @@
   /* Invalid input feedback */
   .invalid-feedback {
     color: #e74
+  } 
+  
+  .button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
   }
+  
+  .saveButton {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .cancelButton {
+    background-color: #a90b1b;
+    color: white;
+  }
+  

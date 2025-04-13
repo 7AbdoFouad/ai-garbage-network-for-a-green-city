@@ -216,8 +216,10 @@ export default function EditAnnouncementModal({ show, onHide, onSave, announceme
 
           <div className={styles.modalButtons}>
             <button className={`${styles.button} ${styles.saveButton}`} type="submit"
-             disabled={submitting}>
+             disabled={submitting} style={{marginRight:"10px",marginTop:"10px"}}
+>
               {submitting ? "Updating..." : "💾 Update"}
+
             </button>
             <button className={`${styles.button} ${styles.cancelButton}`}
             

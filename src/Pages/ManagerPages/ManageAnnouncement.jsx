@@ -109,9 +109,10 @@ export default function ManageAnnouncement() {
 
   const handleAccept = async (report) => {
     addUserNotification({
-      userId: report.userId,
       notificationContent: `Report accepted: ${report.AnnouncementType}`,
-      notificationDate: new Date().toISOString().split("T")[0],
+      notificationDate: new Date().toISOString().split("T")[0], 
+      isRead:"false",
+      userId: report.userId
     });
     const user = await fetchUser(report.userId);
     updateUser(report.userId, {
@@ -217,9 +218,10 @@ export default function ManageAnnouncement() {
     onSubmit: (values) => {
       if (selectedReport) {
         addUserNotification({
-          userId: selectedReport.userId,
           notificationContent: `Report rejected: ${selectedReport.AnnouncementType} - Reason: ${values.reason}`,
           notificationDate: new Date().toISOString().split("T")[0],
+          isRead:"false",
+          userId: selectedReport.userId
         });
         deleteUsersAnnouncements(selectedReport.id);
         toast.success("Rejection sent successfully");
@@ -245,9 +247,10 @@ export default function ManageAnnouncement() {
     onSubmit: (values) => {
       if (selectedContactUs) {
         addUserNotification({
-          userId: selectedContactUs.userId,
           notificationContent: `Reply: "${selectedContactUs.message}" - ${values.reason}`,
-          notificationDate: new Date().toISOString().split("T")[0],
+          notificationDate: new Date().toISOString().split("T")[0],   
+          isRead:"false",  
+          userId: selectedContactUs.userId
         });
         deleteContactUs(selectedContactUs.id);
         toast.success("Reply sent successfully");
@@ -273,10 +276,23 @@ export default function ManageAnnouncement() {
       {/* FILTERS for User Reports */}
       <div className={styles.filterGrid}>
         <div className={styles.filterBlock}>
-          <label className={styles.filterLabel}>Report Type</label>
+          <label className={styles.filterLabel}style={{marginLeft:"5px",marginBottom:"5px"}}>Report Type</label>
           <Form.Select
             onChange={(e) => setFilterType(e.target.value)}
-            className={styles.filterSelect}
+            className={styles.filterSelect}            style={{maxWidth: "200px"}}
+
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "#00980DFF";
+              e.target.style.borderWidth = "2px";
+            }}
+            onBlur={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "none";
+              e.target.style.borderWidth = "0px";
+            }}
           >
             <option value="">All Report Types</option>
             <option value="Full Bin">Full Bin</option>
@@ -288,10 +304,23 @@ export default function ManageAnnouncement() {
         </div>
 
         <div className={styles.filterBlock}>
-          <label className={styles.filterLabel}>Date Order</label>
+          <label className={styles.filterLabel}style={{marginLeft:"5px",marginBottom:"5px"}}>Date Order</label>
           <Form.Select
             onChange={(e) => setFilterDate(e.target.value)}
-            className={styles.filterSelect}
+            className={styles.filterSelect}            style={{maxWidth: "200px"}}
+
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "#00980DFF";
+              e.target.style.borderWidth = "2px";
+            }}
+            onBlur={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "none";
+              e.target.style.borderWidth = "0px";
+            }}
           >
             <option value="">Select Date Order</option>
             <option value="oldest">Oldest to Newest</option>
@@ -300,10 +329,23 @@ export default function ManageAnnouncement() {
         </div>
 
         <div className={styles.filterBlock}>
-          <label className={styles.filterLabel}>Region</label>
+          <label className={styles.filterLabel}style={{marginLeft:"5px",marginBottom:"5px"}}>Region</label>
           <Form.Select
             onChange={(e) => setFilterRegion(e.target.value)}
-            className={styles.filterSelect}
+            className={styles.filterSelect}            style={{maxWidth: "200px"}}
+
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "#00980DFF";
+              e.target.style.borderWidth = "2px";
+            }}
+            onBlur={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "none";
+              e.target.style.borderWidth = "0px";
+            }}
           >
             <option value="">All Regions</option>
             {regions.map((region) => (
@@ -315,10 +357,23 @@ export default function ManageAnnouncement() {
         </div>
 
         <div className={styles.filterBlock}>
-          <label className={styles.filterLabel}>Priority</label>
+          <label className={styles.filterLabel}style={{marginLeft:"5px",marginBottom:"5px"}}>Priority</label>
           <Form.Select
             onChange={(e) => setFilterPriority(e.target.value)}
             className={styles.filterSelect}
+            style={{maxWidth: "200px"}}
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "#00980DFF";
+              e.target.style.borderWidth = "2px";
+            }}
+            onBlur={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "none";
+              e.target.style.borderWidth = "0px";
+            }}
           >
             <option value="">All Priorities</option>
             <option value="high">High</option>
@@ -352,7 +407,7 @@ export default function ManageAnnouncement() {
                 <td>{report.AnnouncementType || "—"}</td>
                 <td>{report.todayDate || "—"}</td>
                 <td>{report.userName || "—"}</td>
-                <td>{report.AnnouncementDescription || "—"}</td>
+                <td style={{ minWidth: "120px" }}>{report.AnnouncementDescription || "—"}</td>
                 <td>{report.siteLocation}</td>
                 <td>{report.binNumber || "—"}</td>
                 <td>{report.region || "—"}</td>
@@ -363,6 +418,7 @@ export default function ManageAnnouncement() {
                       src={report.photoFile}
                       alt="Report"
                       className={styles.reportImage}
+                      style={{  width: "150px", height: "150px" ,borderRadius:"10px",border:"3px solid rgb(46, 125, 50)"}}
                     />
                   ) : (
                     "—"
@@ -373,17 +429,21 @@ export default function ManageAnnouncement() {
                     variant="success"
                     size="sm"
                     onClick={() => handleAccept(report)}
-                    className={styles.acceptButton}
+                    // className={styles.acceptButton}
+                    style={{width:"53.39px",height:"30.6px",marginBottom:"3px"}}
                   >
-                    Accept
+                    <span style={{marginLeft:"-3px"}}>
+                    Accept</span>
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
                     onClick={() => handleReject(report)}
-                    className={`${styles.rejectButton} ms-2`}
-                  >
-                    Reject
+                    
+                    style={{width:"53.39px",height:"30.6px"}}
+
+                  ><span style={{marginLeft:"-2px"}}>
+                    Reject</span>
                   </Button>
                 </td>
               </tr>
@@ -419,7 +479,7 @@ export default function ManageAnnouncement() {
       {/* FILTERS for Contact Us Reports */}
       <div className={styles.filterGrid}>
         <div className={styles.filterBlock}>
-          <label className={styles.filterLabel}>Date Order</label>
+          <label className={styles.filterLabel}style={{marginLeft:"5px",marginBottom:"5px"}}>Date Order</label>
           <Form.Select
             onChange={(e) => setfilterContactUsByDate(e.target.value)}
             className={styles.filterSelect}
@@ -448,7 +508,7 @@ export default function ManageAnnouncement() {
               <tr key={report.id}>
                 <td>{report.name}</td>
                 <td>{report.email}</td>
-                <td>{report.message}</td>
+                <td >{report.message}</td>
                 <td>{report.todayDate}</td>
                 <td>
                   <Button
@@ -502,7 +562,7 @@ export default function ManageAnnouncement() {
                 rows={3}
                 value={formikReject.values.reason}
                 onChange={formikReject.handleChange}
-                onBlur={formikReject.handleBlur}
+                // onBlur={formikReject.handleBlur}
                 className={`form-control ${
                   formikReject.touched.reason && formikReject.errors.reason
                     ? "is-invalid"
@@ -513,7 +573,15 @@ export default function ManageAnnouncement() {
                 onFocus={(e) => {
                   e.target.style.outline = "none";
                   e.target.style.boxShadow = "none";
-                  e.target.style.borderColor = "#ced4da";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formikReject.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "none";
+                  e.target.style.borderWidth = "0px";
                 }}
 
               />
@@ -548,7 +616,7 @@ export default function ManageAnnouncement() {
                 rows={3}
                 value={formikNotify.values.reason}
                 onChange={formikNotify.handleChange}
-                onBlur={formikNotify.handleBlur}
+                // onBlur={formikNotify.handleBlur}
                 className={`form-control  ${
                   formikNotify.touched.reason && formikNotify.errors.reason
                     ? "is-invalid"
@@ -559,7 +627,15 @@ export default function ManageAnnouncement() {
                 onFocus={(e) => {
                   e.target.style.outline = "none";
                   e.target.style.boxShadow = "none";
-                  e.target.style.borderColor = "#ced4da";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formikNotify.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "none";
+                  e.target.style.borderWidth = "0px";
                 }}
               />
               {formikNotify.touched.reason && formikNotify.errors.reason && (

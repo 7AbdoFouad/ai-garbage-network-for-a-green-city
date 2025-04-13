@@ -36,6 +36,19 @@ export default function Login() {
     validationSchema: schema,
     onSubmit: () => checkUser(),
   });
+  // const sendHmacRequest = async (userId) => {
+  //   try {
+  //     await fetch("http://localhost:5000/generate-hmac", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ userId }),
+  //     });
+  //   } catch (error) {
+  //     console.error("❌ Error sending HMAC request:", error);
+  //   }
+  // };
 
   const checkUser = async () => {
     const roles = [

@@ -186,9 +186,11 @@ export default function CommunityEngagementPage() {
     <div className={styles.maincont}>
       <div className={styles.container}>
         {/* Available Activities Section */}
-        {availableActivities.length > 0 && (
+        <h2 className={styles.title}>Available Community Activities</h2>
+        {availableActivities.length === 0 ? (
+          <p className={styles.noActivitesMessage}>There are no activities available</p>
+        ) :  (
           <>
-            <h2 className={styles.title}>Available Community Activities</h2>
             <div className={styles.activitiesGrid}>
               {paginatedAvailable.map((activity, index) => (
                 <div key={activity.id} className={styles.activityCard}>

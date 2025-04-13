@@ -51,7 +51,7 @@
 /* Activity Image */
 .activityImage {
   width: 100%;
-  height: 200px;
+  height: 220px;
   object-fit: cover;
   border-radius: 12px;
   transition: transform 0.1s ease-in-out;
@@ -72,7 +72,10 @@
   color: #3498db;
   font-weight: bold;
 }
-
+.noActivitesMessage{
+  font-size: 1.2rem;
+  color: #2e7d32;
+}
 /* Activity Description */
 .activityDescription {
   font-size: 1rem;

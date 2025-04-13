@@ -7,8 +7,7 @@ import { useFormik } from "formik";
 const schema = object().shape({
   name: string()
     .required("Name is required")
-    .min(3, "Name must be more than 3 characters")
-    .matches(/^[a-zA-Z\s]+$/, "Invalid Name, must contain letters only"),
+    .min(3, "Name must be more than 3 characters"),
   password: string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters"),
@@ -48,10 +47,23 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
             placeholder="Enter Your Name"
             value={formik.values.name}
             onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`form-control ${styles.input} ${
+            // onBlur={formik.handleBlur}
+             className={`form-control ${styles.input} ${
               formik.touched.name && formik.errors.name ? "is-invalid" : ""
             }`}
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "#00980DFF";
+              e.target.style.borderWidth = "2px";
+            }}
+            onBlur={(e) => {
+              formik.handleBlur(e);
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "none";
+              e.target.style.borderWidth = "0px";
+            }}
           />
           {formik.touched.name && formik.errors.name && (
             <div className="invalid-feedback">{formik.errors.name}</div>
@@ -67,10 +79,24 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
             placeholder="Enter Your Address"
             value={formik.values.Address}
             onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            // onBlur={formik.handleBlur}
             className={`form-control ${styles.input} ${
               formik.touched.Address && formik.errors.Address ? "is-invalid" : ""
             }`}
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "#00980DFF";
+              e.target.style.borderWidth = "2px";
+            }}
+            onBlur={(e) => {
+              formik.handleBlur(e);
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "none";
+              e.target.style.borderWidth = "0px";
+            }}
+      
           />
           {formik.touched.Address && formik.errors.Address && (
             <div className="invalid-feedback">{formik.errors.Address}</div>
@@ -86,10 +112,24 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
             placeholder="Enter Your Password"
             value={formik.values.password}
             onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            // onBlur={formik.handleBlur}
             className={`form-control ${styles.input} ${
               formik.touched.password && formik.errors.password ? "is-invalid" : ""
             }`}
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "#00980DFF";
+              e.target.style.borderWidth = "2px";
+            }}
+            onBlur={(e) => {
+              formik.handleBlur(e);
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderColor = "none";
+              e.target.style.borderWidth = "0px";
+            }}
+
           />
           {formik.touched.password && formik.errors.password && (
             <div className="invalid-feedback">{formik.errors.password}</div>
@@ -99,6 +139,8 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
             <button
               className={`${styles.button} ${styles.saveButton}`}
               type="submit"
+              style={{marginRight:"10px",marginTop:"10px"}}
+
             >
               💾 Save Information
             </button>

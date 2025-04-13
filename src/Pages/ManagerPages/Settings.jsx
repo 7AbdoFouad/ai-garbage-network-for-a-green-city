@@ -154,7 +154,7 @@ export default function Settings() {
         <h4>Manager Permissions</h4>
         {userData.Permissions &&
           userData.Permissions.map((permission, index) => (
-            <p key={index}> {permission}</p>
+            <li key={index}>{permission}</li>
           ))}
       </div>
 

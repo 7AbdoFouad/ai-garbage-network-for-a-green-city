@@ -17,6 +17,9 @@ export default function CommunityEngagementManagement() {
     SubscribersOfCommunityActivities,
     users,
     updateUser,
+    addUserNotification,
+    addPublicNotification
+
   } = useUser();
 
   // Subscribers Modal Pagination
@@ -76,6 +79,11 @@ export default function CommunityEngagementManagement() {
     }),
     onSubmit: (values) => {
       addCommunityActivity(values);
+      addPublicNotification({
+        notificationContent: `New activity "${values.ActName}" has been added!`,
+        notificationDate: new Date().toISOString().split("T")[0],
+        isRead: false,
+      });
       toast.success("Activity added successfully!");
       setFormVisible(false);
       inputRef.current.value = null;
@@ -172,27 +180,41 @@ export default function CommunityEngagementManagement() {
           ...user,
           numOfCompletedActivitiesCount: user.numOfCompletedActivitiesCount + 1,
         });
-        const res = await fetch("http://localhost:5000/community", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: user.email,
-            actName: ActName,
-            name: user.name,
-          }),
+        await addUserNotification({
+          notificationContent: `Activity ${ActName} completed successfully!`,
+          notificationDate: new Date().toISOString().split("T")[0],
+          isRead: "false",
+          userId: user.id,
         });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to send email.");
-        }
+        // const res = await fetch("http://localhost:5000/community", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     email: user.email,
+        //     actName: ActName,
+        //     name: user.name,
+        //   }),
+        // });
+        // const data = await res.json();
+        // if (!res.ok) {
+        //   throw new Error(data.message || "Failed to send email.");
+        // }
       }
       for (const sub of filteredSubscribers) {
         await deleteSubscribersOfCommunityActivity(sub.id);
       }
-      await deleteCommunityActivity(selectedActivity.id);
+      await deleteCommunityActivity(selectedActivity.id); 
+          // Fix pagination if page becomes empty
+  const newTotalPages = Math.ceil((completedActivities.length - 1) / activitiesItemsPerPage );
+  if ( completedCurrentPage> newTotalPages) {
+  const newPage = Math.max(newTotalPages - 1, 1);
+  setCompletedCurrentPage(newPage);
+  sessionStorage.setItem("completedCurrentPage", newPage); 
+  }
       setSelectedActivity(null);
       toast.success("All subscribers accepted successfully!");
       closeSubscribersModal();
+ 
     } catch (error) {
       console.error(error);
       toast.error("An error occurred while accepting subscribers.");
@@ -216,6 +238,16 @@ export default function CommunityEngagementManagement() {
     }
   };
 
+  const handledeactivate = async (activity) => {
+   deleteCommunityActivity(activity.id)
+    // Fix pagination if page becomes empty
+  const newTotalPages = Math.ceil((availableActivities.length - 1) / activitiesItemsPerPage );
+  if ( availableCurrentPage> newTotalPages) {
+  const newPage = Math.max(newTotalPages - 1, 1);
+  setAvailableCurrentPage(newPage);
+  sessionStorage.setItem("availableCurrentPage", newPage);
+  }
+}
   // Generate activity objects for available and completed statuses
   const generateActivities = (status) => {
     return (CommunityActivities || [])
@@ -260,7 +292,7 @@ export default function CommunityEngagementManagement() {
             <Button
               variant="outline-danger"
               size="sm"
-              onClick={() => deleteCommunityActivity(activity.id)}
+              onClick={() => {handledeactivate(activity)}}
               className={styles.deleteButton}
             >
               Delete

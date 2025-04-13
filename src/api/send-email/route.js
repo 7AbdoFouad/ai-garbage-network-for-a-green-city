@@ -243,7 +243,40 @@ router.post("/community", async (req, res) => {
     return res.status(500).json({ error: "Failed to send email" });
   }
 });
+// import crypto from 'crypto';
 
+// router.post('/generate-hmac', (req, res) => {
+//   // افترض أن body يحتوي على userId بعد التحقق من المستخدم
+//   const { userId } = req.body;
+//   if (!userId) {
+//     return res.status(400).json({ error: "userId is required" });
+//   }
+  
+//   // المفتاح السري يتم تخزينه في المتغيرات البيئية
+//   const secret =  '5329vcsxg5z939m8xw1mcp4ko20p4jky';
+  
+//   const hash = crypto.createHmac('sha256', secret)
+//                      .update(userId)
+//                      .digest('hex');
+  
+//   res.json({ userId, hmac: hash });
+// });
+
+// For identity verification
+// On the server
+// Secret key
+// 5329vcsxg5z939m8xw1mcp4ko20p4jky
+// You'll need to generate an HMAC on your server for each logged-in user and send it to Chatbase.
+
+// You'll need your secret key to add identity verification to your site or app.
+
+// Keep your secret key safe! Never commit it directly to your repository, client-side code, or anywhere a third party can find it.
+// const crypto = require('crypto');
+
+// const secret = '•••••••••'; // Your verification secret key
+// const userId = current_user.id // A string UUID to identify your user
+
+// const hash = crypto.createHmac('sha256', secret).update(userId).digest('hex');
 // __________________________________________________________________________
 // import express from "express";
 // import cors from "cors";

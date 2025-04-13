@@ -2,7 +2,7 @@
 .container {
   padding: 40px;
   margin: 30px auto;
-  max-width: 1200px;
+  max-width: 1400px;
   background: linear-gradient(135deg, #e6f9ed, #c4f1de);
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 100, 0, 0.1);
@@ -23,7 +23,12 @@ p {
   text-align: center;
   font-size: 1rem;
 }
-
+.filterGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
 /* Form Styling */
 .activityForm {
   margin-top: 40px;
@@ -209,6 +214,7 @@ p {
   margin-top: 10px;
   border: 2px solid #a7e0b7;
   box-shadow: 0 3px 8px rgba(0, 100, 0, 0.1);
+
 }
 
 /* Animation */
@@ -248,4 +254,5 @@ p {
     margin: 2px;
     padding: 4px 8px;
   }
+
 }

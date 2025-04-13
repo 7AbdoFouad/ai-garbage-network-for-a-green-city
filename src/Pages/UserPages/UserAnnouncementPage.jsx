@@ -204,7 +204,7 @@ const UserAnnouncementPage = () => {
                     <td>{announcement.siteLocation}</td>
                     <td>
                       <button
-                        className={`btn ${styles.button} ${styles.editButton} me-2`}
+                        className={`btn ${styles.button} ${styles.editButton} mb-1`}
                         onClick={() => handleEdit(announcement)}
                       >
                         Edit

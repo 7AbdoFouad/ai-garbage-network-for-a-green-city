@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useUser from "../../hooks/useUser";
-import styles from "./SettingPage.module.css";
-import { useParams } from "react-router-dom";
+ import { useParams } from "react-router-dom";
 import EditProfileModal from "./EditProfileModal"; // Import modal component
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
@@ -140,7 +139,7 @@ export default function SettingPage() {
         <div className={settingstyle.profileField}>
           <strong>Password:</strong>{" "}
           <input
-            className={styles.inputField}
+            className={ settingstyle.inputField}
             type="text"
             name="password"
             value={userData.password}
@@ -151,26 +150,26 @@ export default function SettingPage() {
       </div>
 
       {/* User Statistics */}
-      <div className={settingstyle.stats}>
-        <h4>User Statistics</h4>
-        <p>
+      <div className={settingstyle.permissions}>
+                <h4>User Statistics</h4>
+        <li style={{ listStyleType: "none" }}>
           📌 Number of accepted announcements you have submitted:{" "}
           <strong>{userData.numOfAcceptedAnnouncementsCount}</strong>
-        </p>
-        <p>
+        </li>
+        <li style={{ listStyleType: "none" }}>
           📌 Number of social activities you registered and completed successfully:{" "}
           <strong>{userData.numOfCompletedActivitiesCount}</strong>
-        </p>
-        <p>
+        </li>
+        <li style={{ listStyleType: "none" }}>
           📌 Number of completed polls:{" "}
           <strong>{userData.numOfCompletedPollsCount}</strong>
-        </p>
+        </li>
       </div>
 
       {/* Buttons */}
       <div className={settingstyle.buttonContainer}>
         <button
-          className={`${styles.button} ${styles.editButton}`}
+          className={`${settingstyle.button} ${settingstyle.editButton}`}
           onClick={() => setIsEditing(true)}
         >
           ✏️ Edit Profile

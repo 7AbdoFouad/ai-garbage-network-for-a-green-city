@@ -8,8 +8,7 @@ export default function PollPopup({ poll, closePopup, onSubmit }) {
   return (
     <div className={styles.overlay} onClick={closePopup}>
       <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
-        <h3 className={styles.title}>📋 {poll.pollName}</h3>
-        <p className={styles.description}>{poll.pollDesc}</p>
+
 
         <div className={styles.pollIframeContainer}>
         <FormfacadeEmbed
