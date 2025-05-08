@@ -208,6 +208,9 @@ const CustomNavbar = () => {
         "PollsManagement",
         "RewardsManagement",
         "WasteBinManagement",
+        "RecycleManagement",
+        "RequestSpecialWasteManagement",
+
       ],
     },
     {
@@ -246,6 +249,16 @@ const CustomNavbar = () => {
       requiredRoles: ["admin", "PollsManagement"],
     },
     {
+      path: "RecycleManagement",
+      label: "Recycle Management",
+      requiredRoles: ["admin", "RecycleManagement"],
+    },
+    {
+      path: "RequestSpecialWasteManagement",
+      label: "RequestSpecialWasteManagement",
+      requiredRoles: ["admin", "RequestSpecialWasteManagement"],
+    },
+    {
       path: "notifications",
       label: "Notifications",
       requiredRoles: [
@@ -258,6 +271,8 @@ const CustomNavbar = () => {
         "PollsManagement",
         "RewardsManagement",
         "WasteBinManagement",
+        "RecycleManagement",
+        "RequestSpecialWasteManagement",
       ],
     },
     {

@@ -1,0 +1,149 @@
+/* DriverAnnouncementPage.module.css */
+
+.container {
+    background: linear-gradient(135deg, #d4edda, #a8e3a8);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .header {
+    color: #010710;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .tableResponsive {
+    margin: 30px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table th {
+    background-color: #02060b;
+    color: white;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .table tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+  
+  .table tr:hover {
+    background-color: #e9ecef;
+  }
+  
+  .button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .editButton {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .editButton:hover {
+    background-color: #e0a800;
+  }
+  
+  .completeButton {
+    background-color: #198754;
+    color: white;
+  }
+  
+  .completeButton:hover {
+    background-color: #157347;
+  }
+  
+  .completeButton:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .deleteButton {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .deleteButton:hover {
+    background-color: #bb2d3b;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    gap: 5px;
+  }
+  
+  .pageButton {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    background-color: white;
+    color: #02070e;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .pageButton:hover {
+    background-color: #e9ecef;
+  }
+  
+  .activePage {
+    padding: 8px 12px;
+    background-color: #02060c;
+    color: white;
+    border: 1px solid #0d6efd;
+    cursor: default;
+    border-radius: 4px;
+  }
+  
+  .formContainer {
+    background: linear-gradient(135deg, #d4edda, #a0da86);
+    margin-top: 30px;
+    border: 1px solid #dee2e6;
+  }
+  
+  .img-thumbnail {
+    max-width: 200px;
+    max-height: 200px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .button {
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+    }
+    
+    .formContainer {
+      padding: 15px;
+    }
+  }

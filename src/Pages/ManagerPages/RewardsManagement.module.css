@@ -1,0 +1,83 @@
+.container {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    direction: rtl;
+  }
+  
+  .searchInput {
+    margin-bottom: 1rem;
+    text-align: right;
+    
+  }
+  
+  .table {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    margin-top: 1.5rem;
+  }
+  
+  .table th {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    text-align: right;
+  }
+  
+  .actionsCell {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    white-space: nowrap;
+  }
+  
+  .requirementsBadge {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    margin-left: 0.3rem;
+    margin-right: 0.3rem;
+  }
+  
+  /* Modal styles */
+  .modalHeader {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .modalTitle {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    font-weight: bold;
+  }
+  
+  /* Form styles */
+  .formLabel {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    }
+    
+    .actionsCell {
+      white-space: normal;
+    }
+  }
+  
+  /* Loading indicator */
+  .loadingIndicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+  }
+  
+  /* Error/Success messages */
+  .alertMessage {
+    margin-bottom: 1.5rem;
+  }

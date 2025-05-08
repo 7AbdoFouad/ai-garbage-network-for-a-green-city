@@ -9,7 +9,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "react-facebook-login";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import styles from "./Login.module.css";
+import styles from "./login.module.css";
 import ForgetPassword from "./ForgotPassword";
 
 const schema = object().shape({

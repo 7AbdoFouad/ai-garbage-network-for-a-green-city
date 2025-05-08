@@ -67,12 +67,17 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink to="requiredTasks" className="nav-link" onClick={toggleSidebar}>
-              Required Tasks
+              Required Tasks 
             </NavLink>
           </li>
           <li>
             <NavLink to={`settings/${id}`} className="nav-link" onClick={toggleSidebar}>
               Settings
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="Recycle" className="nav-link" onClick={toggleSidebar}>
+              Recycling 
             </NavLink>
           </li>
         </ul>

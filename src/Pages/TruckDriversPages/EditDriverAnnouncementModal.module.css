@@ -1,0 +1,44 @@
+.modal {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .modalHeader {
+    background-color: #0d6efd;
+    color: white;
+  }
+  
+  .modalTitle {
+    font-weight: 600;
+  }
+  
+  .cancelButton {
+    background-color: #6c757d;
+    border: none;
+    padding: 8px 16px;
+  }
+  
+  .cancelButton:hover {
+    background-color: #5a6268;
+  }
+  
+  .saveButton {
+    background-color: #0d6efd;
+    border: none;
+    padding: 8px 16px;
+  }
+  
+  .saveButton:hover {
+    background-color: #0b5ed7;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .modal {
+      margin: 10px;
+    }
+    
+    .modalBody {
+      padding: 15px;
+    }
+  }

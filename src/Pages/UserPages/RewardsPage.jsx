@@ -52,13 +52,13 @@ export default function RewardsPage() {
     return (
       <>
         {req.numOfAcceptedAnnouncements && (
-          <li>عدد البلاغات المقبولة: {req.numOfAcceptedAnnouncements}✅</li>
+          <li>number of accepted announcements: {req.numOfAcceptedAnnouncements}✅</li>
         )}
         {req.numOfCompletedActivities && (
-          <li>عدد الفعاليات المكتملة: {req.numOfCompletedActivities}✅</li>
+          <li>number of completed activities: {req.numOfCompletedActivities}✅</li>
         )}
         {req.numOfCompletedPolls && (
-          <li>عدد استطلاعات الرأي المكتملة: {req.numOfCompletedPolls}✅</li>
+          <li> Number of completed polls: {req.numOfCompletedPolls}✅</li>
         )}
       </>
     );
@@ -67,10 +67,10 @@ export default function RewardsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.infoBanner}>
-        ⚠️ <strong>ملاحظة:</strong> أزرار المكافآت ستكون متاحة فقط إذا كنت مستوفياً لجميع المتطلبات المحددة لكل مكافأة.  
+        ⚠️ <strong>Note:</strong> reward availbale for you if you complete the requirements.  
       </div>
 
-      <h2>🌟 المكافآت المتاحة 🌟</h2>
+      <h2>🌟 reward availbale 🌟</h2>
 
       <div className={styles.rewardGrid}>
         {availableRewards.map((reward, index) => (

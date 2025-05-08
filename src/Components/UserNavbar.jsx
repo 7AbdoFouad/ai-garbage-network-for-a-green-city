@@ -133,6 +133,11 @@ const CustomNavbar = () => {
               Reports
             </NavLink>
           </li>
+          <li>
+            <NavLink to="requestSpecialWaste" className="nav-link" onClick={toggleSidebar}>
+              RequestSpecialWaste
+            </NavLink>
+          </li>
         </ul>
       </div>
 

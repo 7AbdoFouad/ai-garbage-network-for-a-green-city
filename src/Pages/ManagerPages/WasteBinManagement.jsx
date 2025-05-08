@@ -1,7 +1,9 @@
 import React from 'react'
 
-export default function WasteBinManagement() {
+function WasteBinManagement() {
   return (
     <div>WasteBinManagement</div>
   )
 }
+
+export default WasteBinManagement

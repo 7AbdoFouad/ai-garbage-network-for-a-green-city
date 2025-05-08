@@ -16,6 +16,7 @@ import Registeration from "./Pages/Registeration";
 import ForgetPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
 import NotFound from "./Pages/NotFound";
+
 // import VerifyEmail from "./Pages/VerifyEmail";
 
 // Manager pages
@@ -30,6 +31,8 @@ import RewardsManagement from "./Pages/ManagerPages/RewardsManagement";
 import WasteBinManagement from "./Pages/ManagerPages/WasteBinManagement";
 import Settings from "./Pages/ManagerPages/Settings";
 import Notifications from "./Pages/ManagerPages/Notifications";
+import RecycleManagement from "./Pages/ManagerPages/RecycleManagement";
+import RequestSpecialWasteManagement from "./Pages/ManagerPages/RequestSpecialWasteManagement";
 // User pages
 import HomePageForUsers from "./Pages/UserPages/HomePageForUsers";
 import AboutUsPage from "./Pages/UserPages/AboutUsPage";
@@ -42,6 +45,7 @@ import PollsPage from "./Pages/UserPages/PollsPage";
 import RewardsPage from "./Pages/UserPages/RewardsPage";
 import UserAnnouncementPage from "./Pages/UserPages/UserAnnouncementPage";
 import ReportsPage from "./Pages/UserPages/ReportsPage";
+import RequestSpecialWaste from "./Pages/UserPages/RequestSpecialWaste";
 
 // TruckDriver pages
 import HomePageForTruckDrivers from "./Pages/TruckDriversPages/HomePageForTruckDrivers";
@@ -50,6 +54,7 @@ import DriverNotificationsPage from "./Pages/TruckDriversPages/DriverNotificatio
 import DriverPollsPage from "./Pages/TruckDriversPages/DriverPollsPage";
 import DriversRequiredTasksPage from "./Pages/TruckDriversPages/DriversRequiredTasksPage";
 import DriverSettingsPage from "./Pages/TruckDriversPages/DriverSettingsPage";
+import Recycle from "./Pages/TruckDriversPages/Recycle";  // TruckDriver pages
 
 // Navbar Components
 import NavbarManager from "./Components/NavbarManager";
@@ -73,7 +78,9 @@ const ProtectedHomePageForManagers = withAuthorization(HomePageForManagers, [
   "UserManagement",
   "PollsManagement",
   "RewardsManagement",
-  "WasteBinManagement"
+  "WasteBinManagement",
+  "RecycleManagement",
+  "RequestSpecialWasteManagement",
 ]);
 const ProtectedManageAnnouncement = withAuthorization(ManageAnnouncement, [
   "admin",
@@ -99,9 +106,17 @@ const ProtectedPollsManagement = withAuthorization(PollsManagement,[
   "admin",
   "PollsManagement"
 ]);
+const ProtectedRecycleManagement = withAuthorization(RecycleManagement,[
+  "admin",
+  "RecycleManagement"
+]);
 const ProtectedRewardsManagement = withAuthorization(RewardsManagement,[
   "admin",
   "RewardsManagement"
+]);
+const ProtectedRequestSpecialWasteManagement = withAuthorization(RequestSpecialWasteManagement,[
+  "admin",
+  "RequestSpecialWasteManagement"
 ]);
 const ProtectedWasteBinManagement = withAuthorization(WasteBinManagement,[
   "admin",
@@ -117,6 +132,7 @@ const ProtectedSettings = withAuthorization(Settings,[
   "PollsManagement",
   "RewardsManagement",
   "WasteBinManagement",
+  "RecycleManagment",
 
 ]);
 const ProtectedNotifications = withAuthorization(Notifications,[
@@ -129,6 +145,8 @@ const ProtectedNotifications = withAuthorization(Notifications,[
   "PollsManagement",
   "RewardsManagement",
   "WasteBinManagement",
+  "RecycleManagment",
+  "RequestSpecialWasteManagement",
 ]);
 // Authentication user pages
 const ProtectedHomePageForUsers = withAuthorization(HomePageForUsers);
@@ -142,6 +160,9 @@ const ProtectedPollsPage = withAuthorization(PollsPage);
 const ProtectedRewardsPage = withAuthorization(RewardsPage);
 const ProtectedUserAnnouncementPage = withAuthorization(UserAnnouncementPage);
 const ProtectedReportsPage = withAuthorization(ReportsPage);
+const ProtectedRequestSpecialWaste = withAuthorization(RequestSpecialWaste);
+
+
 
 // Authentication TruckDrivers pages
 const ProtectedHomePageForTruckDrivers = withAuthorization(HomePageForTruckDrivers);
@@ -214,6 +235,9 @@ const router = createBrowserRouter(
         />
         <Route path="settings/:id" element={<ProtectedSettings />} />
         <Route path="notifications" element={<ProtectedNotifications />} />
+        <Route path="RecycleManagement" element={<ProtectedRecycleManagement />} />
+        <Route path="RequestSpecialWasteManagement" element={<ProtectedRequestSpecialWasteManagement />} />
+        
       </Route>
 
 
@@ -230,6 +254,8 @@ const router = createBrowserRouter(
         <Route path="rewards/:id" element={<ProtectedRewardsPage />} />
         <Route path="userAnnouncement/:id" element={<ProtectedUserAnnouncementPage />} />
         <Route path="reports" element={<ProtectedReportsPage />} />
+        <Route path="requestSpecialWaste" element={<ProtectedRequestSpecialWaste />} />
+        
       </Route>
 
       {/* Truck Driver Routes */}
@@ -240,6 +266,7 @@ const router = createBrowserRouter(
         <Route path="driverPolls" element={<ProtectedDriverPollsPage />} />
         <Route path="requiredTasks" element={<ProtectedDriverRequiredTasksPage />} />
         <Route path="settings/:id" element={<ProtectedDriverSettingsPage />} />
+        <Route path="recycle" element={<Recycle />} />
       </Route>
 
       {/* Authentication Routes */}

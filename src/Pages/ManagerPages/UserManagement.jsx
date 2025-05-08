@@ -480,7 +480,7 @@ export default function UserManagement() {
 
   return (
     <div className="container py-4">
-      <h2 className="text-center mb-4">إدارة حسابات المستخدمين</h2>
+      <h2 className="text-center mb-4">User Accounts Management</h2>
       <Form.Control
             type="text"
             placeholder="Search User"
@@ -498,9 +498,9 @@ export default function UserManagement() {
           />      <Table striped bordered hover responsive>
         <thead className="bg-dark text-white">
           <tr>
-            <th>الاسم</th>
-            <th>البريد الإلكتروني</th>
-            <th>الإجراءات</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -514,13 +514,13 @@ export default function UserManagement() {
                   className="me-2"
                   onClick={() => handleDeleteUser(user.id)}
                 >
-                  {loadingDeleteUsers[user.id] ? "...جاري الحذف" : "حذف  "}
+                  {loadingDeleteUsers[user.id] ? "Deleting..." : "Delete"}
                 </Button>
                 {/* {error && <div className="text-danger mt-2">{error}</div>} */}
                 {/* {success && <div className="text-success mt-2">{success}</div>} */}
                 <Button
                   variant="danger"
-                  size="sm"
+                  size="md"
                   onClick={() => handleNotify(user)}
                   className={styles.notifyButton}
                 >
@@ -548,7 +548,7 @@ export default function UserManagement() {
                   ))}
                 </div>
       <div className="container py-4">
-        <h2 className="text-center mt-5 mb-4">إدارة حسابات المديرين</h2>
+        <h2 className="text-center mt-5 mb-4">Admin Accounts Management</h2>
         <Form.Control
             type="text"
             placeholder="Search Manager"
@@ -566,12 +566,12 @@ export default function UserManagement() {
           />          <Table striped bordered hover responsive>
           <thead className="bg-dark text-white">
             <tr>
-              <th>الاسم</th>
-              <th>البريد الإلكتروني</th>
-              <th>الهاتف</th>
-              <th>العنوان</th>
-              <th>الصلاحيات</th>
-              <th>الإجراءات</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Permissions</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -584,7 +584,7 @@ export default function UserManagement() {
                 <td>
                   {Array.isArray(manager.Permissions)
                     ? manager.Permissions.join(", ")
-                    : "لا توجد صلاحيات"}
+                    : "No permissions"}
                 </td>
                 <td>
                   <Button
@@ -592,13 +592,13 @@ export default function UserManagement() {
                     className="me-2"
                     onClick={() => handleEditManager(manager)}
                   >
-                    تعديل
+                    Edit
                   </Button>
                   <Button
                     variant="danger"
                     onClick={() => handleDeleteManager(manager.id)}
                   >
-                    {loadingDeleteManager[manager.id] ? "...جاري الحذف" : "حذف"}
+                    {loadingDeleteManager[manager.id] ? "Deleting..." : "Delete"}
                   </Button>
                 </td>
               </tr>
@@ -622,10 +622,10 @@ export default function UserManagement() {
                     </Button>
                   ))}
                 </div>
-      <h3 className="text-center mt-5">إضافة مدير</h3>
+      <h3 className="text-center mt-5">Add Admin</h3>
       <form onSubmit={formik.handleSubmit}>
         <label htmlFor="username" className={styles.label}>
-          اسم المدير:
+          Admin Name:
         </label>
         <input
           type="text"
@@ -643,7 +643,7 @@ export default function UserManagement() {
           <div className="invalid-feedback">{formik.errors.name}</div>
         )}
         <label htmlFor="email" className={styles.label}>
-          البريد الإلكتروني:
+          Email:
         </label>
         <input
           type="email"
@@ -662,7 +662,7 @@ export default function UserManagement() {
         )}
 
         <label htmlFor="phone" className={styles.label}>
-          رقم الهاتف:
+          Phone Number:
         </label>
         <input
           type="text"
@@ -681,7 +681,7 @@ export default function UserManagement() {
         )}
 
         <label htmlFor="Address" className={styles.label}>
-          العنوان:
+          Address:
         </label>
         <input
           type="text"
@@ -699,7 +699,7 @@ export default function UserManagement() {
           <div className="invalid-feedback">{formik.errors.Address}</div>
         )}
         <label htmlFor="password" className={styles.label}>
-          كلمة المرور:
+          Password:
         </label>
         <input
           type="text"
@@ -719,7 +719,7 @@ export default function UserManagement() {
           <div className="invalid-feedback">{formik.errors.password}</div>
         )}
         <label htmlFor="Permissions" className={styles.label}>
-          الصلاحيات:
+          Permissions:
         </label>
         {/* chexkbox */}
         <div
@@ -745,7 +745,7 @@ export default function UserManagement() {
               id="admin"
               checked={formik.values.Permissions.includes("admin")}
             />
-            <label htmlFor="admin">مدير عام</label>
+            <label htmlFor="admin">Super Admin</label>
           </div>
           <div className={styles.checkboxItem}>
             <input
@@ -756,7 +756,7 @@ export default function UserManagement() {
               id="ManageTrucks"
               checked={formik.values.Permissions.includes("ManageTrucks")}
             />
-            <label htmlFor="ManageTrucks">مدير شاحنات</label>
+            <label htmlFor="ManageTrucks">Trucks Manager</label>
           </div>
           <div className={styles.checkboxItem}>
             <input
@@ -767,7 +767,7 @@ export default function UserManagement() {
               id="ManageAnnouncement"
               checked={formik.values.Permissions.includes("ManageAnnouncement")}
             />
-            <label htmlFor="ManageAnnouncement">مدير بلاغات</label>
+            <label htmlFor="ManageAnnouncement">Announcements Manager</label>
           </div>
           <div className={styles.checkboxItem}>
             <input
@@ -781,7 +781,7 @@ export default function UserManagement() {
               )}
             />
             <label htmlFor="ManageReportsAndDataAnalysis">
-              مدير تقارير وتحليل البيانات
+              Reports and Data Analysis Manager
             </label>
           </div>
           <div className={styles.checkboxItem}>
@@ -795,7 +795,7 @@ export default function UserManagement() {
                 "CommunityEngagementManagement"
               )}
             />
-            <label htmlFor="CommunityEngagementManagement">مدير فعاليات</label>
+            <label htmlFor="CommunityEngagementManagement">Events Manager</label>
           </div>
           <div className={styles.checkboxItem}>
             <input
@@ -806,7 +806,7 @@ export default function UserManagement() {
               id="UserManagement"
               checked={formik.values.Permissions.includes("UserManagement")}
             />
-            <label htmlFor="UserManagement">مدير مستخدمين</label>
+            <label htmlFor="UserManagement">Users Manager</label>
           </div>
           <div className={styles.checkboxItem}>
             <input
@@ -817,7 +817,7 @@ export default function UserManagement() {
               id="PollsManagement"
               checked={formik.values.Permissions.includes("PollsManagement")}
             />
-            <label htmlFor="PollsManagement">مدير استطلاعات</label>
+            <label htmlFor="PollsManagement">Polls Manager</label>
           </div>
           <div className={styles.checkboxItem}>
             <input
@@ -828,7 +828,7 @@ export default function UserManagement() {
               id="RewardsManagement"
               checked={formik.values.Permissions.includes("RewardsManagement")}
             />
-            <label htmlFor="RewardsManagement">مدير مكافئات</label>
+            <label htmlFor="RewardsManagement">Rewards Manager</label>
           </div>
           <div className={styles.checkboxItem}>
             <input
@@ -839,7 +839,7 @@ export default function UserManagement() {
               id="WasteBinManagement"
               checked={formik.values.Permissions.includes("WasteBinManagement")}
             />
-            <label htmlFor="WasteBinManagement">مدير صناديق نفايات</label>
+            <label htmlFor="WasteBinManagement">Waste Bins Manager</label>
           </div>
         </div>
         {formik.touched.Permissions && formik.errors.Permissions && (
@@ -851,12 +851,12 @@ export default function UserManagement() {
             type="submit"
             disabled={submitingManager}
           >
-            {submitingManager ? "...جاري الاضافة" : " 🧑🏻‍💼 اضافة"}
+            {submitingManager ? "Adding..." : " 🧑🏻‍💼 Add"}
           </button>
         </div>
       </form>
 
-      <h2 className="text-center mt-5 mb-4">إدارة حسابات السائقين</h2>
+      <h2 className="text-center mt-5 mb-4">Truck Drivers Accounts Management</h2>
       <Form.Control
             type="text"
             placeholder="Search Truck Driver"
@@ -875,12 +875,12 @@ export default function UserManagement() {
       <Table striped bordered hover responsive>
         <thead className="bg-dark text-white">
           <tr>
-            <th>الاسم</th>
-            <th>البريد الإلكتروني</th>
-            <th>الهاتف</th>
-            <th>العنوان</th>
-            <th>رقم الشاحنة</th>
-            <th>الإجراءات</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Truck Number</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -897,15 +897,15 @@ export default function UserManagement() {
                   className="me-2"
                   onClick={() => handleEditTruckDriver(driver)}
                 >
-                  تعديل
+                  Edit
                 </Button>
                 <Button
                   variant="danger"
                   onClick={() => handleDeleteTruckDriver(driver.id)}
                 >
                   {loadingDeleteTruckDriver[driver.id]
-                    ? "...جاري الحذف"
-                    : "حذف"}
+                    ? "Deleting..."
+                    : "Delete"}
                 </Button>
               </td>
             </tr>
@@ -928,10 +928,10 @@ export default function UserManagement() {
                     </Button>
                   ))}
                 </div>
-      <h3 className="text-center mt-5">إضافة سائق</h3>
+      <h3 className="text-center mt-5">Add Driver</h3>
       <form onSubmit={formik2.handleSubmit}>
         <label htmlFor="username" className={styles.label}>
-          اسم المستخدم:
+          Username:
         </label>
         <input
           type="text"
@@ -949,7 +949,7 @@ export default function UserManagement() {
           <div className="invalid-feedback">{formik2.errors.name}</div>
         )}
         <label htmlFor="email" className={styles.label}>
-          البريد الإلكتروني:
+          Email:
         </label>
         <input
           type="email"
@@ -968,7 +968,7 @@ export default function UserManagement() {
         )}
 
         <label htmlFor="phone" className={styles.label}>
-          رقم الهاتف:
+          Phone Number:
         </label>
         <input
           type="text"
@@ -987,7 +987,7 @@ export default function UserManagement() {
         )}
 
         <label htmlFor="Address" className={styles.label}>
-          العنوان:
+          Address:
         </label>
         <input
           type="text"
@@ -1007,7 +1007,7 @@ export default function UserManagement() {
           <div className="invalid-feedback">{formik2.errors.Address}</div>
         )}
         <label htmlFor="password" className={styles.label}>
-          كلمة المرور:
+          Password:
         </label>
         <input
           type="text"
@@ -1027,7 +1027,7 @@ export default function UserManagement() {
           <div className="invalid-feedback">{formik2.errors.password}</div>
         )}
         <label htmlFor="truckNumber" className={styles.label}>
-          رقم الشاحنة:
+          Truck Number:
         </label>
         <input
           type="text"
@@ -1053,7 +1053,7 @@ export default function UserManagement() {
             type="submit"
             disabled={submitingDriver}
           >
-            {submitingDriver ? "...جاري الاضافة" : " 🧑🏻‍💼 اضافة"}
+            {submitingDriver ? "Adding..." : " 🧑🏻‍💼 Add"}
           </button>
         </div>
       </form>
