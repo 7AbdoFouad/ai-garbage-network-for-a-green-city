@@ -220,12 +220,12 @@ const CustomNavbar = () => {
     },
     {
       path: "manageTrucks",
-      label: "Trucks Management",
+      label: "WareHouse Management",
       requiredRoles: ["admin", "ManageTrucks"],
     },
     {
       path: "wasteBinManagement",
-      label: "Waste Bin Management",
+      label: "WareHouse Store",
       requiredRoles: ["admin", "WasteBinManagement"],
     },
     {
@@ -255,7 +255,7 @@ const CustomNavbar = () => {
     },
     {
       path: "RequestSpecialWasteManagement",
-      label: "RequestSpecialWasteManagement",
+      label: "Request Waste Management",
       requiredRoles: ["admin", "RequestSpecialWasteManagement"],
     },
     {

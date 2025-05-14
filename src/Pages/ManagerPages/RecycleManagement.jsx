@@ -15,8 +15,7 @@ const RecycleManagement = () => {
     recyclingDate: '',
     recyclingLocation: '',
     recyclingImage: '',
-    TheMassofWasteKilo: '',
-    recyclingValue: ''
+
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
@@ -58,8 +57,8 @@ const RecycleManagement = () => {
       recyclingDate: item.recyclingDate,
       recyclingLocation: item.recyclingLocation,
       recyclingImage: item.recyclingImage,
-      TheMassofWasteKilo: item.TheMassofWasteKilo,
-      recyclingValue: item.recyclingValue
+
+      
     });
     setIsModalOpen(true);
   };
@@ -120,15 +119,12 @@ const RecycleManagement = () => {
                   <span style={styles.detailLabel}>Location:</span>
                   <span>{item.recyclingLocation}</span>
                 </div>
-                <div style={styles.detailItem}>
-                  <span style={styles.detailLabel}>Waste Mass (kg):</span>
-                  <span>{item.TheMassofWasteKilo}</span>
-                </div>
-                <div style={styles.detailItem}>
-                  <span style={styles.detailLabel}>Value:</span>
-                  <span>{item.recyclingValue}</span>
-                </div>
-              </div>
+                
+                      <div style={styles.detailItem}>
+                    <span style={styles.detailLabel}>Driver:</span>
+                    <span>{item.driverName || 'Unknown'}</span>
+                    </div>
+                      </div>
               
               <div style={styles.actionButtons}>
                 <button 
@@ -213,15 +209,7 @@ const RecycleManagement = () => {
                 />
               </div>
               
-              <div style={styles.formGroup}>
-                <label>Value:</label>
-                <textarea
-                  name="recyclingValue"
-                  value={editForm.recyclingValue}
-                  onChange={handleEditChange}
-                  style={{...styles.input, minHeight: '60px'}}
-                />
-              </div>
+        
               
               <div style={styles.formGroup}>
                 <label>Date:</label>
@@ -245,16 +233,7 @@ const RecycleManagement = () => {
                 />
               </div>
               
-              <div style={styles.formGroup}>
-                <label>Waste Mass (kg):</label>
-                <input
-                  type="number"
-                  name="TheMassofWasteKilo"
-                  value={editForm.TheMassofWasteKilo}
-                  onChange={handleEditChange}
-                  style={styles.input}
-                />
-              </div>
+           
               
               <div style={styles.formGroup}>
                 <label>Program Image:</label>

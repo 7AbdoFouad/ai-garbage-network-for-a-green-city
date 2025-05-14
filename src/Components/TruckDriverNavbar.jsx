@@ -50,24 +50,15 @@ const CustomNavbar = () => {
               Home
             </NavLink>
           </li>
+         
           <li>
-            <NavLink to="driverAnnouncement" className="nav-link" onClick={toggleSidebar}>
-             Announcement
+            <NavLink to="requiredTasks" className="nav-link" onClick={toggleSidebar}>
+              Required Tasks 
             </NavLink>
           </li>
           <li>
             <NavLink to="driverNotifications" className="nav-link" onClick={toggleSidebar}>
-              Notifications
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="driverPolls" className="nav-link" onClick={toggleSidebar}>
-              Polls
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="requiredTasks" className="nav-link" onClick={toggleSidebar}>
-              Required Tasks 
+              Accepted Tasks
             </NavLink>
           </li>
           <li>

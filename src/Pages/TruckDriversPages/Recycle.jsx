@@ -10,12 +10,8 @@ const RecyclingPage = () => {
     recyclingDate: '',
     recyclingLocation: 'Cairo, Egypt',
     recyclingImage: '',
-    recyclingRequirements: {
-      numOfParticipants: 0,
-      numOfAcceptedReports: 0
-    },
-    TheMassofWasteKilo: '',
-    recyclingValue: ''
+    
+   
   });
 
   const [loading, setLoading] = useState(false);
@@ -61,11 +57,19 @@ const RecyclingPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
+    // جلب بيانات السائق الحالي من localStorage
+    const currentDriver = JSON.parse(localStorage.getItem('currentDriver')) || {
+      id: "defaultId",
+      name: "Unknown Driver"
+    };
+
     try {
       const response = await axios.post(API_URL, {
         ...newItem,
-        id: String(Date.now())
+        id: String(Date.now()),
+        driverId: currentDriver.id, // إضافة ID السائق
+        driverName: currentDriver.name // إضافة اسم السائق
       });
       
       if (response.status === 201) {
@@ -86,12 +90,8 @@ const RecyclingPage = () => {
           recyclingDate: '',
           recyclingLocation: 'Cairo, Egypt',
           recyclingImage: '',
-          recyclingRequirements: {
-            numOfParticipants: 0,
-            numOfAcceptedReports: 0
-          },
-          TheMassofWasteKilo: '',
-          recyclingValue: ''
+        
+         
         });
         setImagePreview(null);
         document.getElementById('imageUpload').value = '';
@@ -181,38 +181,9 @@ const RecyclingPage = () => {
                   placeholder="Enter location"
                 />
               </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Waste Mass (kg):</label>
-                <input
-                  type="number"
-                  name="TheMassofWasteKilo"
-                  value={newItem.TheMassofWasteKilo}
-                  onChange={handleInputChange}
-                  required
-                  style={styles.input}
-                  min="0"
-                  placeholder="Enter weight in kg"
-                />
-              </div>
             </div>
 
-            <div style={styles.formRow}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Estimated Value:</label>
-                <input
-                  type="text"
-                  name="recyclingValue"
-                  value={newItem.recyclingValue}
-                  onChange={handleInputChange}
-                  required
-                  style={styles.input}
-                  placeholder="Enter estimated value"
-                />
-              </div>
-
-             
-            </div>
+            
 
             <div style={styles.formGroup}>
               <label style={styles.label}>Program Image:</label>
