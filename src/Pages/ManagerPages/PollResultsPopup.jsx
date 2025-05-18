@@ -128,8 +128,10 @@ export default function PollResultsPopup({ poll, subscribers, onClose }) {
   };
 
   return (
+    <div className={styles.overlay} onClick={onClose}>
     <div className={styles.popupOverlay}>
-      <div className={styles.popupContent}>
+      <div className={styles.popupContent}         onClick={(e) => e.stopPropagation()}
+ >
         <h2>{poll.pollName} - Results</h2>
 
         {poll.excelFile && excelAnalysis ? (
@@ -272,6 +274,6 @@ export default function PollResultsPopup({ poll, subscribers, onClose }) {
           Close
         </button>
       </div>
-    </div>
+    </div></div>
   );
 }

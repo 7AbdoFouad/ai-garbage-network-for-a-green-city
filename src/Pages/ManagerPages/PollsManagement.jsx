@@ -1,3 +1,4 @@
+// PollsManagement.js
 import React, { useState } from "react";
 import useUser from "../../hooks/useUser";
 import styles from "./PollsManagement.module.css";
@@ -7,7 +8,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
+import { Table, Button, Modal, Form } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
+import { IoIosAddCircle } from "react-icons/io";
+import { IoIosCloudDone } from "react-icons/io";
+import { MdOutlinePendingActions } from "react-icons/md";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -18,10 +24,15 @@ import {
   Legend,
 } from "chart.js";
 
-// تسجيل مكونات Chart.js اللازمة للرسم البياني
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-// مثال على مخطط التحقق من صحة نموذج الإضافة مع حقل External Excel Link
 const pollValidationSchema = Yup.object({
   pollName: Yup.string()
     .required("Poll name is required")
@@ -31,43 +42,55 @@ const pollValidationSchema = Yup.object({
     .min(5, "Description must be at least 5 characters"),
   pollEndDate: Yup.date()
     .required("End date is required")
-    .test("is-future", "The expiry date must be in the future", function (value) {
-      return value > new Date();
-    }),
+    .test(
+      "is-future",
+      "The expiry date must be in the future",
+      function (value) {
+        return value > new Date();
+      }
+    ),
   pollFormLink: Yup.string()
     .url("Invalid URL format")
     .required("Form link is required"),
   imgFile: Yup.mixed().required("Image is required"),
   excelFile: Yup.string()
     .required("Excel file link is required")
-    .url("Invalid URL format")
+    .url("Invalid URL format"),
 });
 
 export default function PollsManagement() {
-  const { Polls, SubscribersOfPolls, deletePoll, updatePoll, users, addPoll } = useUser();
+  const { Polls, SubscribersOfPolls, deletePoll, updatePoll, users, addPoll } =
+    useUser();
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedResultsPoll, setSelectedResultsPoll] = useState(null);
   const [showResultsPopup, setShowResultsPopup] = useState(false);
 
-  // حالات لتحليل بيانات ملف Excel (في حال تم رفعه) – يبقى هذا القسم إذا كنت تحتاج لتحليل البيانات من أي ملف Excel خارجي يتم تحميله يدويًا
   const [excelData, setExcelData] = useState([]);
   const [questionResults, setQuestionResults] = useState({});
   const [questions, setQuestions] = useState([]);
 
-  const handleImageChange = async (event) => {
-    const file = event.target.files[0];
+  const [availableCurrentPagePolls, setAvailableCurrentPagePolls] = useState(
+    parseInt(sessionStorage.getItem("availableCurrentPagePolls")) || 1
+  );
+  const [completedCurrentPagePolls, setCompletedCurrentPagePolls] = useState(
+    parseInt(sessionStorage.getItem("completedCurrentPagePolls")) || 1
+  );
+  const PollsItemsPerPage = 5;
+  const handleAvailablePagePollsChange = (page) => {
+    setAvailableCurrentPagePolls(page);
+    sessionStorage.setItem("availableCurrentPagePolls", page);
+  };
+
+  const handleCompletedPagePollsChange = (page) => {
+    setCompletedCurrentPagePolls(page);
+    sessionStorage.setItem("completedCurrentPagePolls", page);
+  };
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = async () => {
-        const newProfileImage = reader.result;
-        try {
-          formik.setFieldValue("imgFile", newProfileImage);
-        } catch (error) {
-          console.error("Failed to update profile image:", error);
-          toast.error("An error occurred while updating the image.");
-        }
-      };
+      reader.onloadend = () => formik.setFieldValue("imgFile", reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -81,7 +104,14 @@ export default function PollsManagement() {
     try {
       deletePoll(pollId);
       toast.success("Poll deleted successfully!");
-    } catch (error) {
+      // Fix pagination if page becomes empty
+      const newTotalPages = Math.ceil((completedPolls.length - 1) / PollsItemsPerPage );
+      if ( completedCurrentPagePolls> newTotalPages) {
+      const newPage = Math.max(newTotalPages - 1, 1);
+      setCompletedCurrentPagePolls(newPage);
+      sessionStorage.setItem("completedCurrentPagePolls", newPage); 
+      }
+    } catch {
       toast.error("Failed to delete poll. Please try again later.");
     }
   };
@@ -96,12 +126,11 @@ export default function PollsManagement() {
       updatePoll(updatedPoll.id, updatedPoll);
       toast.success("Poll updated successfully!");
       setShowEditPopup(false);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update poll. Please try again later.");
     }
   };
 
-  // Formik لنموذج إضافة استفتاء جديد بما في ذلك حقل "excelFile" الذي يمثل رابط Excel الخارجي
   const formik = useFormik({
     initialValues: {
       pollName: "",
@@ -113,7 +142,6 @@ export default function PollsManagement() {
     },
     validationSchema: pollValidationSchema,
     onSubmit: (values, { resetForm }) => {
-      // التأكد من إضافة &lang=en إلى رابط الاستمارة
       const newPoll = {
         ...values,
         pollFormLink: values.pollFormLink.includes("&lang=en")
@@ -126,261 +154,341 @@ export default function PollsManagement() {
     },
   });
 
-  // دالة لتحليل ملف Excel في حال تم رفع ملف Excel محلي (يمكن استخدامها عند الحاجة)
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (evt) => {
-        const binaryStr = evt.target.result;
-        const workbook = XLSX.read(binaryStr, { type: "binary" });
-        // استخدام الورقة الأولى
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        setExcelData(jsonData);
-
-        if (jsonData.length > 0) {
-          // استخراج أسماء الأعمدة مع استثناء عمود "طابع زمني"
-          const keys = Object.keys(jsonData[0]);
-          const qs = keys.filter((key) => key !== "طابع زمني");
-          setQuestions(qs);
-
-          const aggregateResults = {};
-          qs.forEach((q) => {
-            aggregateResults[q] = {};
-          });
-          jsonData.forEach((row) => {
-            qs.forEach((q) => {
-              const answer = row[q];
-              if (answer) {
-                aggregateResults[q][answer] = (aggregateResults[q][answer] || 0) + 1;
-              }
-            });
-          });
-          setQuestionResults(aggregateResults);
+        const workbook = XLSX.read(evt.target.result, { type: "binary" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(sheet);
+        setExcelData(data);
+        if (data.length) {
+          const keys = Object.keys(data[0]).filter((k) => k !== "طابع زمني");
+          setQuestions(keys);
+          const agg = {};
+          keys.forEach((q) => (agg[q] = {}));
+          data.forEach((row) =>
+            keys.forEach(
+              (q) => row[q] && (agg[q][row[q]] = (agg[q][row[q]] || 0) + 1)
+            )
+          );
+          setQuestionResults(agg);
         }
       };
       reader.readAsBinaryString(file);
     }
   };
 
+  const underway = Polls.filter((p) => new Date(p.pollEndDate) > new Date());
+  const completed = Polls.filter((p) => new Date(p.pollEndDate) <= new Date());
+
+  // Pagination for available Polls
+  const availablePolls = underway;
+  const paginatedAvailablePolls = availablePolls.slice(
+    (availableCurrentPagePolls - 1) * PollsItemsPerPage,
+    availableCurrentPagePolls * PollsItemsPerPage
+  );
+  const totalAvailablePollsPages = Math.ceil(
+    availablePolls.length / PollsItemsPerPage
+  );
+  //------------------------
+  // Pagination for completed Polls
+  const completedPolls = completed;
+  const paginatedCompletedPolls = completedPolls.slice(
+    (completedCurrentPagePolls - 1) * PollsItemsPerPage,
+    completedCurrentPagePolls * PollsItemsPerPage
+  );
+  const totalCompletedPollsPages = Math.ceil(
+    completedPolls.length / PollsItemsPerPage
+  );
   return (
     <div className={styles.container}>
-      <h2>📊 Manage surveys</h2>
+      <h2 className={styles.title}>📊 Manage Surveys</h2>
 
-      {/* جدول الاستفتاءات */}
-      <table className={styles.pollTable}>
-        <thead>
-          <tr>
-            <th>Poll Name</th>
-            <th>Poll Description</th>
-            <th>End Date</th>
-            <th>Number of Participants</th>
-            <th>Poll Status</th>
-            <th>Participation Rate</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Polls.map((poll) => {
-            const participantsCount = SubscribersOfPolls.filter(
-              (sub) => sub.pollId === poll.id
-            ).length;
-            const isActive = new Date(poll.pollEndDate) > new Date();
-            return (
-              <tr key={poll.id}>
-                <td>{poll.pollName}</td>
-                <td>{poll.pollDesc}</td>
-                <td>{poll.pollEndDate}</td>
-                <td>{participantsCount}</td>
-                <td>{isActive ? "Underway" : "Over"}</td>
-                <td>{((participantsCount * 100) / users.length).toFixed(2)}%</td>
-                <td>
-                  {isActive ? (
-                    <button className={styles.editButton} onClick={() => handleEdit(poll)}>
-                      ✏ Edit
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}><MdOutlinePendingActions fontSize={90}/>
+        Underway Polls</h3>
+        <table className={styles.pollTable}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>End Date</th>
+              <th>Participants</th>
+              <th>Rate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedAvailablePolls.map((poll) => {
+              const count = SubscribersOfPolls.filter(
+                (s) => s.pollId === poll.id
+              ).length;
+              return (
+                <tr key={poll.id}>
+                  <td>{poll.pollName}</td>
+                  <td>{poll.pollDesc}</td>
+                  <td style={{ width: "15%" }}>{poll.pollEndDate}</td>
+                  <td>{count}</td>
+                  <td>{((count * 100) / users.length).toFixed(2)}%</td>
+                  <td style={{ width: "10%" }}>
+                    <button
+                      className={styles.editBtn}
+                      onClick={() => handleEdit(poll)}
+                    >
+                      <span style={{ marginLeft: "-5px" }}>✏️ Edit </span>
                     </button>
-                  ) : (
-                    <>
-                      <button
-                        className={styles.viewResultsButton}
-                        onClick={() => handleShowResults(poll)}
-                      >
-                        📊 Show Results
-                      </button>
-                      <button
-                        className={styles.deleteButton}
-                        onClick={() => handleDelete(poll.id)}
-                      >
-                        🗑 Delete
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+      <div className={styles.paginationContainer}>
+        <div>
+          {Array.from({ length: totalAvailablePollsPages }, (_, i) => (
+            <Button
+              key={i + 1}
+              variant={
+                availableCurrentPagePolls === i + 1 ? "primary" : "light"
+              }
+              style={{
+                backgroundColor:
+                  availableCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
+                color: availableCurrentPagePolls === i + 1 ? "white" : "black",
+                border:
+                  availableCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
+              }}
+              onClick={() => handleAvailablePagePollsChange(i + 1)}
+              className={styles.paginationButton}
+            >
+              {i + 1}
+            </Button>
+          ))}
+        </div>
+        <p style={{ fontWeight: "bold" }}>
+          Number of Available Polls: {availablePolls.length}
+        </p>
+      </div>
 
-      {/* Form لإضافة استفتاء جديد */}
-      <h2>➕ Add a new survey</h2>
-      <form onSubmit={formik.handleSubmit} className={styles.pollForm}>
-        <label htmlFor="pollName">📌 Enter survey name:</label>
-        <input
-          type="text"
-          id="pollName"
-          name="pollName"
-          placeholder="Enter survey name"
-          value={formik.values.pollName}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.pollName && formik.errors.pollName ? "is-invalid" : ""}`}
-        />
-        {formik.touched.pollName && formik.errors.pollName && (
-          <div className="invalid-feedback">{formik.errors.pollName}</div>
-        )}
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}><IoIosCloudDone fontSize={90} />&nbsp;
+        Completed Polls</h3>
+        <table className={styles.pollTable}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>End Date</th>
+              <th>Participants</th>
+              <th>Rate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedCompletedPolls.map((poll) => {
+              const count = SubscribersOfPolls.filter(
+                (s) => s.pollId === poll.id
+              ).length;
+              return (
+                <tr key={poll.id}>
+                  <td>{poll.pollName}</td>
+                  <td>{poll.pollDesc}</td>
+                  <td style={{ width: "15%" }}>{poll.pollEndDate}</td>
+                  <td>{count}</td>
+                  <td>{((count * 100) / users.length).toFixed(2)}%</td>
+                  <td style={{ width: "12%" }}>
+                    <button
+                      className={styles.viewBtn}
+                      onClick={() => handleShowResults(poll)}
+                    >
+                      📊 Results
+                    </button>
+                    <button
+                      className={styles.deleteBtn}
+                      onClick={() => handleDelete(poll.id)}
+                    >
+                      🗑 Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+      <div className={styles.paginationContainer}>
+        <div>
+          {Array.from({ length: totalCompletedPollsPages }, (_, i) => (
+            <Button
+              key={i + 1}
+              variant={
+                completedCurrentPagePolls === i + 1 ? "primary" : "light"
+              }
+              style={{
+                backgroundColor:
+                completedCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
+                color: completedCurrentPagePolls === i + 1 ? "white" : "black",
+                border:
+                  completedCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
+              }}
+              onClick={() => handleCompletedPagePollsChange(i + 1)}
+              className={styles.paginationButton}
+            >
+              {i + 1}
+            </Button>
+          ))}
+        </div>
+        <p style={{ fontWeight: "bold" }}>
+        Number Of Completed Polls: {completedPolls.length}
+        </p>
+      </div>
+      <section className={styles.addSection}>
+        <h3 className={styles.sectionTitle}> <IoIosAddCircle fontSize={"5rem"}/>
+   <span>     Add New Poll </span></h3>
 
-        <label htmlFor="pollDesc">📄 Survey Description:</label>
-        <textarea
-          id="pollDesc"
-          name="pollDesc"
-          placeholder="Enter survey description"
-          value={formik.values.pollDesc}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.pollDesc && formik.errors.pollDesc ? "is-invalid" : ""}`}
-          style={{ height: "150px", resize: "none" }}
-        />
-        {formik.touched.pollDesc && formik.errors.pollDesc && (
-          <div className="invalid-feedback">{formik.errors.pollDesc}</div>
-        )}
+        <form onSubmit={formik.handleSubmit} className={styles.pollForm}>
+          <label htmlFor="pollName">📌 Enter survey name:</label>
+          <input
+            type="text"
+            id="pollName"
+            name="pollName"
+            placeholder="Enter survey name"
+            value={formik.values.pollName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`form-control ${formik.touched.pollName && formik.errors.pollName ? "is-invalid" : ""}`}
+          />
+          {formik.touched.pollName && formik.errors.pollName && (
+            <div className="invalid-feedback">{formik.errors.pollName}</div>
+          )}
 
-        <label htmlFor="pollEndDate">📅 Expiry Date:</label>
-        <input
-          type="date"
-          id="pollEndDate"
-          name="pollEndDate"
-          value={formik.values.pollEndDate}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.pollEndDate && formik.errors.pollEndDate ? "is-invalid" : ""}`}
-        />
-        {formik.touched.pollEndDate && formik.errors.pollEndDate && (
-          <div className="invalid-feedback">{formik.errors.pollEndDate}</div>
-        )}
+          <label htmlFor="pollDesc">📄 Survey Description:</label>
+          <textarea
+            id="pollDesc"
+            name="pollDesc"
+            placeholder="Enter survey description"
+            value={formik.values.pollDesc}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`form-control ${formik.touched.pollDesc && formik.errors.pollDesc ? "is-invalid" : ""}`}
+            style={{ height: "150px", resize: "none" }}
+          />
+          {formik.touched.pollDesc && formik.errors.pollDesc && (
+            <div className="invalid-feedback">{formik.errors.pollDesc}</div>
+          )}
 
-        <label htmlFor="pollFormLink">🔗 Form link:</label>
-        <input
-          type="text"
-          id="pollFormLink"
-          name="pollFormLink"
-          placeholder="Enter the link to the survey form"
-          value={formik.values.pollFormLink}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.pollFormLink && formik.errors.pollFormLink ? "is-invalid" : ""}`}
-        />
-        {formik.touched.pollFormLink && formik.errors.pollFormLink && (
-          <div className="invalid-feedback">{formik.errors.pollFormLink}</div>
-        )}
+          <label htmlFor="pollEndDate">📅 Expiry Date:</label>
+          <input
+            type="date"
+            id="pollEndDate"
+            name="pollEndDate"
+            value={formik.values.pollEndDate}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`form-control ${formik.touched.pollEndDate && formik.errors.pollEndDate ? "is-invalid" : ""}`}
+          />
+          {formik.touched.pollEndDate && formik.errors.pollEndDate && (
+            <div className="invalid-feedback">{formik.errors.pollEndDate}</div>
+          )}
 
-        <label htmlFor="imgFile">🖼 Survey image:</label>
-        <input
-          type="file"
-          id="imgFile"
-          name="imgFile"
-          accept="image/*"
-          onChange={handleImageChange}
-          className={`form-control ${formik.touched.imgFile && formik.errors.imgFile ? "is-invalid" : ""}`}
-        />
-        {formik.touched.imgFile && formik.errors.imgFile && (
-          <div className="invalid-feedback">{formik.errors.imgFile}</div>
-        )}
-        {formik.values.imgFile && (
-          <div className="mt-2">
-            <img
-              src={formik.values.imgFile}
-              alt="Uploaded"
-              className="img-thumbnail"
-              width="200"
-            />
-          </div>
-        )}
+          <label htmlFor="pollFormLink">🔗 Form link:</label>
+          <input
+            type="text"
+            id="pollFormLink"
+            name="pollFormLink"
+            placeholder="Enter the link to the survey form"
+            value={formik.values.pollFormLink}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`form-control ${formik.touched.pollFormLink && formik.errors.pollFormLink ? "is-invalid" : ""}`}
+          />
+          {formik.touched.pollFormLink && formik.errors.pollFormLink && (
+            <div className="invalid-feedback">{formik.errors.pollFormLink}</div>
+          )}
 
-        <label htmlFor="excelFile">📊 External Excel Link:</label>
-        <input
-          type="text"
-          id="excelFile"
-          name="excelFile"
-          placeholder="Enter external Excel link"
-          value={formik.values.excelFile}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${formik.touched.excelFile && formik.errors.excelFile ? "is-invalid" : ""}`}
-        />
-        {formik.touched.excelFile && formik.errors.excelFile && (
-          <div className="invalid-feedback">{formik.errors.excelFile}</div>
-        )}
-        {formik.values.excelFile && (
-          <div className="mt-2">
-            <strong>Link:</strong> {formik.values.excelFile}
-          </div>
-        )}
+          <label htmlFor="imgFile">🖼 Survey image:</label>
+          <input
+            type="file"
+            id="imgFile"
+            name="imgFile"
+            accept="image/*"
+            onChange={handleImageChange}
+            className={`form-control ${formik.touched.imgFile && formik.errors.imgFile ? "is-invalid" : ""}`}
+          />
+          {formik.touched.imgFile && formik.errors.imgFile && (
+            <div className="invalid-feedback">{formik.errors.imgFile}</div>
+          )}
+          {formik.values.imgFile && (
+            <div className="mt-2">
+              <img
+                src={formik.values.imgFile}
+                alt="Uploaded"
+                className="img-thumbnail"
+                width="200"
+              />
+            </div>
+          )}
 
-        <button type="submit" className={styles.submitButton}>
-          ➕ Add survey
-        </button>
-      </form>
+          <label htmlFor="excelFile">📊 External Excel Link:</label>
+          <input
+            type="text"
+            id="excelFile"
+            name="excelFile"
+            placeholder="Enter external Excel link"
+            value={formik.values.excelFile}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`form-control ${formik.touched.excelFile && formik.errors.excelFile ? "is-invalid" : ""}`}
+          />
+          {formik.touched.excelFile && formik.errors.excelFile && (
+            <div className="invalid-feedback">{formik.errors.excelFile}</div>
+          )}
+          {formik.values.excelFile && (
+            <div className="mt-2">
+              <strong>Link:</strong> {formik.values.excelFile}
+            </div>
+          )}
 
-      {/* قسم عرض تحليل ملف Excel (إذا تم رفع ملف محليًا وتحليله) */}
+          <button type="submit" className={styles.submitButton}>
+       Add survey
+          </button>
+        </form>
+      </section>
+
       {questions.length > 0 && (
-        <div className={styles.excelAnalysis}>
-          <h2>Excel File Analysis</h2>
-          {questions.map((question) => {
-            const responses = questionResults[question];
-            if (!responses) return null;
-            const labels = Object.keys(responses);
-            const values = Object.values(responses);
-            const chartData = {
-              labels,
-              datasets: [
-                {
-                  label: question,
-                  data: values,
-                  backgroundColor: "rgba(75, 192, 192, 0.6)",
-                },
-              ],
+        <div className={styles.analysis}>
+          <h3 className={styles.sectionTitle}>📈 Excel Analysis</h3>
+          {questions.map((q) => {
+            const resp = questionResults[q];
+            const data = {
+              labels: Object.keys(resp),
+              datasets: [{ label: q, data: Object.values(resp) }],
             };
-            const options = {
+            const opts = {
               responsive: true,
-              plugins: {
-                title: {
-                  display: true,
-                  text: question,
-                },
-              },
+              plugins: { title: { display: true, text: q } },
             };
-            return (
-              <div key={question} style={{ marginBottom: "2rem" }}>
-                <Bar data={chartData} options={options} />
-              </div>
-            );
+            return <Bar key={q} data={data} options={opts} />;
           })}
         </div>
       )}
 
-      {/* Popup تعديل الاستفتاء */}
-      {showEditPopup && selectedPoll && (
-        <PollEditPopup poll={selectedPoll} onSave={handleSave} onClose={() => setShowEditPopup(false)} />
+      {showEditPopup && (
+        <PollEditPopup
+          poll={selectedPoll}
+          onSave={handleSave}
+          onClose={() => setShowEditPopup(false)}
+        />
       )}
-
-      {/* Popup عرض نتائج الاستفتاء */}
-      {showResultsPopup && selectedResultsPoll && (
+      {showResultsPopup && (
         <PollResultsPopup
           poll={selectedResultsPoll}
-          subscribers={SubscribersOfPolls.filter((sub) => sub.pollId === selectedResultsPoll.id)}
+          subscribers={SubscribersOfPolls.filter(
+            (s) => s.pollId === selectedResultsPoll.id
+          )}
           onClose={() => setShowResultsPopup(false)}
         />
       )}

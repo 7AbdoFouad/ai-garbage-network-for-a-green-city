@@ -1,0 +1,130 @@
+// Add this CSS to your stylesheet or in a <style> tag
+const styles = `
+.auth-container {
+    background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.auth-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.auth-header {
+    background: linear-gradient(45deg, #2baf2b, #8bc34a);
+    padding: 2rem;
+    color: white;
+    text-align: center;
+    position: relative;
+}
+
+.auth-header h3 {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.auth-header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    clip-path: polygon(50% 50%, 0 0, 100% 0);
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #2d6a4f;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 2px solid #e3f2e5;
+    border-radius: 10px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #8bc34a;
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.2);
+}
+
+.invalid-feedback {
+    background: #ffe3e3;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.btn-primary {
+    background: #4CAF50;
+    border: none;
+    padding: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+.social-divider {
+    position: relative;
+    margin: 2rem 0;
+    color: #6c757d;
+}
+
+.social-divider::before,
+.social-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background: #dee2e6;
+}
+
+.social-divider::before { left: 0; }
+.social-divider::after { right: 0; }
+
+.social-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.google-btn {
+    background: #34a853;
+    color: white;
+}
+
+.facebook-btn {
+    background: #3b5998;
+    color: white;
+    margin-top: 1rem;
+}
+`;

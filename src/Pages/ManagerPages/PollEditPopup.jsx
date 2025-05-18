@@ -216,11 +216,15 @@ export default function PollEditPopup({ poll, onSave, onClose }) {
             <div className="invalid-feedback">{formik.errors.excelFile}</div>
           )}
 
-          <div className={styles.modalButtons}>
-            <button className={`${styles.button} ${styles.saveButton}`} type="submit">
-              💾 Save Poll
+<div className={styles.modalButtons}>
+            <button className={`${styles.button} ${styles.saveButton}`} type="submit" style={{marginRight:"10px",marginTop:"10px"}}>
+              💾 Save
             </button>
-            <button className={`${styles.button} ${styles.cancelButton}`} type="button" onClick={onClose}>
+            <button
+              className={`${styles.button} ${styles.cancelButton}`}
+              type="button"
+              onClick={onClose}
+            >
               ❌ Cancel
             </button>
           </div>

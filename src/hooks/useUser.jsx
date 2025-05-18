@@ -19,6 +19,10 @@ const useUser = () => {
   const [PublicNotifications, setPublicNotifications] = useState([]);
   const [UserNotificationsMarkedPublic, setUserNotificationsMarkedPublic] = useState([]);
   const [DrivierNotifications, setDrivierNotifications] = useState([]);
+  const [managerNotifications, setManagerNotifications] = useState([]);
+  const [Acceptted_Users_And_SpecialOrder,setAcceptted_Users_And_SpecialOrder] = useState([]);
+  const [Available_UsersAnnouncements_Tasks, setAvailable_UsersAnnouncements_Tasks] = useState([]);
+  
   // const [user, setUse
   // r] = useState({});
 
@@ -544,6 +548,88 @@ const useUser = () => {
     setDrivierNotifications(DrivierNotifications.map((DrivierNotification) => DrivierNotification.id === id ? res.data : DrivierNotification));
     return res.data;
   }
+//_____________________________
+  // ____________________________ managerNotifications --------------------------------------
+  // Add a managerNotification
+  const addManagerNotification = async (values) => {
+    const res = await axios.post("http://localhost:3000/managerNotifications", values);
+    setManagerNotifications([...managerNotifications, res.data]); // Assuming the server returns the created user object
+    return res.data;
+  }
+  // Delete a managerNotification
+  const deleteManagerNotification = async (id) => {
+    await axios.delete(`http://localhost:3000/managerNotifications/${id}`);
+    setManagerNotifications(managerNotifications.filter((managerNotification) => managerNotification.id !== id));
+  }
+  // Fetch a single managerNotification
+  const fetchManagerNotification = async (id) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/managerNotifications/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // Update a managerNotification
+  const updateManagerNotification = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/managerNotifications/${id}`, values);
+    setManagerNotifications(managerNotifications.map((managerNotification) => managerNotification.id === id ? res.data : managerNotification));
+    return res.data;
+  }
+  // ____________________________ Acceptted_Users_And_SpecialOrder --------------------------------------
+  // Add a Acceptted_Users_And_SpecialOrder
+  const addAcceptted_Users_And_SpecialOrder = async (values) => {
+    const res = await axios.post("http://localhost:3000/Acceptted_Users_And_SpecialOrder", values);
+    setAcceptted_Users_And_SpecialOrder([...Acceptted_Users_And_SpecialOrder, res.data]); // Assuming the server returns the created user object
+    return res.data;
+  }
+  // Delete a Acceptted_Users_And_SpecialOrder
+  const deleteAcceptted_Users_And_SpecialOrder = async (id) => {
+    await axios.delete(`http://localhost:3000/Acceptted_Users_And_SpecialOrder/${id}`);
+    setAcceptted_Users_And_SpecialOrder(Acceptted_Users_And_SpecialOrder.filter((Acceptted_Users_And_SpecialOrder) => Acceptted_Users_And_SpecialOrder.id !== id));
+  }
+  // Fetch a single Acceptted_Users_And_SpecialOrder
+  const fetchAcceptted_Users_And_SpecialOrder = async (id) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/Acceptted_Users_And_SpecialOrder/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // Update a Acceptted_Users_And_SpecialOrder
+  const updateAcceptted_Users_And_SpecialOrder = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/Acceptted_Users_And_SpecialOrder/${id}`, values);
+    setAcceptted_Users_And_SpecialOrder(Acceptted_Users_And_SpecialOrder.map((Acceptted_Users_And_SpecialOrder) => Acceptted_Users_And_SpecialOrder.id === id ? res.data : Acceptted_Users_And_SpecialOrder));
+    return res.data;
+  }
+  // ____________________________ Available_UsersAnnouncements_Tasks --------------------------------------
+  // Add a Available_UsersAnnouncements_Tasks
+  const addAvailable_UsersAnnouncements_Tasks = async (values) => {
+    const res = await axios.post("http://localhost:3000/Available_UsersAnnouncements_Tasks", values);
+    setAvailable_UsersAnnouncements_Tasks([...Available_UsersAnnouncements_Tasks, res.data]); // Assuming the server returns the created user object
+    return res.data;
+  }
+  // Delete a Available_UsersAnnouncements_Tasks
+  const deleteAvailable_UsersAnnouncements_Tasks = async (id) => {
+    await axios.delete(`http://localhost:3000/Available_UsersAnnouncements_Tasks/${id}`);
+    setAvailable_UsersAnnouncements_Tasks(Available_UsersAnnouncements_Tasks.filter((Available_UsersAnnouncements_Task) => Available_UsersAnnouncements_Task.id !== id));
+  }
+  // Fetch a single Available_UsersAnnouncements_Tasks
+  const fetchAvailable_UsersAnnouncements_Tasks = async (id) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/Available_UsersAnnouncements_Tasks/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // Update a Available_UsersAnnouncements_Tasks
+  const updateAvailable_UsersAnnouncements_Tasks = async (id, values) => {
+    const res = await axios.put(`http://localhost:3000/Available_UsersAnnouncements_Tasks/${id}`, values);
+    setAvailable_UsersAnnouncements_Tasks(Available_UsersAnnouncements_Tasks.map((Available_UsersAnnouncements_Task) => Available_UsersAnnouncements_Task.id === id ? res.data : Available_UsersAnnouncements_Task));
+    return res.data;
+  }
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -688,7 +774,31 @@ const useUser = () => {
         console.error(error);
       }
     };
-    
+        const fetchManagerNotifications = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3000/managerNotifications");
+        setManagerNotifications(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const fetchAcceptted_Users_And_SpecialOrder = async()=>{
+      try {
+        const { data } = await axios.get("http://localhost:3000/Acceptted_Users_And_SpecialOrder");
+        setAcceptted_Users_And_SpecialOrder(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+   const fetchAvailable_UsersAnnouncements_Tasks = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3000/Available_UsersAnnouncements_Tasks");
+        setAvailable_UsersAnnouncements_Tasks(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     fetchUsers();
     fetchmanagers();
     fetchtruckDrivers();
@@ -706,6 +816,9 @@ const useUser = () => {
     fetchPublicNotifications();
     fetchUserNotificationsMarkedPublic();
     fetchDrivierNotifications();
+    fetchManagerNotifications();
+    fetchAcceptted_Users_And_SpecialOrder();
+    fetchAvailable_UsersAnnouncements_Tasks();
   }, []);
 
   return {
@@ -726,6 +839,10 @@ const useUser = () => {
     PublicNotifications,
     UserNotificationsMarkedPublic,
     DrivierNotifications,
+    managerNotifications,
+    Acceptted_Users_And_SpecialOrder,
+    Available_UsersAnnouncements_Tasks,
+
     registerUser,
     deleteUser,
     fetchUser,
@@ -793,7 +910,19 @@ const useUser = () => {
     addDrivierNotification,
     deleteDrivierNotification,
     fetchDrivierNotification,
-    updateDrivierNotification
+    updateDrivierNotification,
+    addManagerNotification,
+    deleteManagerNotification,
+    fetchManagerNotification,
+    updateManagerNotification,
+    addAcceptted_Users_And_SpecialOrder,
+    deleteAcceptted_Users_And_SpecialOrder,
+    fetchAcceptted_Users_And_SpecialOrder,
+    updateAcceptted_Users_And_SpecialOrder,
+    addAvailable_UsersAnnouncements_Tasks,
+    deleteAvailable_UsersAnnouncements_Tasks,
+    fetchAvailable_UsersAnnouncements_Tasks,
+    updateAvailable_UsersAnnouncements_Tasks
   };
 };
 

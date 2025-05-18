@@ -33,6 +33,7 @@ import Settings from "./Pages/ManagerPages/Settings";
 import Notifications from "./Pages/ManagerPages/Notifications";
 import RecycleManagement from "./Pages/ManagerPages/RecycleManagement";
 import RequestSpecialWasteManagement from "./Pages/ManagerPages/RequestSpecialWasteManagement";
+
 // User pages
 import HomePageForUsers from "./Pages/UserPages/HomePageForUsers";
 import AboutUsPage from "./Pages/UserPages/AboutUsPage";
@@ -254,7 +255,7 @@ const router = createBrowserRouter(
         <Route path="rewards/:id" element={<ProtectedRewardsPage />} />
         <Route path="userAnnouncement/:id" element={<ProtectedUserAnnouncementPage />} />
         <Route path="reports" element={<ProtectedReportsPage />} />
-        <Route path="requestSpecialWaste" element={<ProtectedRequestSpecialWaste />} />
+        <Route path="requestSpecialWaste/:id" element={<ProtectedRequestSpecialWaste />} />
         
       </Route>
 

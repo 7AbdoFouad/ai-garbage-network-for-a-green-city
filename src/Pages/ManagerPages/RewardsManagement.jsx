@@ -1,379 +1,496 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Form, Modal, Badge, Alert } from 'react-bootstrap';
-import * as RewardsService from '../ManagerPages/RewardsService';
-import styles from './RewardsManagement.module.css';
+import React, { useState, useEffect } from "react";
+import useUser from "../../hooks/useUser";
+import { Table, Button, Modal, Form, Input, DatePicker, Space, Typography, Tag, Avatar, Spin } from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, CheckOutlined } from "@ant-design/icons";
+import { toast } from "react-toastify";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import styles from './RewardManagement.module.css';
 
-export default function RewardsManagement() {
-  const [rewards, setRewards] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [currentReward, setCurrentReward] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+dayjs.extend(isSameOrAfter);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    rewardName: '',
-    rewardDesc: '',
-    rewardValue: '',
-    ExpiryDate: '',
-    rewardRequirements: {
-      numOfAcceptedAnnouncements: 0,
-      numOfCompletedActivities: 0,
-      numOfCompletedPolls: 0
-    }
+const { Title, Text } = Typography;
+
+const usePagination = (key, initialPage = 1) => {
+  const [currentPage, setCurrentPage] = useState(() => {
+    const saved = sessionStorage.getItem(key);
+    return saved ? parseInt(saved) : initialPage;
   });
 
   useEffect(() => {
-    fetchRewards();
-  }, []);
+    sessionStorage.setItem(key, currentPage);
+  }, [currentPage, key]);
 
-  const fetchRewards = async () => {
-    setLoading(true);
+  return [currentPage, setCurrentPage];
+};
+
+export default function RewardManagement() {
+  const {
+    Rewards,
+    UsersSignedUpForRewards,
+    addReward,
+    deleteReward,
+    updateReward,
+    deleteUsersSignedUpForReward,
+    addUserNotification,
+  } = useUser();
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [editingReward, setEditingReward] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [rewardPage, setRewardPage] = usePagination('rewardPage');
+  const [userPage, setUserPage] = usePagination('userPage');
+  const itemsPerPage = 5;
+
+  const today = dayjs().startOf('day');
+  const availableRewards = Rewards.filter(r => dayjs(r.ExpiryDate).isSameOrAfter(today));
+  const unavailableRewards = Rewards.filter(r => dayjs(r.ExpiryDate).isBefore(today));
+
+  const paginate = (data, page) => {
+    const start = (page - 1) * itemsPerPage;
+    return data.slice(start, start + itemsPerPage);
+  };
+
+  const handleDone = async (user) => {
     try {
-      const rewardsData = await RewardsService.getRewards();
-      setRewards(rewardsData);
-      setError(null);
-    } catch (err) {
-      setError('فشل تحميل المكافآت. يرجى المحاولة مرة أخرى.');
+      setLoading(true);
+      await deleteUsersSignedUpForReward(user.id);
+      await addUserNotification({
+        userId: user.userId,
+        notificationContent: `Congratulations! You've completed the ${user.rewardName} reward`,
+        notificationDate: dayjs().format('YYYY-MM-DD')
+      });
+      toast.success(`Notification sent to ${user.name}`);
+    } catch (error) {
+      toast.error('Operation failed');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleRequirementsChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      rewardRequirements: {
-        ...prev.rewardRequirements,
-        [name]: parseInt(value) || 0
-      }
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      if (editMode) {
-        await RewardsService.updateReward(currentReward.id, formData);
-        setSuccess('تم تحديث المكافأة بنجاح');
-      } else {
-        await RewardsService.addReward(formData);
-        setSuccess('تم إضافة المكافأة بنجاح');
-      }
-      fetchRewards(); // Refresh data after update
-      setShowModal(false);
-    } catch (err) {
-      setError('فشل حفظ المكافأة. يرجى المحاولة مرة أخرى.');
-    } finally {
-      setLoading(false);
-      setTimeout(() => setSuccess(null), 3000);
-    }
-  };
-
-  const handleEdit = (reward) => {
-    setCurrentReward(reward);
-    setFormData({
-      rewardName: reward.rewardName,
-      rewardDesc: reward.rewardDesc,
-      rewardValue: reward.rewardValue,
-      ExpiryDate: reward.ExpiryDate,
-      rewardRequirements: reward.rewardRequirements || {
-        numOfAcceptedAnnouncements: 0,
-        numOfCompletedActivities: 0,
-        numOfCompletedPolls: 0
-      }
-    });
-    setEditMode(true);
-    setShowModal(true);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("are you sure you want to delete this reward?")) {
-      try {
-        await RewardsService.deleteReward(id);
-        setRewards(prev => prev.filter(r => r.id !== id));
-        setSuccess('reward deleted successfully');
-        setTimeout(() => setSuccess(null), 3000);
-      } catch (err) {
-        setError('failed to delete reward. please try again.');
-      }
+    try {
+      setLoading(true);
+      await deleteReward(id);
+      toast.success("Reward deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete reward");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setShowModal(false);
-    setEditMode(false);
-    setCurrentReward(null);
-    setFormData({
+  const formik = useFormik({
+    initialValues: {
       rewardName: "",
       rewardDesc: "",
-      rewardValue: "",
-      ExpiryDate: "",
       rewardRequirements: {
         numOfAcceptedAnnouncements: 0,
         numOfCompletedActivities: 0,
         numOfCompletedPolls: 0
+      },
+      ExpiryDate: null,
+      rewardValue: "",
+      imgFile: null,
+    },
+    validationSchema: Yup.object({
+      rewardName: Yup.string().required("Required"),
+      rewardDesc: Yup.string().required("Required"),
+      rewardRequirements: Yup.object().shape({
+        numOfAcceptedAnnouncements: Yup.number()
+          .min(0, "Must be 0 or more")
+          ,
+        numOfCompletedActivities: Yup.number()
+          .min(0, "Must be 0 or more")
+          ,
+        numOfCompletedPolls: Yup.number()
+          .min(0, "Must be 0 or more")
+          
+      }).test(
+        'at-least-one-requirement',
+        'At least one requirement must be greater than 0',
+        value => Object.values(value).some(v => v > 0)
+      ),
+      ExpiryDate: Yup.mixed().required("Expiry date is required"),
+      rewardValue: Yup.string().required("Reward value is required"),
+      imgFile: Yup.mixed().required("Image is required"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        const payload = {
+          ...values,
+          ExpiryDate: values.ExpiryDate.format('YYYY-MM-DD'),
+        };
+
+        if (editingReward) {
+          await updateReward(editingReward.id, payload);
+          toast.success("Reward updated successfully");
+        } else {
+          await addReward(payload);
+          toast.success("Reward created successfully");
+        }
+        setModalVisible(false);
+      } catch (error) {
+        toast.error("Operation failed");
+      } finally {
+        setLoading(false);
       }
-    });
+    },
+  });
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          formik.setFieldValue("imgFile", reader.result);
+        } catch (error) {
+          toast.error("Failed to upload image");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const filteredRewards = rewards.filter(reward => 
-    reward.rewardName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reward.rewardDesc.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const userColumns = [
+    { 
+      title: 'User', 
+      render: (_, r) => (
+        <div className={styles.userCard}>
+          <Avatar className={styles.userAvatar}>{r.name[0]}</Avatar>
+          <div className={styles.userInfo}>
+            <Text strong>{r.name}</Text>
+            <Text type="secondary">{r.email}</Text>
+          </div>
+        </div>
+      )
+    },
+    { title: 'Reward', dataIndex: 'rewardName', className: styles.tableCell },
+    { title: 'Phone', dataIndex: 'PhoneNum', className: styles.tableCell },
+    { 
+      title: 'Actions', 
+      render: (_, r) => (
+        <Button
+          type="primary"
+          className={styles.doneButton}
+          icon={<CheckOutlined />}
+          onClick={() => handleDone(r)}
+          loading={loading}
+        >
+          Mark Done
+        </Button>
+      )
+    }
+  ];
 
-  const getRequirementDetails = (reward) => {
-    const req = reward.rewardRequirements || {};
-    const requirements = [];
-    
-    if (req.numOfAcceptedAnnouncements > 0) {
-      requirements.push(`${req.numOfAcceptedAnnouncements} announcements`);
+  const rewardColumns = [
+    { title: 'Name', dataIndex: 'rewardName', className: styles.tableCell },
+    { title: 'Description', dataIndex: 'rewardDesc', className: styles.tableCell },
+    { 
+      title: 'Requirements', 
+      render: (_, r) => (
+        <div className={styles.requirements}>
+          {Object.entries(r.rewardRequirements).map(([key, value]) => (
+            value > 0 && (
+              <Tag key={key} className={styles.requirementTag}>
+                {value} {key
+                  .replace('numOf', '')
+                  .replace(/([A-Z])/g, ' $1')
+                  .trim()}
+              </Tag>
+            )
+          ))}
+        </div>
+      )
+    },
+    { 
+      title: 'Expiry Date', 
+      render: (_, r) => (
+        <span className={styles.dateCell}>
+          {dayjs(r.ExpiryDate).format('DD/MM/YYYY')}
+        </span>
+      )
+    },
+    { title: 'Value', dataIndex: 'rewardValue', className: styles.tableCell },
+    {
+      title: 'Actions',
+      render: (_, r) => (
+        <Space>
+          <Button
+            icon={<EditOutlined />}
+            className={styles.editButton}
+            onClick={() => {
+              setEditingReward(r);
+              formik.setValues({
+                ...r,
+                ExpiryDate: dayjs(r.ExpiryDate),
+              });
+              setModalVisible(true);
+            }}
+          />
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            className={styles.deleteButton}
+            onClick={() => handleDelete(r.id)}
+            loading={loading}
+          />
+        </Space>
+      )
     }
-    if (req.numOfCompletedActivities > 0) {
-      requirements.push(`${req.numOfCompletedActivities} activities`);
-    }
-    if (req.numOfCompletedPolls > 0) {
-      requirements.push(`${req.numOfCompletedPolls} polls`);
-    }
-    
-    return requirements.length > 0 ? requirements.join(', ') : 'No requirements';
-  };
-
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredRewards.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredRewards.length / itemsPerPage);
+  ];
 
   return (
     <div className={styles.container}>
-      <h2 className="text-center mb-4">Reward Management</h2>
-      
-      {/* <div className="d-flex justify-content-between mb-4">
-        <Form.Control
-          type="text"
-          placeholder="search by name or description..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
-          style={{ width: '300px' }}
-        />
-      </div> */}
-
-      {loading && !showModal && <div className="text-center">جاري التحميل...</div>}
-      {error && <Alert variant="danger">{error}</Alert>}
-      {success && <Alert variant="success">{success}</Alert>}
-
-      <Table striped bordered hover responsive className="mt-4" dir="rtl">
-  <thead className="bg-dark text-white">
-    <tr style={{ width: '200px', textAlign: 'center' }}>
-      <th >Actions</th>
-      <th>Requirements</th>
-      <th>Expiry Date</th>
-      <th>Value</th>
-      <th>Description</th>
-      <th>Reward Name</th>
-      
-    </tr>
-  </thead>
-  <tbody>
-    {currentItems.map((reward) => (
-      <tr key={reward.id } style={{ textAlign: 'center' , width: '200px'} }>
-        <td>
-          <div className="d-flex" style={{ gap: '10px', justifyContent: 'flex-end' }}>
-            <Button
-              variant="warning"
-              size="sm"
-              onClick={() => handleEdit(reward)}
-              style={{ marginBottom: '10px' ,marginLeft: '15px'}}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => handleDelete(reward.id)}
-              style={{ marginBottom: '10px', marginLeft: '30px' }}
-            >
-              Delete
-            </Button>
-          </div>
-        </td>
-        <td style={{ textAlign: 'center' }}>
-          <Badge bg="success" >
-            {getRequirementDetails(reward)}
-          </Badge>
-        </td>
-        <td>{reward.ExpiryDate}</td>
-        <td>{reward.rewardValue}</td>
-        <td>{reward.rewardDesc}</td>
-        <td>{reward.rewardName}</td>
-      </tr>
-    ))}
-  </tbody>
-</Table>
-      {/* Pagination */}
-     {filteredRewards.length > itemsPerPage && (
-  <div className="d-flex justify-content-center mt-4">
-    <nav>
-      <ul className="pagination">
-        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-          <button 
-            className="page-link" 
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+      <Spin spinning={loading} tip="Processing..." className={styles.loader}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>🏆 Reward Management</h1>
+          <Button
+            className={styles.addButton}
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setEditingReward(null);
+              formik.resetForm();
+              setModalVisible(true);
+            }}
           >
-            &laquo;
-          </button>
-        </li>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
-            <button 
-              className="page-link" 
-              onClick={() => setCurrentPage(page)}
-              style={{ 
-                backgroundColor: currentPage === page ? '#28a745' : '#f8f9fa', 
-                color: currentPage === page ? 'white' : '#28a745',
-                borderColor: '#28a745'
-              }}
-            >
-              {page}
-            </button>
-          </li>
-        ))}
-        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-          <button 
-            className="page-link" 
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            style={{ backgroundColor: currentPage === totalPages ? '#f8f9fa' : '#28a745', color: currentPage === totalPages ? '#6c757d' : 'white' }}
-          >
-            &raquo;
-          </button>
-        </li>
-      </ul>
-    </nav>
-  </div>
-)}
+            New Reward
+          </Button>
+        </header>
 
+        {/* Available Rewards Section */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            Active Rewards ({availableRewards.length})
+          </h2>
+          <Table
+            className={styles.table}
+            dataSource={paginate(availableRewards, rewardPage)}
+            columns={rewardColumns}
+            pagination={{
+              current: rewardPage,
+              pageSize: itemsPerPage,
+              total: availableRewards.length,
+              onChange: setRewardPage,
+              hideOnSinglePage: true,
+            }}
+            scroll={{ x: true }}
+            locale={{ emptyText: <div className={styles.emptyState}>No active rewards found 🌱</div> }}
+            rowKey="id"
+          />
+        </section>
 
-      {/* Add Reward Section */}
-      <div className="mt-5 p-4 border rounded" style={{ backgroundColor: '#f8f9fa' }}>
-        <h4 className="mb-4">Add New Reward</h4>
-        <Form onSubmit={handleSubmit}>
-          <div className="row">
-            <div className="col-md-6">
-              <Form.Group className="mb-3">
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="rewardName"
-                  value={formData.rewardName}
-                  onChange={handleInputChange}
-                  required
+        {/* Expired Rewards Section */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            Expired Rewards ({unavailableRewards.length})
+          </h2>
+          <Table
+            className={styles.table}
+            dataSource={paginate(unavailableRewards, rewardPage)}
+            columns={rewardColumns}
+            pagination={{
+              current: rewardPage,
+              pageSize: itemsPerPage,
+              total: unavailableRewards.length,
+              onChange: setRewardPage,
+              hideOnSinglePage: true,
+            }}
+            scroll={{ x: true }}
+            locale={{ emptyText: <div className={styles.emptyState}>No expired rewards found 🍂</div> }}
+            rowKey="id"
+          />
+        </section>
+
+        {/* Participants Section */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            Participants ({UsersSignedUpForRewards.length})
+          </h2>
+          <Table
+            className={styles.table}
+            dataSource={paginate(UsersSignedUpForRewards, userPage)}
+            columns={userColumns}
+            pagination={{
+              current: userPage,
+              pageSize: itemsPerPage,
+              total: UsersSignedUpForRewards.length,
+              onChange: setUserPage,
+              hideOnSinglePage: true,
+            }}
+            scroll={{ x: true }}
+            locale={{ emptyText: <div className={styles.emptyState}>No participants yet 🤷♂️</div> }}
+            rowKey="id"
+          />
+        </section>
+
+        {/* Reward Form Modal */}
+        <Modal
+          title={editingReward ? "Edit Reward" : "Create Reward"}
+          visible={isModalVisible}
+          onCancel={() => setModalVisible(false)}
+          footer={null}
+          className={styles.modal}
+          destroyOnClose
+        >
+          <Form layout="vertical" onFinish={formik.handleSubmit}>
+            {/* Image Upload */}
+            <Form.Item className={styles.formItem}>
+              <label className={styles.fileLabel}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className={styles.fileInput}
                 />
-              </Form.Group>
-            </div>
-            <div className="col-md-6">
-              <Form.Group className="mb-3">
-                <Form.Label>Value</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="rewardValue"
-                  value={formData.rewardValue}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="مثال: 5$"
-                />
-              </Form.Group>
-            </div>
-          </div>
+                📷 Upload Reward Image
+              </label>
+              {formik.errors.imgFile && (
+                <Text type="danger" className={styles.errorText}>
+                  {formik.errors.imgFile}
+                </Text>
+              )}
+            </Form.Item>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="rewardDesc"
-              value={formData.rewardDesc}
-              onChange={handleInputChange}
-              required
-            />
-          </Form.Group>
+            {/* Reward Name */}
+            <Form.Item className={styles.formItem}>
+              <label className={styles.formLabel}>Reward Name</label>
+              <Input
+                name="rewardName"
+                value={formik.values.rewardName}
+                onChange={formik.handleChange}
+                className={styles.formInput}
+              />
+              {formik.errors.rewardName && (
+                <Text type="danger" className={styles.errorText}>
+                  {formik.errors.rewardName}
+                </Text>
+              )}
+            </Form.Item>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Expiry Date</Form.Label>
-            <Form.Control
-              type="date"
-              name="ExpiryDate"
-              value={formData.ExpiryDate}
-              onChange={handleInputChange}
-              required
-            />
-          </Form.Group>
+            {/* Description */}
+            <Form.Item className={styles.formItem}>
+              <label className={styles.formLabel}>Description</label>
+              <Input.TextArea
+                name="rewardDesc"
+                value={formik.values.rewardDesc}
+                onChange={formik.handleChange}
+                className={styles.formInput}
+                rows={3}
+              />
+              {formik.errors.rewardDesc && (
+                <Text type="danger" className={styles.errorText}>
+                  {formik.errors.rewardDesc}
+                </Text>
+              )}
+            </Form.Item>
 
-          <h5 className="mt-4">Requirements</h5>
-          <div className="row">
-            <div className="col-md-4">
-              <Form.Group className="mb-3">
-                <Form.Label>Number of accepted announcements</Form.Label>
-                <Form.Control
+            {/* Requirements */}
+            <div className={styles.requirementsGrid}>
+              <Form.Item className={styles.formItem}>
+                <label className={styles.formLabel}>AcceptedAnnouncements</label>
+                <Input
                   type="number"
-                  name="numOfAcceptedAnnouncements"
-                  value={formData.rewardRequirements.numOfAcceptedAnnouncements}
-                  onChange={handleRequirementsChange}
-                  min="0"
+                  name="rewardRequirements.numOfAcceptedAnnouncements"
+                  value={formik.values.rewardRequirements.numOfAcceptedAnnouncements}
+                  onChange={formik.handleChange}
+                  className={styles.formInput}
+                  min={0}
                 />
-              </Form.Group>
-            </div>
-            <div className="col-md-4">
-              <Form.Group className="mb-3">
-                <Form.Label>Number of completed activities</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="numOfCompletedActivities"
-                  value={formData.rewardRequirements.numOfCompletedActivities}
-                  onChange={handleRequirementsChange}
-                  min="0"
-                />
-              </Form.Group>
-            </div>
-            <div className="col-md-4">
-              <Form.Group className="mb-3">
-                <Form.Label>Number of completed polls</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="numOfCompletedPolls"
-                  value={formData.rewardRequirements.numOfCompletedPolls}
-                  onChange={handleRequirementsChange}
-                  min="0"
-                />
-              </Form.Group>
-            </div>
-          </div>
+              </Form.Item>
 
-          <div className="d-flex justify-content-end mt-4">
-            <Button variant="secondary" onClick={handleClose} className="me-2" >
-              Cancel
-            </Button>
-            <Button variant="success" type="submit" disabled={loading}>
-              {loading ? 'Loading...' : 'Add Reward'}
-            </Button>
-          </div>
-        </Form>
-      </div>
-      
+              <Form.Item className={styles.formItem}>
+                <label className={styles.formLabel}>Completed Activities</label>
+                <Input
+                  type="number"
+                  name="rewardRequirements.numOfCompletedActivities"
+                  value={formik.values.rewardRequirements.numOfCompletedActivities}
+                  onChange={formik.handleChange}
+                  className={styles.formInput}
+                  min={0}
+                />
+              </Form.Item>
+
+              <Form.Item className={styles.formItem}>
+                <label className={styles.formLabel}>Completed Polls</label>
+                <Input
+                  type="number"
+                  name="rewardRequirements.numOfCompletedPolls"
+                  value={formik.values.rewardRequirements.numOfCompletedPolls}
+                  onChange={formik.handleChange}
+                  className={styles.formInput}
+                  min={0}
+                />
+              </Form.Item>
+            </div>
+
+            {formik.errors.rewardRequirements && (
+              <Text type="danger" className={styles.errorText}>
+                {typeof formik.errors.rewardRequirements === 'string' 
+                  ? formik.errors.rewardRequirements
+                  : Object.values(formik.errors.rewardRequirements).map((error, index) => (
+                      <div key={index}>{error}</div>
+                    ))
+                }
+              </Text>
+            )}
+
+            {/* Expiry Date */}
+            <Form.Item className={styles.formItem}>
+              <label className={styles.formLabel}>Expiry Date</label>
+              <DatePicker
+                name="ExpiryDate"
+                value={formik.values.ExpiryDate}
+                onChange={date => formik.setFieldValue('ExpiryDate', date)}
+                className={styles.formInput}
+                disabledDate={(current) => current && current < dayjs().startOf('day')}
+              />
+              {formik.errors.ExpiryDate && (
+                <Text type="danger" className={styles.errorText}>
+                  {formik.errors.ExpiryDate}
+                </Text>
+              )}
+            </Form.Item>
+
+            {/* Reward Value */}
+            <Form.Item className={styles.formItem}>
+              <label className={styles.formLabel}>Reward Value</label>
+              <Input
+                name="rewardValue"
+                value={formik.values.rewardValue}
+                onChange={formik.handleChange}
+                className={styles.formInput}
+              />
+              {formik.errors.rewardValue && (
+                <Text type="danger" className={styles.errorText}>
+                  {formik.errors.rewardValue}
+                </Text>
+              )}
+            </Form.Item>
+
+            {/* Form Actions */}
+            <div className={styles.formActions}>
+              <Button 
+                onClick={() => setModalVisible(false)} 
+                className={styles.cancelButton}
+              >
+                Cancel
+              </Button>
+              <Button
+                htmlType="submit"
+                className={styles.submitButton}
+                loading={loading}
+              >
+                {editingReward ? 'Update Reward' : 'Create Reward'}
+              </Button>
+            </div>
+          </Form>
+        </Modal>
+      </Spin>
     </div>
   );
 }

@@ -1,0 +1,254 @@
+/* RewardManagement.module.css */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fff8 0%, #e6f7ed 100%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(46, 204, 113, 0.15);
+}
+
+.title {
+  color: white;
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.addButton {
+  background: linear-gradient(135deg, #fff, #e6ffe6);
+  border: none;
+  color: #27ae60;
+  padding: 1rem 2rem;
+  border-radius: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
+.section {
+  background: white;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  box-shadow: 0 4px 25px rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.1);
+}
+
+.sectionTitle {
+  color: #2ecc71;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(46, 204, 113, 0.1);
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.table {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.tableHeader {
+  background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
+  color: white !important;
+}
+
+.tableRow {
+  transition: all 0.2s ease;
+}
+
+.tableRow:hover {
+  /*background: rgba(46, 204, 113, 0.05) !important;
+  */
+  /* transform: scale(1.01); */
+
+}
+
+.tag {
+  background: rgba(46, 204, 113, 0.15) !important;
+  color: #2ecc71 !important;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-weight: 600;
+}
+
+.modal {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.modalHeader {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white !important;
+  padding: 1.5rem;
+}
+
+.modalBody {
+  padding: 2rem;
+}
+
+.formItem {
+  margin-bottom: 1.5rem;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.formInput {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgba(46, 204, 113, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.formInput:focus {
+  border-color: #2ecc71;
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileLabel {
+  display: block;
+  padding: 1rem;
+  background: rgba(46, 204, 113, 0.1);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fileLabel:hover {
+  background: rgba(46, 204, 113, 0.2);
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border: none;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: #95a5a6;
+  background: rgba(46, 204, 113, 0.05);
+  border-radius: 20px;
+  margin: 2rem 0;
+}
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .section {
+    padding: 1rem;
+  }
+}
+/* Add to RewardManagement.module.css */
+.requirementsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.requirementTag {
+  background: rgba(46, 204, 113, 0.1) !important;
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  color: #2ecc71 !important;
+  border-radius: 8px;
+  padding: 4px 12px;
+  margin: 4px;
+  font-weight: 500;
+}
+
+.requirementTag::before {
+  content: '✓';
+  margin-right: 6px;
+  color: #27ae60;
+}
+
+.errorText {
+  display: block;
+  margin-top: 8px;
+  color: #ff4d4f;
+  font-size: 0.875rem;
+}
+
+.table tbody tr:nth-child(odd) td { 
+     background-color: #ffffff;
+
+}
+.table tbody tr:nth-child(even) td {
+  background-color: #ebf8eb;
+}
+/* RewardManagement.module.css */
+:global(.ant-table-tbody) > tr:hover > td {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  /* cursor: default !important; */
+  filter: none !important;
+}
+
+:global(.ant-table-tbody) >  tr:nth-child(even) {
+   background: #ebf8eb !important;
+}
+:global(.ant-table-tbody) >  tr:nth-child(odd) {
+   background: #ffffff !important;
+}

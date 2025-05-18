@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useUser from "../hooks/useUser";
 import { useParams } from "react-router-dom";
-import { object, string, ref } from "yup"; // Ensure you import Yup correctly
+import { object, string, ref } from "yup";
 import { useFormik } from "formik";
+import styles from './ResetPassword.module.css';
 
 const schema = object().shape({
   password: string()
@@ -20,20 +21,19 @@ export default function ResetPassword() {
   const { updateUser, fetchUser } = useUser();
   const [user, setUser] = useState({});
   const { id } = useParams();
-  const handleResetPassword = async (e) => {
+  const navigate = useNavigate();
+
+  const handleResetPassword = async (values) => {
     try {
       setSubmitting(true);
-      if (user.password === formik.values.password) {
+      if (user.password === values.password) {
         toast.error("New password cannot be the same as the old password.");
-        setSubmitting(false);
         return;
       }
-      await updateUser(id, { ...user, password: e.password });
-      toast.success("Password updated successfully.");
-      setSubmitting(false);
+      await updateUser(id, { ...user, password: values.password });
+      toast.success("Password updated successfully!");
       navigate("/login");
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
       toast.error("Failed to update password. Please try again later.");
     } finally {
       setSubmitting(false);
@@ -41,103 +41,95 @@ export default function ResetPassword() {
   };
 
   const formik = useFormik({
-    initialValues: {
-      password: "",
-      repeatPassword: "",
-    },
+    initialValues: { password: "", repeatPassword: "" },
     validationSchema: schema,
     onSubmit: handleResetPassword,
   });
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const user = await fetchUser(id);
-      setUser(user);
+      const userData = await fetchUser(id);
+      setUser(userData);
     };
     fetchUsers();
-  }, [id]);
-  const navigate = useNavigate();
+  }, [id, fetchUser]);
 
   return (
-    <div className="container my-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-6 col-md-8 col-sm-10">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center mb-4">Reset Password</h2>
-              <form onSubmit={formik.handleSubmit}>
-                {/* Password Field */}
-                <div className="form-group">
-                  <label htmlFor="password">Password</label>
-                  <input
-                    type="password"
-                    className={`form-control ${
-                      formik.touched.password && formik.errors.password
-                        ? "is-invalid"
-                        : ""
-                    }`}
-                    id="password"
-                    name="password"
-                    placeholder="Password"
-                    value={formik.values.password}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  {formik.touched.password && formik.errors.password && (
-                    <div className="invalid-feedback">
-                      {formik.errors.password}
-                    </div>
-                  )}
-                </div>
-
-                {/* Repeat Password Field */}
-                <div className="form-group">
-                  <label htmlFor="repeatPassword">Repeat Password</label>
-                  <input
-                    type="password"
-                    className={`form-control ${
-                      formik.touched.repeatPassword &&
-                      formik.errors.repeatPassword
-                        ? "is-invalid"
-                        : ""
-                    }`}
-                    id="repeatPassword"
-                    name="repeatPassword"
-                    placeholder="Repeat Password"
-                    value={formik.values.repeatPassword}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  {formik.touched.repeatPassword &&
-                    formik.errors.repeatPassword && (
-                      <div className="invalid-feedback">
-                        {formik.errors.repeatPassword}
-                      </div>
-                    )}
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className={`btn btn-primary btn-block mt-3 ${
-                    submitting && "disabled"
-                  }`}
-                  disabled={submitting}
-                >
-                  {submitting ? "Submitting..." : "update Password"}
-                </button>
-              </form>
-              <div className="mt-3 text-center">
-                <button
-                  className="btn btn-link"
-                  onClick={() => navigate("/login")}
-                >
-                  Back to Login
-                </button>
-              </div>
-            </div>
+    <div className={styles.container}>
+      <div className={styles.gradientBackground}></div>
+      
+      <div className={styles.cardWrapper}>
+        <div className={styles.authCard}>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.title}>Reset Password 🔒</h2>
+            <p className={styles.subtitle}>Create a new secure password</p>
           </div>
+
+          <form onSubmit={formik.handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                New Password
+                <input
+                  type="password"
+                  className={`${styles.input} ${
+                    formik.touched.password && formik.errors.password ? styles.error : ""
+                  }`}
+                  name="password"
+                  placeholder="••••••••"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </label>
+              {formik.touched.password && formik.errors.password && (
+                <div className={styles.errorMessage}>{formik.errors.password}</div>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Confirm Password
+                <input
+                  type="password"
+                  className={`${styles.input} ${
+                    formik.touched.repeatPassword && formik.errors.repeatPassword ? styles.error : ""
+                  }`}
+                  name="repeatPassword"
+                  placeholder="••••••••"
+                  value={formik.values.repeatPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </label>
+              {formik.touched.repeatPassword && formik.errors.repeatPassword && (
+                <div className={styles.errorMessage}>{formik.errors.repeatPassword}</div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <div className={styles.spinner}></div>
+              ) : (
+                'Reset Password'
+              )}
+            </button>
+
+            <div className={styles.footer}>
+              <button
+                type="button"
+                className={styles.backButton}
+                onClick={() => navigate("/login")}
+              >
+                ← Back to Login
+              </button>
+            </div>
+          </form>
         </div>
+ 
       </div>
     </div>
   );

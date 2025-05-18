@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Button, Table, Badge, Toast, ToastContainer, Modal, Row, Col, Spinner } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
 
 const API_URL = 'http://localhost:3000/requests';
 
 const WasteCollectionApp = () => {
+  const{id}=useParams();
   // Initial form state
   const initialFormState = {
     id: '',
@@ -17,7 +19,8 @@ const WasteCollectionApp = () => {
     pickupDate: '',
     pickupTime: '',
     notes: '',
-    paymentMethod: 'electronic'
+    paymentMethod: 'electronic',
+    userId:id
   };
 
   // State management

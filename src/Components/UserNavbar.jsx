@@ -134,7 +134,7 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="requestSpecialWaste" className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`requestSpecialWaste/${id}`} className="nav-link" onClick={toggleSidebar}>
               RequestSpecialWaste
             </NavLink>
           </li>
