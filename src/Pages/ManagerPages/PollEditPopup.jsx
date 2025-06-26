@@ -19,7 +19,7 @@ const schema = object().shape({
     .required("Form link is required"),
   imgFile: mixed().required("Image is required"),
   // حقل رابط Excel خارجي، يصبح اختياري أو يمكن التحقق منه
-  excelFile: string().required("Excel file link is required").url("Invalid URL format"),
+  excelFileLink: string().required("Excel file link is required").url("Invalid URL format"),
 });
 
 export default function PollEditPopup({ poll, onSave, onClose }) {
@@ -30,7 +30,7 @@ export default function PollEditPopup({ poll, onSave, onClose }) {
       pollEndDate: "",
       pollFormLink: "",
       imgFile: "",
-      excelFile: "",
+      excelFileLink: "",
     },
     validationSchema: schema,
     onSubmit: (data) => {
@@ -67,16 +67,20 @@ export default function PollEditPopup({ poll, onSave, onClose }) {
   };
 
   useEffect(() => {
-    if (poll) {
+    
+    if (poll) {    console.log("Poll data received:", poll);
+      console.log("Setting initial form values with poll data:", poll);
+  console.log("Poll data received:", poll);
+  
       formik.setValues({
         pollName: poll.pollName || "",
         pollDesc: poll.pollDesc || "",
         pollEndDate: poll.pollEndDate
           ? new Date(poll.pollEndDate).toISOString().split("T")[0]
           : "",
-        pollFormLink: poll.pollFormLink || "",
-        imgFile: poll.imgFile || "",
-        excelFile: poll.excelFile || "",
+        pollFormLink: poll.pollLink || "",
+        imgFile: poll.photo || "",
+        excelFileLink: poll.excelFileLink || "",
       });
     }
 
@@ -197,23 +201,23 @@ export default function PollEditPopup({ poll, onSave, onClose }) {
             </div>
           )}
 
-          <label htmlFor="excelFile" className={styles.label}>
+          <label htmlFor="excelFileLink" className={styles.label}>
             📊 External Excel Link:
           </label>
           <input
             type="text"
-            id="excelFile"
-            name="excelFile"
+            id="excelFileLink"
+            name="excelFileLink"
             placeholder="Enter external Excel link"
-            value={formik.values.excelFile}
+            value={formik.values.excelFileLink}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className={`form-control ${styles.input} ${
-              formik.touched.excelFile && formik.errors.excelFile ? "is-invalid shadow-none" : ""
+              formik.touched.excelFileLink && formik.errors.excelFileLink ? "is-invalid shadow-none" : ""
             }`}
           />
-          {formik.touched.excelFile && formik.errors.excelFile && (
-            <div className="invalid-feedback">{formik.errors.excelFile}</div>
+          {formik.touched.excelFileLink && formik.errors.excelFileLink && (
+            <div className="invalid-feedback">{formik.errors.excelFileLink}</div>
           )}
 
 <div className={styles.modalButtons}>
@@ -240,8 +244,10 @@ PollEditPopup.propTypes = {
     pollDesc: PropTypes.string,
     pollEndDate: PropTypes.string,
     pollFormLink: PropTypes.string,
+    pollLink: PropTypes.string,
     imgFile: PropTypes.string,
-    excelFile: PropTypes.string,
+    photo: PropTypes.string,
+    excelFileLink: PropTypes.string,
   }),
   onSave: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,

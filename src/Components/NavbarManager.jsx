@@ -115,7 +115,7 @@
 
 //         <ul className="sidebar-links">
 //           <li>
-//             <NavLink to={`/managerDashboard/${id}`} className="nav-link" onClick={toggleSidebar}>
+//             <NavLink to={`/managerDashboard`} className="nav-link" onClick={toggleSidebar}>
 //                Home
 //             </NavLink>
 //           </li>
@@ -145,7 +145,7 @@
 //             </NavLink>
 //           </li>
 //           <li>
-//             <NavLink to={`userManagement/${id}`} className="nav-link" onClick={toggleSidebar}>
+//             <NavLink to={`userManagement`} className="nav-link" onClick={toggleSidebar}>
 //             User Management
 //             </NavLink>
 //           </li>
@@ -160,7 +160,7 @@
 //             </NavLink>
 //           </li>
 //           <li>
-//             <NavLink to={`settings/${id}`} className="nav-link" onClick={toggleSidebar}>
+//             <NavLink to={`settings`} className="nav-link" onClick={toggleSidebar}>
 //             Settings
 //             </NavLink>
 //           </li>
@@ -180,109 +180,111 @@
 
 // export default CustomNavbar;
 
+// src/Components/CustomNavbar.jsx
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { FaUserTie, FaBars, FaTimes } from "react-icons/fa";
+import { NavLink, useParams } from "react-router-dom";
+import { FaBars, FaTimes } from "react-icons/fa";
 import "./ManagerNavbar.css";
-import { useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const CustomNavbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { id } = useParams();
-  const { cookies } = useAuth();
-  const userPermissions = cookies.user.Permissions || [];
+  const { user } = useAuth();                       // ← get `user` directly
+  const userPermissions = user?.Permissions || [];  // ← guard against undefined
 
-  // Define permission-based routes
   const routes = [
     {
-      path: `/managerDashboard/${id}`,
+      path: `/managerDashboard`,
       label: "Home",
       requiredRoles: [
-        "admin",
-        "ManageTrucks",
-        "ManageAnnouncement",
-        "ManageReportsAndDataAnalysis",
+        "Admin",
+        "TruckManagement",
+        "AnnouncementManagement",
+        "ReportsAndDataAnalysisManagement",
         "CommunityEngagementManagement",
         "UserManagement",
         "PollsManagement",
         "RewardsManagement",
         "WasteBinManagement",
-        "RecycleManagement",
+        "RecylingManagemnet",
         "RequestSpecialWasteManagement",
-
       ],
     },
     {
-      path: "manageAnnouncement",
+      path: `/managerDashboard/manageAnnouncement`,
       label: "Announcement Management",
-      requiredRoles: ["admin", "ManageAnnouncement"],
+      requiredRoles: ["Admin", "AnnouncementManagement"],
     },
     {
-      path: "manageTrucks",
-      label: "WareHouse Management",
-      requiredRoles: ["admin", "ManageTrucks"],
+      path: `/managerDashboard/manageTrucks`,
+      label: "Warehouse Management",
+      requiredRoles: ["Admin", "TruckManagement"],
     },
     {
-      path: "wasteBinManagement",
-      label: "WareHouse Store",
-      requiredRoles: ["admin", "WasteBinManagement"],
+      path: `/managerDashboard/wasteBinManagement`,
+      label: "Warehouse Store",
+      requiredRoles: ["Admin", "WasteBinManagement"],
     },
     {
-      path: "rewardsManagement",
+      path: `/managerDashboard/rewardsManagement`,
       label: "Rewards Management",
-      requiredRoles: ["admin", "RewardsManagement"],
+      requiredRoles: ["Admin", "RewardsManagement"],
     },
     {
-      path: "communityEngagementManagement",
+      path: `/managerDashboard/communityEngagementManagement`,
       label: "Community Engagement Management",
-      requiredRoles: ["admin", "CommunityEngagementManagement"],
+      requiredRoles: ["Admin", "CommunityEngagementManagement"],
     },
     {
-      path: `userManagement/${id}`,
+      path: `/managerDashboard/userManagement`,
       label: "User Management",
-      requiredRoles: ["admin", "UserManagement"],
+      requiredRoles: ["Admin", "UserManagement"],
     },
     {
-      path: "pollsManagement",
+      path: `/managerDashboard/pollsManagement`,
       label: "Polls Management",
-      requiredRoles: ["admin", "PollsManagement"],
+      requiredRoles: ["Admin", "PollsManagement"],
     },
     {
-      path: "RecycleManagement",
+      path: `/managerDashboard/RecycleManagement`,
       label: "Recycle Management",
-      requiredRoles: ["admin", "RecycleManagement"],
+      requiredRoles: ["Admin", "RecylingManagemnet"],
     },
     {
-      path: "RequestSpecialWasteManagement",
+      path: `/managerDashboard/RequestSpecialWasteManagement`,
       label: "Request Waste Management",
-      requiredRoles: ["admin", "RequestSpecialWasteManagement"],
+      requiredRoles: [
+        "Admin",
+        "RequestSpecialWasteManagement",
+        "AnnouncementManagement",
+      ],
     },
     {
-      path: "notifications",
+      path: `/managerDashboard/notifications`,
       label: "Notifications",
       requiredRoles: [
-        "admin",
-        "ManageTrucks",
-        "ManageAnnouncement",
-        "ManageReportsAndDataAnalysis",
+        "Admin",
+        "TruckManagement",
+        "AnnouncementManagement",
+        "ReportsAndDataAnalysisManagement",
         "CommunityEngagementManagement",
         "UserManagement",
         "PollsManagement",
         "RewardsManagement",
         "WasteBinManagement",
-        "RecycleManagement",
+        "RecylingManagemnet",
         "RequestSpecialWasteManagement",
       ],
     },
     {
-      path: `settings/${id}`,
+      path: `/managerDashboard/settings`,
       label: "Settings",
       requiredRoles: [
-        "admin",
-        "ManageTrucks",
-        "ManageAnnouncement",
-        "ManageReportsAndDataAnalysis",
+        "Admin",
+        "TruckManagement",
+        "AnnouncementManagement",
+        "ReportsAndDataAnalysisManagement",
         "CommunityEngagementManagement",
         "UserManagement",
         "PollsManagement",
@@ -291,15 +293,13 @@ const CustomNavbar = () => {
       ],
     },
     {
-      path: "manageReportsAndDataAnalysis",
+      path: `/managerDashboard/manageReportsAndDataAnalysis`,
       label: "Reports & Data Analysis Management",
-      requiredRoles: ["admin", "ManageReportsAndDataAnalysis"],
+      requiredRoles: ["Admin", "ReportsAndDataAnalysisManagement"],
     },
   ];
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = () => setSidebarOpen((open) => !open);
 
   return (
     <>
@@ -325,7 +325,7 @@ const CustomNavbar = () => {
         </ul>
       </div>
 
-      {sidebarOpen && <div className="overlay" onClick={toggleSidebar}></div>}
+      {sidebarOpen && <div className="overlay" onClick={toggleSidebar} />}
     </>
   );
 };

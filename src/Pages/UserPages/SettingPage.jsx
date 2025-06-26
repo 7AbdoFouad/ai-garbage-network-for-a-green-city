@@ -1,90 +1,136 @@
 import React, { useState, useEffect } from "react";
-import useUser from "../../hooks/useUser";
- import { useParams } from "react-router-dom";
-import EditProfileModal from "./EditProfileModal"; // Import modal component
+import { useParams } from "react-router-dom";
+import EditProfileModal from "./EditProfileModal";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 import settingstyle from "./setting.module.css";
+import Cookies from "js-cookie";
 
 export default function SettingPage() {
   const { id } = useParams();
-  const { fetchUser, updateUser } = useUser();
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(() => {
+    // Initialize from localStorage if available
+    const savedUser = localStorage.getItem('userProfile');
+    return savedUser ? JSON.parse(savedUser) : {};
+  });
   const [profileImage, setProfileImage] = useState("");
   const { logout } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user profile from API
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
+      const token = Cookies.get("token");
+      const response = await fetch("/api/Users/my-profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error("Failed to fetch user profile");
+      
+      const data = await response.json();
+      
+      // Save to state and localStorage
+      setUser(data);
+      localStorage.setItem('userProfile', JSON.stringify(data));
+      
+      // Set profile image
+      setProfileImage(data.profileImage || "");
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await fetchUser(id);
-      setUser(data);
-      setProfileImage(data.profileImage); // Set initial profile image
-    };
-    fetchData();
-  }, [id]);
+    fetchUserProfile();
+  }, []);
 
   // Handle profile image change
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
+    if (!file) return;
 
-      reader.onloadend = async () => {
-        const newProfileImage = reader.result;
+    try {
+      const token = Cookies.get("token");
+      const formData = new FormData();
+      formData.append("profileimage", file);
+      
+      // Add other user fields that need to be preserved
+      formData.append("name", user.name);
+      formData.append("phone", user.phone);
+      formData.append("address", user.address);
 
-        setProfileImage(newProfileImage); // Set preview image
+      const response = await fetch("/api/Users/my-profile", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-        try {
-          await updateUser(id, { ...user, profileImage: newProfileImage });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update profile image");
+      }
 
-          setUser((prevUser) => ({
-            ...prevUser,
-            profileImage: newProfileImage, // Update state after successful update
-          }));
-
-          toast.success("Profile image updated successfully!");
-        } catch (error) {
-          console.error("Failed to update profile image:", error);
-          toast.error("An error occurred while updating the image.");
-        }
-      };
-
-      reader.readAsDataURL(file);
+      // Success - refetch updated profile data
+      await fetchUserProfile();
+      toast.success("Profile image updated successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Failed to update profile image");
     }
   };
 
-  // State for the modal
-  const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState({});
+  // Update user profile
+  const updateUserProfile = async (updatedData) => {
+    try {
+      const token = Cookies.get("token");
+      const formData = new FormData();
+      
+      // Append updated fields
+      formData.append("name", updatedData.name);
+      formData.append("phone", updatedData.phone);
+      formData.append("address", updatedData.address);
+      
+      const response = await fetch("/api/Users/my-profile", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-  useEffect(() => {
-    setUserData({
-      name: user.name || "",
-      address: user.Address || "", // Renamed to "address"
-      profileImage: profileImage || "",
-      email: user.email || "",
-      password: user.password || "",
-      numOfAcceptedAnnouncementsCount:
-        user.numOfAcceptedAnnouncementsCount || 0,
-      numOfCompletedActivitiesCount: user.numOfCompletedActivitiesCount || 0,
-      numOfCompletedPollsCount: user.numOfCompletedPollsCount || 0,
-    });
-  }, [user, profileImage]);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update profile");
+      }
 
-  // Handle input change
-  const handleChange = (e) => {
-    setUserData({ ...userData, [e.target.name]: e.target.value });
+      // Success - refetch updated profile data
+      await fetchUserProfile();
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Failed to update profile");
+      throw error;
+    }
   };
 
-  // Save data to JSON file
-  const saveData = async (data) => {
-    await updateUser(id, { ...user, ...data });
-    setUser((prevUser) => ({
-      ...prevUser,
-      ...data, // Update state after successful update
-    }));
-    toast.success("Data saved successfully!");
-    setIsEditing(false);
-  };
+  if (loading) {
+    return (
+      <div className={settingstyle.container}>
+        <div className={settingstyle.loading}>
+          <div className={settingstyle.spinner}></div>
+          <p>Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={settingstyle.container}>
@@ -93,7 +139,11 @@ export default function SettingPage() {
         className={settingstyle.profilePicture}
         onClick={() => document.getElementById("fileInput").click()}
       >
-        <img src={profileImage} alt="Profile" className={settingstyle.profileImage} />
+        <img 
+          src={profileImage || "https://www.placeholderimage.online/images/generic/user-profile-images.jpg"} 
+          alt="Profile" 
+          className={settingstyle.profileImage} 
+        />
         <input
           type="file"
           id="fileInput"
@@ -103,16 +153,32 @@ export default function SettingPage() {
         />
       </div>
 
-      {/* Profile Info */}
+   {/* Profile Info */}
       <div className={settingstyle.profileInfo}>
         <div className={settingstyle.profileField}>
-          <strong>Username:</strong>{" "}
+          <strong>Name:</strong>{" "}
           <input
             className={settingstyle.inputField}
-            name="username"
-            value={userData.name}
-            // onChange={handleChange}
-            disabled={!isEditing}
+            value={user.name || ""}
+            disabled
+          />
+        </div>
+
+        <div className={settingstyle.profileField}>
+          <strong>Email:</strong>{" "}
+          <input
+            className={settingstyle.inputField}
+            value={user.email || ""}
+            disabled
+          />
+        </div>
+
+        <div className={settingstyle.profileField}>
+          <strong>Phone:</strong>{" "}
+          <input
+            className={settingstyle.inputField}
+            value={user.phone || ""}
+            disabled
           />
         </div>
 
@@ -120,49 +186,26 @@ export default function SettingPage() {
           <strong>Address:</strong>{" "}
           <input
             className={settingstyle.inputField}
-            name="address"
-            value={userData.address}
-            // onChange={handleChange}
-            disabled={!isEditing}
-          />
-        </div>
-        <div className={settingstyle.profileField}>
-          <strong>Email:</strong>{" "}
-          <input
-            className={settingstyle.inputField}
-            name="email"
-            value={userData.email}
-            // onChange={handleChange}
+            value={user.address || ""}
             disabled
-          />
-        </div>
-        <div className={settingstyle.profileField}>
-          <strong>Password:</strong>{" "}
-          <input
-            className={ settingstyle.inputField}
-            type="text"
-            name="password"
-            value={userData.password}
-            // onChange={handleChange}
-            disabled={!isEditing}
           />
         </div>
       </div>
 
       {/* User Statistics */}
       <div className={settingstyle.permissions}>
-                <h4>User Statistics</h4>
+        <h4>User Statistics</h4>
         <li style={{ listStyleType: "none" }}>
-          📌 Number of accepted announcements you have submitted:{" "}
-          <strong>{userData.numOfAcceptedAnnouncementsCount}</strong>
+          📌 Accepted announcements:{" "}
+          <strong>{user.numOfAcceptedAnnouncementsCount || 0}</strong>
         </li>
         <li style={{ listStyleType: "none" }}>
-          📌 Number of social activities you registered and completed successfully:{" "}
-          <strong>{userData.numOfCompletedActivitiesCount}</strong>
+          📌 Completed activities:{" "}
+          <strong>{user.numOfCompletedActivitiesCount || 0}</strong>
         </li>
         <li style={{ listStyleType: "none" }}>
-          📌 Number of completed polls:{" "}
-          <strong>{userData.numOfCompletedPollsCount}</strong>
+          📌 Completed polls:{" "}
+          <strong>{user.numOfCompletedPollsCount || 0}</strong>
         </li>
       </div>
 
@@ -185,9 +228,8 @@ export default function SettingPage() {
       {/* Edit Profile Modal */}
       {isEditing && (
         <EditProfileModal
-          userData={userData}
-          handleChange={handleChange}
-          saveData={saveData}
+          userData={user}
+          updateUserProfile={updateUserProfile}
           closeModal={() => setIsEditing(false)}
         />
       )}

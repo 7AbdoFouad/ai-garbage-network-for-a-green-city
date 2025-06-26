@@ -1,45 +1,26 @@
-import React, { useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+// src/Components/withAuthorization.jsx
+import React from "react";
+import { Navigate, useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { toast } from "react-toastify";
 
-function withAuthorization(Component, requiredRole) {
-  return function AuthRoute(props) {
-    const { isLoggedIn, user, islogoutyet, setIslogoutyet } = useAuth();
-    const location = useLocation();
+export default function withAuthorization(Component, allowedRoles = []) {
+  return function Wrapped(props) {
+    const { user } = useAuth();
+    const { id } = useParams();
 
-    // Store last active page before redirection
-    useEffect(() => {
-      if (isLoggedIn) {
-        sessionStorage.setItem("lastActivePath", location.pathname);
-      }
-    }, [location.pathname, isLoggedIn]);
+    // If not logged in, send to /login
+    if (!user) return <Navigate to="/login" replace />;
 
-    if (islogoutyet) {
-      setIslogoutyet(false);
-      toast.error("Logout successfully");
-      return <Navigate to="/login" replace />;
-    }
-
-    if (!isLoggedIn) {
-      toast.error("You need to login to view this page");
-      return <Navigate to="/login" replace />;
-    }
-    // [1, 2, 3].includes(2) => true
+    // If allowedRoles is empty, allow all logged-in users
     if (
-      requiredRole &&
-      !requiredRole.some((role) => user.Permissions.includes(role))
+      allowedRoles.length > 0 &&
+      !allowedRoles.includes(user.role)
     ) {
-      toast.error("You are not authorized to view this page");
-
-      // Retrieve the last active page (before unauthorized attempt)
-      const lastActivePath = sessionStorage.getItem("lastActivePath") || "/";
-
-      return <Navigate to={lastActivePath} replace />;
+      // forbidden
+      return <Navigate to="*" replace />;
     }
 
+    // all good
     return <Component {...props} />;
   };
 }
-
-export default withAuthorization;

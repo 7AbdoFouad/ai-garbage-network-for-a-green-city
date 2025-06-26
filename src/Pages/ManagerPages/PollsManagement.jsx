@@ -1,6 +1,4 @@
-// PollsManagement.js
-import React, { useState } from "react";
-import useUser from "../../hooks/useUser";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./PollsManagement.module.css";
 import PollEditPopup from "./PollEditPopup";
 import PollResultsPopup from "./PollResultsPopup";
@@ -8,11 +6,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import { Table, Button } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 import { IoIosAddCircle } from "react-icons/io";
 import { IoIosCloudDone } from "react-icons/io";
 import { MdOutlinePendingActions } from "react-icons/md";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
 
 import {
   Chart as ChartJS,
@@ -42,50 +42,78 @@ const pollValidationSchema = Yup.object({
     .min(5, "Description must be at least 5 characters"),
   pollEndDate: Yup.date()
     .required("End date is required")
-    .test(
-      "is-future",
-      "The expiry date must be in the future",
-      function (value) {
-        return value > new Date();
-      }
-    ),
+    // .test(
+    //   "is-future",
+    //   "The expiry date must be in the future",
+    //   function (value) {
+    //     return value > new Date();
+    //   }
+    // ),
+    ,
   pollFormLink: Yup.string()
     .url("Invalid URL format")
     .required("Form link is required"),
   imgFile: Yup.mixed().required("Image is required"),
-  excelFile: Yup.string()
+  excelFileLink: Yup.string()
     .required("Excel file link is required")
     .url("Invalid URL format"),
 });
 
 export default function PollsManagement() {
-  const { Polls, SubscribersOfPolls, deletePoll, updatePoll, users, addPoll } =
-    useUser();
+  const [polls, setPolls] = useState([]);
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedResultsPoll, setSelectedResultsPoll] = useState(null);
   const [showResultsPopup, setShowResultsPopup] = useState(false);
-
   const [excelData, setExcelData] = useState([]);
   const [questionResults, setQuestionResults] = useState({});
   const [questions, setQuestions] = useState([]);
+  const inputRef = useRef();
+  const [loading, setLoading] = useState(false);
 
-  const [availableCurrentPagePolls, setAvailableCurrentPagePolls] = useState(
-    parseInt(sessionStorage.getItem("availableCurrentPagePolls")) || 1
-  );
-  const [completedCurrentPagePolls, setCompletedCurrentPagePolls] = useState(
-    parseInt(sessionStorage.getItem("completedCurrentPagePolls")) || 1
-  );
+  // Pagination states
+  const [availableCurrentPagePolls, setAvailableCurrentPagePolls] = useState(1);
+  const [completedCurrentPagePolls, setCompletedCurrentPagePolls] = useState(1);
   const PollsItemsPerPage = 5;
+
+  // Fetch token from cookies
+  const getAuthToken = () => {
+    return Cookies.get("token");
+  };
+
+  // Fetch polls from API
+  const fetchPolls = async () => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch("/api/Polls", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error("Failed to fetch polls");
+      
+      const data = await response.json();
+      setPolls(data);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchPolls();
+  }, []);
+
+  // Handle pagination changes
   const handleAvailablePagePollsChange = (page) => {
     setAvailableCurrentPagePolls(page);
-    sessionStorage.setItem("availableCurrentPagePolls", page);
   };
 
   const handleCompletedPagePollsChange = (page) => {
     setCompletedCurrentPagePolls(page);
-    sessionStorage.setItem("completedCurrentPagePolls", page);
   };
+
+  // Handle image upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -95,39 +123,73 @@ export default function PollsManagement() {
     }
   };
 
+  // Edit poll handler
   const handleEdit = (poll) => {
     setSelectedPoll(poll);
     setShowEditPopup(true);
   };
 
-  const handleDelete = (pollId) => {
+  // Delete poll handler
+  const handleDelete = async (pollId) => {
     try {
-      deletePoll(pollId);
+      const token = getAuthToken();
+      const response = await fetch(`/api/Polls/${pollId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error("Failed to delete poll");
+      
       toast.success("Poll deleted successfully!");
-      // Fix pagination if page becomes empty
-      const newTotalPages = Math.ceil((completedPolls.length - 1) / PollsItemsPerPage );
-      if ( completedCurrentPagePolls> newTotalPages) {
-      const newPage = Math.max(newTotalPages - 1, 1);
-      setCompletedCurrentPagePolls(newPage);
-      sessionStorage.setItem("completedCurrentPagePolls", newPage); 
-      }
-    } catch {
-      toast.error("Failed to delete poll. Please try again later.");
+      fetchPolls(); // Refresh polls list
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
+  // Show results handler
   const handleShowResults = (poll) => {
     setSelectedResultsPoll(poll);
     setShowResultsPopup(true);
   };
 
-  const handleSave = (updatedPoll) => {
+  // Save updated poll
+  const handleSave = async (updatedPoll) => {
     try {
-      updatePoll(updatedPoll.id, updatedPoll);
+      const token = getAuthToken();
+      const formData = new FormData();
+      
+      // Append updated fields
+      formData.append("pollName", updatedPoll.pollName);
+      formData.append("pollDesc", updatedPoll.pollDesc);
+      formData.append("pollEndDate", updatedPoll.pollEndDate);
+      formData.append("pollLink", updatedPoll.pollFormLink);
+      formData.append("photo", updatedPoll.imgFile || "0");
+      formData.append("excelFileLink", updatedPoll.excelFileLink);
+      
+      // Handle image update if changed
+      if (updatedPoll.imgFile && updatedPoll.imgFile.startsWith("data:image")) {
+        const blob = await fetch(updatedPoll.imgFile).then(r => r.blob());
+        formData.append("photo", blob, "poll-image.png");
+      }
+      
+      const response = await fetch(`/api/Polls/${updatedPoll.id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) throw new Error("Failed to update poll");
+      
       toast.success("Poll updated successfully!");
+      fetchPolls(); // Refresh polls list
       setShowEditPopup(false);
-    } catch {
-      toast.error("Failed to update poll. Please try again later.");
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -138,22 +200,58 @@ export default function PollsManagement() {
       pollEndDate: "",
       pollFormLink: "",
       imgFile: "",
-      excelFile: "",
+      excelFileLink: "",
     },
     validationSchema: pollValidationSchema,
-    onSubmit: (values, { resetForm }) => {
-      const newPoll = {
-        ...values,
-        pollFormLink: values.pollFormLink.includes("&lang=en")
-          ? values.pollFormLink
-          : values.pollFormLink + "&lang=en",
-      };
-      addPoll(newPoll);
-      toast.success("New poll added successfully!");
-      resetForm();
+    onSubmit: async (values, { resetForm }) => {
+      setLoading(true);
+      try {
+        const token = getAuthToken();
+        const formData = new FormData();
+        
+        // Append form values
+        formData.append("pollName", values.pollName);
+        formData.append("pollDesc", values.pollDesc);
+        formData.append("pollDate", new Date().toISOString().split("T")[0]);
+        formData.append("pollEndDate", values.pollEndDate);
+        formData.append("numOfSubscribers", "0");
+        formData.append("pollLink", values.pollFormLink);
+        formData.append("excelFileLinkLink", values.excelFileLinkLink);
+        
+        // Handle image upload
+        if (values.imgFile) {
+          const blob = await fetch(values.imgFile).then(r => r.blob());
+          formData.append("photo", blob, "poll-image.png");
+        }
+        
+        const response = await fetch("/api/Polls", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to add poll");
+        }
+        
+        toast.success("New poll added successfully!");
+        inputRef.current.value = null;
+
+        fetchPolls(); // Refresh polls list
+        resetForm();
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setLoading(false);
+      }
     },
   });
+  ;
 
+  // Handle Excel file upload for analysis
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -180,145 +278,135 @@ export default function PollsManagement() {
     }
   };
 
-  const underway = Polls.filter((p) => new Date(p.pollEndDate) > new Date());
-  const completed = Polls.filter((p) => new Date(p.pollEndDate) <= new Date());
+  // Filter polls
+  const underway = polls.filter((p) => new Date(p.pollEndDate) > new Date());
+  const completed = polls.filter((p) => new Date(p.pollEndDate) <= new Date());
 
-  // Pagination for available Polls
-  const availablePolls = underway;
-  const paginatedAvailablePolls = availablePolls.slice(
+  // Paginate polls
+  const paginatedAvailablePolls = underway.slice(
     (availableCurrentPagePolls - 1) * PollsItemsPerPage,
     availableCurrentPagePolls * PollsItemsPerPage
   );
-  const totalAvailablePollsPages = Math.ceil(
-    availablePolls.length / PollsItemsPerPage
-  );
-  //------------------------
-  // Pagination for completed Polls
-  const completedPolls = completed;
-  const paginatedCompletedPolls = completedPolls.slice(
+  
+  const paginatedCompletedPolls = completed.slice(
     (completedCurrentPagePolls - 1) * PollsItemsPerPage,
     completedCurrentPagePolls * PollsItemsPerPage
   );
-  const totalCompletedPollsPages = Math.ceil(
-    completedPolls.length / PollsItemsPerPage
-  );
+  
+  const totalAvailablePollsPages = Math.ceil(underway.length / PollsItemsPerPage);
+  const totalCompletedPollsPages = Math.ceil(completed.length / PollsItemsPerPage);
+
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>📊 Manage Surveys</h2>
 
+      {/* Underway Polls Section */}
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}><MdOutlinePendingActions fontSize={90}/>
-        Underway Polls</h3>
+        <h3 className={styles.sectionTitle}>
+          <MdOutlinePendingActions fontSize={90} /> Underway Polls
+        </h3>
         <table className={styles.pollTable}>
           <thead>
             <tr>
               <th>Name</th>
               <th>Description</th>
               <th>End Date</th>
-              <th>Participants</th>
-              <th>Rate</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedAvailablePolls.map((poll) => {
-              const count = SubscribersOfPolls.filter(
-                (s) => s.pollId === poll.id
-              ).length;
-              return (
-                <tr key={poll.id}>
-                  <td>{poll.pollName}</td>
-                  <td>{poll.pollDesc}</td>
-                  <td style={{ width: "15%" }}>{poll.pollEndDate}</td>
-                  <td>{count}</td>
-                  <td>{((count * 100) / users.length).toFixed(2)}%</td>
-                  <td style={{ width: "10%" }}>
-                    <button
-                      className={styles.editBtn}
-                      onClick={() => handleEdit(poll)}
-                    >
-                      <span style={{ marginLeft: "-5px" }}>✏️ Edit </span>
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
+            {paginatedAvailablePolls.map((poll) => (
+              <tr key={poll.id}>
+                <td>{poll.pollName}</td>
+                <td>{poll.pollDesc}</td>
+                <td>{poll.pollEndDate.split("T")[0]}</td>
+                <td>
+                  <button
+                    className={styles.editBtn}
+                    onClick={() => handleEdit(poll)}
+                  >
+                    <span style={{marginLeft: "-8px"}}>
+                    ✏️ Edit</span>
+                  </button>
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => handleDelete(poll.id)}
+                  >
+                    🗑️ Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        {/* Pagination */}
+            <div className={styles.paginationContainer}>
+              <div>
+                {Array.from({ length: totalAvailablePollsPages }, (_, i) => (
+                  <Button
+                    key={i + 1}
+                    variant={
+                      availableCurrentPagePolls === i + 1 ? "primary" : "light"
+                    }
+                    style={{
+                      backgroundColor:
+                        availableCurrentPagePolls === i + 1 ? "#2e7d32" : "#ddf7e9",
+                      color: availableCurrentPagePolls === i + 1 ? "white" : "black",
+                      border:
+                        availableCurrentPagePolls === i + 1 ? "#2e7d32" : "#ddf7e9",
+                    }}
+                    onClick={() => handleAvailablePagePollsChange(i + 1)}
+                    className={styles.paginationButton}
+                  >
+                    {i + 1}
+                  </Button>
+                ))}
+              </div>
+              <p style={{ fontWeight: "bold" }}>
+                Number of Available Polls: {underway.length}
+              </p>
+            </div>
       </section>
-      <div className={styles.paginationContainer}>
-        <div>
-          {Array.from({ length: totalAvailablePollsPages }, (_, i) => (
-            <Button
-              key={i + 1}
-              variant={
-                availableCurrentPagePolls === i + 1 ? "primary" : "light"
-              }
-              style={{
-                backgroundColor:
-                  availableCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
-                color: availableCurrentPagePolls === i + 1 ? "white" : "black",
-                border:
-                  availableCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
-              }}
-              onClick={() => handleAvailablePagePollsChange(i + 1)}
-              className={styles.paginationButton}
-            >
-              {i + 1}
-            </Button>
-          ))}
-        </div>
-        <p style={{ fontWeight: "bold" }}>
-          Number of Available Polls: {availablePolls.length}
-        </p>
-      </div>
 
+      {/* Completed Polls Section */}
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}><IoIosCloudDone fontSize={90} />&nbsp;
-        Completed Polls</h3>
+        <h3 className={styles.sectionTitle}>
+          <IoIosCloudDone fontSize={90} /> Completed Polls
+        </h3>
         <table className={styles.pollTable}>
           <thead>
             <tr>
               <th>Name</th>
               <th>Description</th>
               <th>End Date</th>
-              <th>Participants</th>
-              <th>Rate</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedCompletedPolls.map((poll) => {
-              const count = SubscribersOfPolls.filter(
-                (s) => s.pollId === poll.id
-              ).length;
-              return (
-                <tr key={poll.id}>
-                  <td>{poll.pollName}</td>
-                  <td>{poll.pollDesc}</td>
-                  <td style={{ width: "15%" }}>{poll.pollEndDate}</td>
-                  <td>{count}</td>
-                  <td>{((count * 100) / users.length).toFixed(2)}%</td>
-                  <td style={{ width: "12%" }}>
-                    <button
-                      className={styles.viewBtn}
-                      onClick={() => handleShowResults(poll)}
-                    >
-                      📊 Results
-                    </button>
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={() => handleDelete(poll.id)}
-                    >
-                      🗑 Delete
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
+            {paginatedCompletedPolls.map((poll) => (
+              <tr key={poll.id}>
+                <td>{poll.pollName}</td>
+                <td>{poll.pollDesc}</td>
+                <td>{poll.pollEndDate.split("T")[0]}</td>
+                <td>
+                  <button
+                    className={styles.viewBtn}
+                    onClick={() => handleShowResults(poll)}
+                  >
+                    📊 Results
+                  </button>
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => handleDelete(poll.id)}
+                  >
+                    🗑 Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-      </section>
+        {/* Pagination */}
       <div className={styles.paginationContainer}>
         <div>
           {Array.from({ length: totalCompletedPollsPages }, (_, i) => (
@@ -329,10 +417,10 @@ export default function PollsManagement() {
               }
               style={{
                 backgroundColor:
-                completedCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
+                completedCurrentPagePolls === i + 1 ? "#2e7d32" : "#ddf7e9",
                 color: completedCurrentPagePolls === i + 1 ? "white" : "black",
                 border:
-                  completedCurrentPagePolls === i + 1 ? "#2e7d32" : "white",
+                  completedCurrentPagePolls === i + 1 ? "#2e7d32" : "#ddf7e9",
               }}
               onClick={() => handleCompletedPagePollsChange(i + 1)}
               className={styles.paginationButton}
@@ -342,13 +430,18 @@ export default function PollsManagement() {
           ))}
         </div>
         <p style={{ fontWeight: "bold" }}>
-        Number Of Completed Polls: {completedPolls.length}
+        Number Of Completed Polls: {completed.length}
         </p>
       </div>
-      <section className={styles.addSection}>
-        <h3 className={styles.sectionTitle}> <IoIosAddCircle fontSize={"5rem"}/>
-   <span>     Add New Poll </span></h3>
+      </section>
 
+      {/* Add New Poll Section */}
+      <section className={styles.addSection}>
+        <h3 className={styles.sectionTitle}>
+          <IoIosAddCircle fontSize={"5rem"} />
+          <span>Add New Poll</span>
+        </h3>
+        
         <form onSubmit={formik.handleSubmit} className={styles.pollForm}>
           <label htmlFor="pollName">📌 Enter survey name:</label>
           <input
@@ -360,6 +453,12 @@ export default function PollsManagement() {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className={`form-control ${formik.touched.pollName && formik.errors.pollName ? "is-invalid" : ""}`}
+            onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderWidth = "2px";
+            }}
+
           />
           {formik.touched.pollName && formik.errors.pollName && (
             <div className="invalid-feedback">{formik.errors.pollName}</div>
@@ -374,6 +473,11 @@ export default function PollsManagement() {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className={`form-control ${formik.touched.pollDesc && formik.errors.pollDesc ? "is-invalid" : ""}`}
+             onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderWidth = "2px";
+            }}
             style={{ height: "150px", resize: "none" }}
           />
           {formik.touched.pollDesc && formik.errors.pollDesc && (
@@ -389,6 +493,11 @@ export default function PollsManagement() {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className={`form-control ${formik.touched.pollEndDate && formik.errors.pollEndDate ? "is-invalid" : ""}`}
+                         onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderWidth = "2px";
+            }}
           />
           {formik.touched.pollEndDate && formik.errors.pollEndDate && (
             <div className="invalid-feedback">{formik.errors.pollEndDate}</div>
@@ -404,6 +513,11 @@ export default function PollsManagement() {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className={`form-control ${formik.touched.pollFormLink && formik.errors.pollFormLink ? "is-invalid" : ""}`}
+                         onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderWidth = "2px";
+            }}
           />
           {formik.touched.pollFormLink && formik.errors.pollFormLink && (
             <div className="invalid-feedback">{formik.errors.pollFormLink}</div>
@@ -414,9 +528,16 @@ export default function PollsManagement() {
             type="file"
             id="imgFile"
             name="imgFile"
+            ref={inputRef}
             accept="image/*"
             onChange={handleImageChange}
             className={`form-control ${formik.touched.imgFile && formik.errors.imgFile ? "is-invalid" : ""}`}
+                         onFocus={(e) => {
+              e.target.style.outline = "none";
+              e.target.style.boxShadow = "none";
+              e.target.style.borderWidth = "2px";
+            }}
+
           />
           {formik.touched.imgFile && formik.errors.imgFile && (
             <div className="invalid-feedback">{formik.errors.imgFile}</div>
@@ -428,36 +549,38 @@ export default function PollsManagement() {
                 alt="Uploaded"
                 className="img-thumbnail"
                 width="200"
+                style={{ background: "#1bad1d" }}
               />
             </div>
           )}
 
-          <label htmlFor="excelFile">📊 External Excel Link:</label>
+          <label htmlFor="excelFileLink">📊 External Excel Link:</label>
           <input
             type="text"
-            id="excelFile"
-            name="excelFile"
+            id="excelFileLink"
+            name="excelFileLink"
             placeholder="Enter external Excel link"
-            value={formik.values.excelFile}
+            value={formik.values.excelFileLink}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`form-control ${formik.touched.excelFile && formik.errors.excelFile ? "is-invalid" : ""}`}
+            className={`form-control ${formik.touched.excelFileLink && formik.errors.excelFileLink ? "is-invalid" : ""}`}
           />
-          {formik.touched.excelFile && formik.errors.excelFile && (
-            <div className="invalid-feedback">{formik.errors.excelFile}</div>
+          {formik.touched.excelFileLink && formik.errors.excelFileLink && (
+            <div className="invalid-feedback">{formik.errors.excelFileLink}</div>
           )}
-          {formik.values.excelFile && (
+          {formik.values.excelFileLink && (
             <div className="mt-2">
-              <strong>Link:</strong> {formik.values.excelFile}
+              <strong>Link:</strong> {formik.values.excelFileLink}
             </div>
           )}
 
-          <button type="submit" className={styles.submitButton}>
-       Add survey
+          <button type="submit" className={loading ?styles.disabledButton:styles.submitButton } disabled={loading}>
+          {loading ? "Sending..." : "Send"}
           </button>
         </form>
       </section>
 
+      {/* Analysis Section */}
       {questions.length > 0 && (
         <div className={styles.analysis}>
           <h3 className={styles.sectionTitle}>📈 Excel Analysis</h3>
@@ -476,6 +599,7 @@ export default function PollsManagement() {
         </div>
       )}
 
+      {/* Edit Poll Popup */}
       {showEditPopup && (
         <PollEditPopup
           poll={selectedPoll}
@@ -483,12 +607,11 @@ export default function PollsManagement() {
           onClose={() => setShowEditPopup(false)}
         />
       )}
+      
+      {/* Results Popup */}
       {showResultsPopup && (
         <PollResultsPopup
           poll={selectedResultsPoll}
-          subscribers={SubscribersOfPolls.filter(
-            (s) => s.pollId === selectedResultsPoll.id
-          )}
           onClose={() => setShowResultsPopup(false)}
         />
       )}

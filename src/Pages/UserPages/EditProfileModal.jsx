@@ -7,28 +7,38 @@ import { useFormik } from "formik";
 const schema = object().shape({
   name: string()
     .required("Name is required")
-    .min(3, "Name must be more than 3 characters"),
-  password: string()
-    .required("Password is required")
-    .min(8, "Password must be at least 8 characters"),
-  Address: string().min(3, "Address must be more than 3 characters"),
+    .min(3, "Name must be at least 3 characters"),
+  phone: string()
+    .required("Phone is required")
+    .matches(/^01[0125][0-9]{8}$/, "Invalid Egyptian phone number"),
+  address: string()
+    .required("Address is required")
+    .min(3, "Address must be at least 3 characters"),
 });
 
-export default function EditProfileModal({ userData, saveData, closeModal }) {
+export default function EditProfileModal({ userData, updateUserProfile, closeModal }) {
   const formik = useFormik({
-    initialValues: { name: "", Address: "", password: "" },
+    initialValues: { 
+      name: userData.name || "", 
+      phone: userData.phone || "", 
+      address: userData.address || "" 
+    },
     validationSchema: schema,
-    onSubmit: (data) => {
-      console.log(data);
-      saveData(data);
+    onSubmit: async (data) => {
+      try {
+        await updateUserProfile(data);
+        closeModal();
+      } catch (error) {
+        console.error("Failed to update profile:", error);
+      }
     },
   });
 
   useEffect(() => {
     formik.setValues({
-      name: userData.name,
-      Address: userData.Address,
-      password: userData.password,
+      name: userData.name || "",
+      phone: userData.phone || "",
+      address: userData.address || ""
     });
   }, [userData]);
 
@@ -37,102 +47,64 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
       <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
         <h3 className={styles.title}>✏️ Edit Profile</h3>
         <form onSubmit={formik.handleSubmit}>
-          <label htmlFor="username" className={styles.label}>
-            Username:
+          {/* Name Field */}
+          <label htmlFor="name" className={styles.label}>
+            Name:
           </label>
           <input
             type="text"
             name="name"
-            id="username"
+            id="name"
             placeholder="Enter Your Name"
             value={formik.values.name}
             onChange={formik.handleChange}
-            // onBlur={formik.handleBlur}
-             className={`form-control ${styles.input} ${
+            onBlur={formik.handleBlur}
+            className={`form-control ${styles.input} ${
               formik.touched.name && formik.errors.name ? "is-invalid" : ""
             }`}
-            onFocus={(e) => {
-              e.target.style.outline = "none";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "#00980DFF";
-              e.target.style.borderWidth = "2px";
-            }}
-            onBlur={(e) => {
-              formik.handleBlur(e);
-              e.target.style.outline = "none";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "none";
-              e.target.style.borderWidth = "0px";
-            }}
           />
           {formik.touched.name && formik.errors.name && (
             <div className="invalid-feedback">{formik.errors.name}</div>
           )}
 
-          <label htmlFor="Address" className={styles.label}>
+          {/* Phone Field */}
+          <label htmlFor="phone" className={styles.label}>
+            Phone:
+          </label>
+          <input
+            type="tel"
+            name="phone"
+            id="phone"
+            placeholder="Enter Your Phone"
+            value={formik.values.phone}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`form-control ${styles.input} ${
+              formik.touched.phone && formik.errors.phone ? "is-invalid" : ""
+            }`}
+          />
+          {formik.touched.phone && formik.errors.phone && (
+            <div className="invalid-feedback">{formik.errors.phone}</div>
+          )}
+
+          {/* Address Field */}
+          <label htmlFor="address" className={styles.label}>
             Address:
           </label>
           <input
             type="text"
-            name="Address"
-            id="Address"
+            name="address"
+            id="address"
             placeholder="Enter Your Address"
-            value={formik.values.Address}
+            value={formik.values.address}
             onChange={formik.handleChange}
-            // onBlur={formik.handleBlur}
+            onBlur={formik.handleBlur}
             className={`form-control ${styles.input} ${
-              formik.touched.Address && formik.errors.Address ? "is-invalid" : ""
+              formik.touched.address && formik.errors.address ? "is-invalid" : ""
             }`}
-            onFocus={(e) => {
-              e.target.style.outline = "none";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "#00980DFF";
-              e.target.style.borderWidth = "2px";
-            }}
-            onBlur={(e) => {
-              formik.handleBlur(e);
-              e.target.style.outline = "none";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "none";
-              e.target.style.borderWidth = "0px";
-            }}
-      
           />
-          {formik.touched.Address && formik.errors.Address && (
-            <div className="invalid-feedback">{formik.errors.Address}</div>
-          )}
-
-          <label htmlFor="password" className={styles.label}>
-            Password:
-          </label>
-          <input
-            type="text"
-            name="password"
-            id="password"
-            placeholder="Enter Your Password"
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            // onBlur={formik.handleBlur}
-            className={`form-control ${styles.input} ${
-              formik.touched.password && formik.errors.password ? "is-invalid" : ""
-            }`}
-            onFocus={(e) => {
-              e.target.style.outline = "none";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "#00980DFF";
-              e.target.style.borderWidth = "2px";
-            }}
-            onBlur={(e) => {
-              formik.handleBlur(e);
-              e.target.style.outline = "none";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "none";
-              e.target.style.borderWidth = "0px";
-            }}
-
-          />
-          {formik.touched.password && formik.errors.password && (
-            <div className="invalid-feedback">{formik.errors.password}</div>
+          {formik.touched.address && formik.errors.address && (
+            <div className="invalid-feedback">{formik.errors.address}</div>
           )}
 
           <div className={styles.modalButtons}>
@@ -140,12 +112,12 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
               className={`${styles.button} ${styles.saveButton}`}
               type="submit"
               style={{marginRight:"10px",marginTop:"10px"}}
-
             >
               💾 Save Information
             </button>
             <button
               className={`${styles.button} ${styles.cancelButton}`}
+              type="button"
               onClick={closeModal}
             >
               ❌ Cancel
@@ -160,12 +132,9 @@ export default function EditProfileModal({ userData, saveData, closeModal }) {
 EditProfileModal.propTypes = {
   userData: PropTypes.shape({
     name: PropTypes.string,
-    username: PropTypes.string,
     phone: PropTypes.string,
     address: PropTypes.string,
-    password: PropTypes.string,
-    Address: PropTypes.string,
   }).isRequired,
-  saveData: PropTypes.func.isRequired,
+  updateUserProfile: PropTypes.func.isRequired,
   closeModal: PropTypes.func.isRequired,
 };

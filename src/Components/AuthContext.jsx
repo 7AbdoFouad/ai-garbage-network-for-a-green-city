@@ -1,81 +1,134 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
-import PropTypes from 'prop-types';
-// import Cookies from 'js-cookie';
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode";
 
+export const AuthContext = createContext({
+  user: null,
+  isLoading: true,
+  login: () => {},
+  logout: () => {},
+});
 
-// Create the AuthContext
-export const AuthContext = createContext();
+export function AuthProvider({ children }) {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-// AuthProvider to wrap the app
-export default function AuthProvider({ children }) {
-  const [cookies, setCookie, removeCookie] = useCookies(["user"]);
-  const [user, setUser] = useState(cookies.user ? cookies.user: null); // Store user info if needed
-  const [isLoggedIn, setIsLoggedIn] = useState(!!cookies.user); // Track login state
-  const [islogoutyet, setIslogoutyet] = useState(false);
-  const login = (userData) => {
-    setCookie("user", userData, { path: "/", expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
-    setIsLoggedIn(true);
-    setUser(userData);  // Save user details (including "role")
-    // localStorage.setItem("user", JSON.stringify(userData));
-  };
+  const fetchUserProfile = useCallback(async (token) => {
+    const resp = await fetch("/api/Users/my-profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    
+    if (!resp.ok) {
+      throw new Error("Profile fetch failed");
+    }
+    
+    const profile = await resp.json();
+    setUser({ ...profile, Permissions: [profile.role] });
+    return profile;
+  }, []);
 
+  const attemptAutoLogin = useCallback(async () => {
+    const storedCredentials = localStorage.getItem("authCredentials");
+    
+    if (!storedCredentials) {
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { email, password } = JSON.parse(storedCredentials);
+      const payload = {
+        EmailAddress: email,
+        Password: password,
+        deviceInfo: { deviceId: "browser", deviceType: "WEB_BROWSER" },
+      };
 
-  const logout = () => {
+      // Clear any existing authentication state
+      setUser(null);
+      removeCookie("token", { path: "/" });
+
+      const response = await fetch("/api/Auth/Login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.jwtToken) {
+        throw new Error("Auto-login failed");
+      }
+      
+      // Process new token
+      const { exp } = jwtDecode(data.jwtToken);
+      const isProduction = import.meta.env.PROD;
+      
+      setCookie("token", data.jwtToken, {
+        path: "/",
+        expires: new Date(exp * 1000),
+        sameSite: "Lax",
+        secure: isProduction,
+      });
+      
+      await fetchUserProfile(data.jwtToken);
+    } catch (error) {
+      console.error("Auto-login error:", error);
+      localStorage.removeItem("authCredentials");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchUserProfile, removeCookie, setCookie]);
+
+  // Initialize auth state
+  useEffect(() => {
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      
+      // Clear any existing authentication state
+      setUser(null);
+      removeCookie("token", { path: "/" });
+      
+      await attemptAutoLogin();
+      setIsLoading(false);
+    };
+
+    initializeAuth();
+  }, [attemptAutoLogin, removeCookie]);
+
+  const login = useCallback(async (jwtToken, email, password) => {
+    // Clear all previous authentication state
     setUser(null);
-    removeCookie("user", { path: "/" });
-    setIslogoutyet(true);
-    // localStorage.removeItem("user");
-  };
-  // Sync auth state with cookies
-  // useEffect(() => {
-  //   if (cookies.user) {
-  //     try {
-  //       const userData = cookies.user; 
-  //       setIsLoggedIn(true);
-  //       setUser(userData);
-  //     } catch (error) {
-  //       console.error("Failed to parse user cookie:", error);
-  //     }
-  //   }
-  // }, [cookies.user]); // Re-run when cookies change
+    removeCookie("token", { path: "/" });
+    localStorage.removeItem("authCredentials");
+    
+    // Set new token
+    const { exp } = jwtDecode(jwtToken);
+    const isProduction = import.meta.env.PROD;
+    
+    setCookie("token", jwtToken, {
+      path: "/",
+      expires: new Date(exp * 1000),
+      sameSite: "Lax",
+      secure: isProduction,
+    });
+    
+    // Store credentials and fetch profile
+    if (email && password) {
+      localStorage.setItem("authCredentials", JSON.stringify({ email, password }));
+    }
+    
+    await fetchUserProfile(jwtToken);
+  }, [fetchUserProfile, removeCookie, setCookie]);
 
-  // useEffect(() => {
-  //   // Retrieve user data from cookies
-  //   const userData = Cookies.get('user');
-  //   if (userData) {
-  //     setIsLoggedIn(true);
-  //     setUser(JSON.parse(userData)); // Assuming user data is stored as a JSON string
-  //   }
-  // }, []);
+  const logout = useCallback(() => {
+    removeCookie("token", { path: "/" });
+    localStorage.removeItem("authCredentials");
+    setUser(null);
+  }, [removeCookie]);
 
-  // const login = (userData) => {
-  //   setIsLoggedIn(true);
-  //   setUser(userData);
-  //   // Store user data in cookies
-  //   Cookies.set('user', JSON.stringify(userData), { expires: 7 }); // Expires in 7 days
-  // };
-
-  // const logout = () => {
-  //   setIsLoggedIn(false);
-  //   setUser(null);
-  //   // Remove user data from cookies
-  //   Cookies.remove('user');
-  // };
-
- return (
-  
-    <AuthContext.Provider value={{ isLoggedIn, user, login, logout,islogoutyet,setIslogoutyet,cookies }}> 
-      {children}
-    </AuthContext.Provider>)
+  return (
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+      {!isLoading && children}
+    </AuthContext.Provider>
+  );
 }
-
-
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-// Custom hook for accessing AuthContext
-// export function useAuth() {
-//   return useContext(AuthContext);
-// }

@@ -11,22 +11,24 @@ import {
 } from "chart.js";
 import * as XLSX from "xlsx";
 import styles from "./PollResultsPopup.module.css";
+import PropTypes from "prop-types";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export default function PollResultsPopup({ poll, subscribers, onClose }) {
+export default function PollResultsPopup({ poll,  onClose }) {
   // State to store the analysis results from the external Excel file.
   const [excelAnalysis, setExcelAnalysis] = useState(null);
   // Array of questions (column names) extracted from the sheet (except the "طابع زمني" column).
   const [questions, setQuestions] = useState([]);
 
   // useEffect to fetch and analyze the Excel file using row-based parsing.
+  
   useEffect(() => {
     async function fetchAndAnalyzeExcel() {
       try {
-        if (poll.excelFile) {
-          console.log("Fetching Excel file from:", poll.excelFile);
-          const response = await fetch(poll.excelFile);
+        if (poll.excelFileLink) {
+          console.log("Fetching Excel file from:", poll.excelFileLink);
+          const response = await fetch(poll.excelFileLink);
           if (!response.ok) {
             throw new Error("Failed to fetch the Excel file.");
           }
@@ -76,6 +78,7 @@ export default function PollResultsPopup({ poll, subscribers, onClose }) {
 
               // Aggregate responses for each question.
               const aggregateResults = {};
+              
               qs.forEach((q) => {
                 aggregateResults[q] = {};
               });
@@ -100,17 +103,17 @@ export default function PollResultsPopup({ poll, subscribers, onClose }) {
       }
     }
     fetchAndAnalyzeExcel();
-  }, [poll.excelFile]);
+  }, [poll.excelFileLink]);
 
   // Fallback: Analyze local subscriber data by summarizing the "choice" field if needed.
-  const localResults = {};
-  subscribers.forEach((sub) => {
-    const choice = sub.choice;
-    if (choice) {
-      const key = JSON.stringify(choice); // convert choice object into a string for display
-      localResults[key] = (localResults[key] || 0) + 1;
-    }
-  });
+  // const localResults = {};
+  // subscribers.forEach((sub) => {
+  //   const choice = sub.choice;
+  //   if (choice) {
+  //     const key = JSON.stringify(choice); // convert choice object into a string for display
+  //     localResults[key] = (localResults[key] || 0) + 1;
+  //   }
+  // });
 
   // Helper function to get cleaned numeric responses from an Excel row.
   const getCleanedResponseData = (responses) => {
@@ -134,7 +137,7 @@ export default function PollResultsPopup({ poll, subscribers, onClose }) {
  >
         <h2>{poll.pollName} - Results</h2>
 
-        {poll.excelFile && excelAnalysis ? (
+        {poll.excelFileLink && excelAnalysis ? (
           <div>
             <h3>Analysis from External Excel Data</h3>
             {/*
@@ -258,10 +261,10 @@ export default function PollResultsPopup({ poll, subscribers, onClose }) {
           </div>
         )}
 
-        {poll.excelFile && (
+        {poll.excelFileLink && (
           <div style={{ marginTop: "20px" }}>
             <a
-              href={poll.excelFile}
+              href={poll.excelFileLink}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.excelLink}

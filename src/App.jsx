@@ -1,5 +1,7 @@
 // import React from "react";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import { AuthProvider } from './Components/AuthContext';
+
 import {
   Route,
   Outlet,
@@ -67,67 +69,68 @@ import { ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Authentication
-import AuthProvider from "./Components/AuthContext";
+// import AuthProvider from "./Components/AuthContext";
 import withAuthorization from "./Components/Hoc";
 // Authentication manager pages
 const ProtectedHomePageForManagers = withAuthorization(HomePageForManagers, [
-  "admin",
-  "ManageTrucks",
-  "ManageAnnouncement",
-  "ManageReportsAndDataAnalysis",
+  "Admin",
+  "TruckManagement",
+  "AnnouncementManagement",
+  "ReportsAndDataAnalysisManagement",
   "CommunityEngagementManagement",
   "UserManagement",
   "PollsManagement",
   "RewardsManagement",
   "WasteBinManagement",
-  "RecycleManagement",
+  "RecylingManagemnet",
   "RequestSpecialWasteManagement",
 ]);
 const ProtectedManageAnnouncement = withAuthorization(ManageAnnouncement, [
-  "admin",
-  "ManageAnnouncement",
+  "Admin",
+  "AnnouncementManagement",
 ]);
 const ProtectedManageTrucks = withAuthorization(ManageTrucks,[
-  "admin",
-  "ManageTrucks",
+  "Admin",
+  "TruckManagement",
 ]);
 const ProtectedManageReportsAndDataAnalysis = withAuthorization(
   ManageReportsAndDataAnalysis,
-  ["admin", "ManageReportsAndDataAnalysis"]
+  ["Admin", "ReportsAndDataAnalysisManagement"]
 );
 const ProtectedCommunityEngagementManagement = withAuthorization(
   CommunityEngagementManagement,
-  ["admin", "CommunityEngagementManagement"]
+  ["Admin", "CommunityEngagementManagement"]
 );
 const ProtectedUserManagement = withAuthorization(UserManagement,[
-  "admin",
+  "Admin",
   "UserManagement"
 ]);
 const ProtectedPollsManagement = withAuthorization(PollsManagement,[
-  "admin",
+  "Admin",
   "PollsManagement"
 ]);
 const ProtectedRecycleManagement = withAuthorization(RecycleManagement,[
-  "admin",
-  "RecycleManagement"
+  "Admin",
+  "RecylingManagemnet"
 ]);
 const ProtectedRewardsManagement = withAuthorization(RewardsManagement,[
-  "admin",
+  "Admin",
   "RewardsManagement"
 ]);
 const ProtectedRequestSpecialWasteManagement = withAuthorization(RequestSpecialWasteManagement,[
-  "admin",
-  "RequestSpecialWasteManagement"
+  "Admin",
+  "RequestSpecialWasteManagement",
+  "AnnouncementManagement"
 ]);
 const ProtectedWasteBinManagement = withAuthorization(WasteBinManagement,[
-  "admin",
+  "Admin",
   "WasteBinManagement"
 ]);
 const ProtectedSettings = withAuthorization(Settings,[
-  "admin",
-  "ManageTrucks",
-  "ManageAnnouncement",
-  "ManageReportsAndDataAnalysis",
+  "Admin",
+  "TruckManagement",
+  "AnnouncementManagement",
+  "ReportsAndDataAnalysisManagement",
   "CommunityEngagementManagement",
   "UserManagement",
   "PollsManagement",
@@ -137,10 +140,10 @@ const ProtectedSettings = withAuthorization(Settings,[
 
 ]);
 const ProtectedNotifications = withAuthorization(Notifications,[
-  "admin",
-  "ManageTrucks",
-  "ManageAnnouncement",
-  "ManageReportsAndDataAnalysis",
+  "Admin",
+  "TruckManagement",
+  "AnnouncementManagement",
+  "ReportsAndDataAnalysisManagement",
   "CommunityEngagementManagement",
   "UserManagement",
   "PollsManagement",
@@ -209,7 +212,7 @@ const router = createBrowserRouter(
       <Route index element={<LandingPage />} />
 
       {/* Manager Routes */}
-      <Route path="/managerDashboard/:id" element={<LayoutManager />}>
+      <Route path="/managerDashboard" element={<LayoutManager />}>
         <Route index element={<ProtectedHomePageForManagers />} />
         <Route
           path="manageAnnouncement"
@@ -224,7 +227,7 @@ const router = createBrowserRouter(
           path="communityEngagementManagement"
           element={<ProtectedCommunityEngagementManagement />}
         />
-        <Route path="userManagement/:id" element={<ProtectedUserManagement />} />
+        <Route path="userManagement" element={<ProtectedUserManagement />} />
         <Route path="pollsManagement" element={<ProtectedPollsManagement />} />
         <Route
           path="rewardsManagement"
@@ -234,7 +237,7 @@ const router = createBrowserRouter(
           path="wasteBinManagement"
           element={<ProtectedWasteBinManagement />}
         />
-        <Route path="settings/:id" element={<ProtectedSettings />} />
+        <Route path="settings" element={<ProtectedSettings />} />
         <Route path="notifications" element={<ProtectedNotifications />} />
         <Route path="RecycleManagement" element={<ProtectedRecycleManagement />} />
         <Route path="RequestSpecialWasteManagement" element={<ProtectedRequestSpecialWasteManagement />} />
@@ -243,37 +246,37 @@ const router = createBrowserRouter(
 
 
       {/* User Routes */}
-      <Route path="/userDashboard/:id" element={<LayoutUser />}>
+      <Route path="/userDashboard" element={<LayoutUser />}>
         <Route index element={<ProtectedHomePageForUsers/>} />
         <Route path="aboutUs" element={<ProtectedAboutUsPage />} />
-        <Route path="contactUs/:id" element={<ProtectedContactUsPage />} />
+        <Route path="contactUs/" element={<ProtectedContactUsPage />} />
         <Route path="faq" element={<ProtectedFAQPage />} />
-        <Route path="communityEngagement/:id" element={<ProtectedCommunityEngagementManagemen />} />
-        <Route path="notifications/:id" element={<ProtectedNotificationPage />} />
-        <Route path="settings/:id" element={<ProtectedSettingsPage />} />
-        <Route path="polls/:id" element={<ProtectedPollsPage />} />
-        <Route path="rewards/:id" element={<ProtectedRewardsPage />} />
-        <Route path="userAnnouncement/:id" element={<ProtectedUserAnnouncementPage />} />
+        <Route path="communityEngagement" element={<ProtectedCommunityEngagementManagemen />} />
+        <Route path="notifications" element={<ProtectedNotificationPage />} />
+        <Route path="settings" element={<ProtectedSettingsPage />} />
+        <Route path="polls" element={<ProtectedPollsPage />} />
+        <Route path="rewards" element={<ProtectedRewardsPage />} />
+        <Route path="userAnnouncement" element={<ProtectedUserAnnouncementPage />} />
         <Route path="reports" element={<ProtectedReportsPage />} />
-        <Route path="requestSpecialWaste/:id" element={<ProtectedRequestSpecialWaste />} />
+        <Route path="requestSpecialWaste" element={<ProtectedRequestSpecialWaste />} />
         
       </Route>
 
       {/* Truck Driver Routes */}
-      <Route path="/truckDriverDashboard/:id" element={<LayoutTruckDriver />}>
+      <Route path="/truckDriverDashboard" element={<LayoutTruckDriver />}>
         <Route index element={<ProtectedHomePageForTruckDrivers/>} />
         <Route path="driverAnnouncement" element={<ProtectedDriverAnnouncementPage />} />
         <Route path="driverNotifications" element={<ProtectedDriverNotificationsPage />} />
         <Route path="driverPolls" element={<ProtectedDriverPollsPage />} />
         <Route path="requiredTasks" element={<ProtectedDriverRequiredTasksPage />} />
-        <Route path="settings/:id" element={<ProtectedDriverSettingsPage />} />
+        <Route path="DriverSettingsPage" element={<ProtectedDriverSettingsPage />} />
         <Route path="recycle" element={<Recycle />} />
       </Route>
 
       {/* Authentication Routes */}
-      <Route path="/login" element={<Login myrole="admin" />} />
+      <Route path="/login" element={<Login myrole="Admin" />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
-      <Route path="/reset-password/:id" element={<ResetPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/registeration" element={<Registeration />} />
       {/* <Route path="/verify-email/:token" element={<VerifyEmail />} /> */}
 
@@ -302,7 +305,6 @@ const App = () => {
       />
       <RouterProvider router={router} />
     </AuthProvider>
-
   );
 };
 

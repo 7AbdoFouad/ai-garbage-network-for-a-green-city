@@ -3,9 +3,8 @@ import { useFormik } from "formik";
 import { object, string } from "yup";
 import { toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
-import styles from "../../Pages/UserPages/Contact.module.css";
-import useUser from "../../hooks/useUser";
-import { useParams } from "react-router-dom";
+import styles from "./Contact.module.css";
+import Cookies from "js-cookie";
 
 // 📌 Validation Schema
 const schema = object().shape({
@@ -17,28 +16,44 @@ const schema = object().shape({
 });
 
 export default function ContactUsPage() {
-  const todayDate = new Date().toISOString().split("T")[0];
   const [submitting, setSubmitting] = useState(false);
-  const { addContactUs } = useUser();
-  const {id}=useParams();
-  
 
   const handleSubmit = async (values) => {
     try {
       setSubmitting(true);
-      await addContactUs(values);
+      
+      // Create FormData for multipart/form-data submission
+      const formData = new FormData();
+      formData.append("name", values.name);
+      formData.append("email", values.email);
+      formData.append("message", values.message);
+      
+      // Get token from cookies
+      const token = Cookies.get("token");
+      
+      const response = await fetch("/api/ContactUs", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to send message");
+      }
+      
       toast.success("Message sent successfully!");
       formik.resetForm();
-    } catch (e) {
-      console.log(e);
-      toast.error("Failed to send message. Please try again later.");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Failed to send message. Please try again later.");
     } finally {
       setSubmitting(false);
     }
   };
 
   const formik = useFormik({
-    initialValues: { name: "", email: "", message: "", todayDate: todayDate,userId:id },
+    initialValues: { name: "", email: "", message: "" },
     validationSchema: schema,
     onSubmit: handleSubmit,
   });
@@ -116,9 +131,6 @@ export default function ContactUsPage() {
                   )}
                 </div>
 
-                {/* Hidden Field for Date */}
-                <input type="hidden" name="date" value={todayDate} />
-
                 {/* Submit Button */}
                 <div className="text-center">
                   <button
@@ -153,14 +165,6 @@ export default function ContactUsPage() {
           </p>
         </div>
       </div>
-
-      {/* 📌 Contact Info */}
-      {/* <div className={`${styles.contactInfo} shadow-lg fadeIn p-4 rounded-4 mt-4 bg-light text-center`}>
-        <h3 className="mb-3 text-success fw-bold">📞 Contact Information</h3>
-        <p><strong>📱 Phone:</strong> 123-456-7890</p>
-        <p><strong>🏢 Office Address:</strong> Ismailia</p>
-        <p><strong>✉️ Email:</strong> info@cleancity.com</p>
-      </div> */}
     </div>
   );
 }

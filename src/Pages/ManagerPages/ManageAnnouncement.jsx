@@ -6,12 +6,12 @@ import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import styles from "./ManageAnnouncement.module.css";
 
+// Yup schemas
 const rejectSchema = object().shape({
   reason: string()
     .required("Rejection reason is required")
     .min(10, "Message is too short"),
 });
-
 const notifySchema = object().shape({
   reason: string()
     .required("Reply is required")
@@ -23,12 +23,11 @@ export default function ManageAnnouncement() {
     usersAnnouncements,
     contactUs,
     deleteContactUs,
+    deleteUsersAnnouncements,
     regions,
     addUserNotification,
     updateUser,
-    addAvailable_UsersAnnouncements_Tasks,
     fetchUser,
-    deleteUsersAnnouncements
   } = useUser();
 
   const [filterType, setFilterType] = useState("");
@@ -43,14 +42,11 @@ export default function ManageAnnouncement() {
   const [currentPage, setCurrentPage] = useState(
     parseInt(sessionStorage.getItem("currentPage")) || 1
   );
+  const reportsPerPage = 5;
   const [currentPageContact, setcurrentPageContact] = useState(
     parseInt(sessionStorage.getItem("currentPageContact")) || 1
   );
-  const [acceptedReportIds, setAcceptedReportIds] = useState([]);
-
-  const reportsPerPage = 5;
   const contactsPerPage = 5;
-  const isFirstRender = useRef(true);
 
   useEffect(() => {
     sessionStorage.setItem("currentPage", currentPage);
@@ -60,60 +56,79 @@ export default function ManageAnnouncement() {
     sessionStorage.setItem("currentPageContact", currentPageContact);
   }, [currentPageContact]);
 
+  // Dummy NLP function to analyze report description and return a priority level
   const analyzePriority = (report) => {
     const text = (report.AnnouncementDescription || "").toLowerCase();
     const highPriorityKeywords = [
-      "urgent", "immediately", "danger", "critical", "emergency",
-      "life-threatening", "hazard", "leak", "explosion", "fire",
-      "toxic", "severe", "biohazard", "gas", "injury", "collapse"
+      "urgent",
+      "immediately",
+      "danger",
+      "critical",
+      "emergency",
+      "life-threatening",
+      "hazard",
+      "leak",
+      "explosion",
+      "fire",
+      "toxic",
+      "severe",
+      "biohazard",
+      "gas",
+      "injury",
+      "collapse",
     ];
     const mediumPriorityKeywords = [
-      "notice", "soon", "warning", "attention", "delay",
-      "repair needed", "damaged", "malfunction", "issue",
-      "problem", "not working", "maintenance", "breakdown", "missing"
+      "notice",
+      "soon",
+      "warning",
+      "attention",
+      "delay",
+      "repair needed",
+      "damaged",
+      "malfunction",
+      "issue",
+      "problem",
+      "not working",
+      "maintenance",
+      "breakdown",
+      "missing",
     ];
-    
-    const containsKeyword = (keywords) => 
-      keywords.some(keyword => text.includes(keyword));
+    const containsKeyword = (keywords) =>
+      keywords.some((keyword) => text.includes(keyword));
 
-    if (containsKeyword(highPriorityKeywords)) return "high";
-    if (containsKeyword(mediumPriorityKeywords)) return "medium";
-    return text === "" ? "unknown" : "low";
+    if (containsKeyword(highPriorityKeywords)) {
+      return "high";
+    } else if (containsKeyword(mediumPriorityKeywords)) {
+      return "medium";
+    } else if (text === "") {
+      return "unknown";
+    } else {
+      return "low";
+    }
   };
 
   const handleAccept = async (report) => {
-    try {
-      // Add notification
-      await addUserNotification({
-        notificationContent: `Report accepted: ${report.AnnouncementType}`,
-        notificationDate: new Date().toISOString().split("T")[0],
-        isRead: "false",
-        userId: report.userId
-      });
+    addUserNotification({
+      notificationContent: `Report accepted: ${report.AnnouncementType}`,
+      notificationDate: new Date().toISOString().split("T")[0], 
+      isRead:"false",
+      userId: report.userId
+    });
+    const user = await fetchUser(report.userId);
+    updateUser(report.userId, {
+      ...user,
+      numOfAcceptedAnnouncementsCount: user.numOfAcceptedAnnouncementsCount + 1,
+    });
+    deleteUsersAnnouncements(report.id);
+    toast.success("Report accepted successfully");
+    setSelectedReport(null);
 
-      // Update user stats
-      const user = await fetchUser(report.userId);
-      await updateUser(report.userId, {
-        ...user,
-        numOfAcceptedAnnouncementsCount: user.numOfAcceptedAnnouncementsCount + 1,
-      }); 
-
-
-      // Add to available tasks
-      await addAvailable_UsersAnnouncements_Tasks({ requestId: report.id });
-
-      // Hide from UI
-      setAcceptedReportIds(prev => [...prev, report.id]);
-      toast.success("Report accepted successfully");
-
-      // Pagination adjustment
-      const newTotalPages = Math.ceil((filteredReports.length - 1) / reportsPerPage);
-      if (currentPage > newTotalPages) {
-        const newPage = Math.max(newTotalPages, 1);
-        setCurrentPage(newPage);
-      }
-    } catch (error) {
-      toast.error("Error accepting report: " + error.message);
+    // Fix pagination if page becomes empty
+    const newTotalPages = Math.ceil((usersAnnouncements.length - 1) / reportsPerPage);
+    if (currentPage > newTotalPages) {
+      const newPage = Math.max(newTotalPages - 1, 1);
+      setCurrentPage(newPage);
+      sessionStorage.setItem("currentPage", newPage);
     }
   };
 
@@ -127,81 +142,131 @@ export default function ManageAnnouncement() {
     setModalShowNotify(true);
   };
 
+  // Filter reports using useMemo for performance
   const filteredReports = useMemo(() => {
-    let reports = usersAnnouncements.filter(report => 
-      !acceptedReportIds.includes(report.id)
+    let reports = usersAnnouncements;
+    if (filterType) {
+      reports = reports.filter((r) => r.AnnouncementType === filterType);
+    }
+    if (filterRegion) {
+      reports = reports.filter((r) => r.region === filterRegion);
+    }
+    if (filterPriority) {
+      reports = reports.filter((r) => analyzePriority(r) === filterPriority);
+    }
+    if (filterDate === "newest") {
+      reports = [...reports].sort(
+        (a, b) => new Date(b.todayDate) - new Date(a.todayDate)
+      );
+    } else if (filterDate === "oldest") {
+      reports = [...reports].sort(
+        (a, b) => new Date(a.todayDate) - new Date(b.todayDate)
+      );
+    }
+    return reports;
+  }, [usersAnnouncements, filterType, filterRegion, filterPriority, filterDate]);
+
+  // Adjust currentPage if filteredReports changes
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const newTotalPages = Math.ceil(filteredReports.length / reportsPerPage);
+    if (currentPage > newTotalPages) {
+      const newPage = Math.max(newTotalPages - 1, 1);
+      setCurrentPage(newPage);
+      sessionStorage.setItem("currentPage", newPage);
+    }
+  }, [filteredReports, currentPage, reportsPerPage]);
+
+  // Filter and sort contact us messages
+  let filteredContactUs = contactUs;
+  if (filterContactUsByDate === "newest") {
+    filteredContactUs = filteredContactUs.sort(
+      (a, b) => new Date(b.todayDate) - new Date(a.todayDate)
     );
+  } else if (filterContactUsByDate === "oldest") {
+    filteredContactUs = filteredContactUs.sort(
+      (a, b) => new Date(a.todayDate) - new Date(b.todayDate)
+    );
+  }
 
-    if (filterType) reports = reports.filter(r => r.AnnouncementType === filterType);
-    if (filterRegion) reports = reports.filter(r => r.region === filterRegion);
-    if (filterPriority) reports = reports.filter(r => analyzePriority(r) === filterPriority);
-    
-    return filterDate === "newest" 
-      ? [...reports].sort((a, b) => new Date(b.todayDate) - new Date(a.todayDate))
-      : filterDate === "oldest" 
-        ? [...reports].sort((a, b) => new Date(a.todayDate) - new Date(b.todayDate))
-        : reports;
-  }, [usersAnnouncements, acceptedReportIds, filterType, filterRegion, filterPriority, filterDate]);
-
-  const filteredContactUs = useMemo(() => {
-    return filterContactUsByDate === "newest"
-      ? [...contactUs].sort((a, b) => new Date(b.todayDate) - new Date(a.todayDate))
-      : filterContactUsByDate === "oldest"
-        ? [...contactUs].sort((a, b) => new Date(a.todayDate) - new Date(b.todayDate))
-        : contactUs;
-  }, [contactUs, filterContactUsByDate]);
-
-  // Pagination calculations
+  // Pagination logic
   const indexOfLastReport = currentPage * reportsPerPage;
   const indexOfFirstReport = indexOfLastReport - reportsPerPage;
   const currentReports = filteredReports.slice(indexOfFirstReport, indexOfLastReport);
   const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
 
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   const indexOfLastContact = currentPageContact * contactsPerPage;
   const indexOfFirstContact = indexOfLastContact - contactsPerPage;
-  const currentContacts = filteredContactUs.slice(indexOfFirstContact, indexOfLastContact);
+  const currentContacts = filteredContactUs.slice(
+    indexOfFirstContact,
+    indexOfLastContact
+  );
   const totalPagesContact = Math.ceil(filteredContactUs.length / contactsPerPage);
 
-  // Formik setups
+  const paginateContact = (pageNumber) => setcurrentPageContact(pageNumber);
+
+  // Formik for reject modal
   const formikReject = useFormik({
     initialValues: { reason: "" },
     validationSchema: rejectSchema,
-    onSubmit: async (values) => {
-      try {
-        await addUserNotification({
+    onSubmit: (values) => {
+      if (selectedReport) {
+        addUserNotification({
           notificationContent: `Report rejected: ${selectedReport.AnnouncementType} - Reason: ${values.reason}`,
           notificationDate: new Date().toISOString().split("T")[0],
+          isRead:"false",
           userId: selectedReport.userId
         });
-        setAcceptedReportIds(prev => [...prev, selectedReport.id]);
-        await deleteUsersAnnouncements(selectedReport.id);
+        deleteUsersAnnouncements(selectedReport.id);
         toast.success("Rejection sent successfully");
         setModalShow(false);
+        setSelectedReport(null);
         formikReject.resetForm();
-      } catch (error) {
-        toast.error("Error rejecting report: " + error.message);
+
+        // Fix pagination if page becomes empty
+        const newTotalPages = Math.ceil((usersAnnouncements.length - 1) / reportsPerPage);
+        if (currentPage > newTotalPages) {
+          const newPage = Math.max(newTotalPages - 1, 1);
+          setCurrentPage(newPage);
+          sessionStorage.setItem("currentPage", newPage);
+        }
       }
-    }
+    },
   });
 
+  // Formik for notify modal
   const formikNotify = useFormik({
     initialValues: { reason: "" },
     validationSchema: notifySchema,
-    onSubmit: async (values) => {
-      try {
-        await addUserNotification({
+    onSubmit: (values) => {
+      if (selectedContactUs) {
+        addUserNotification({
           notificationContent: `Reply: "${selectedContactUs.message}" - ${values.reason}`,
-          notificationDate: new Date().toISOString().split("T")[0],
+          notificationDate: new Date().toISOString().split("T")[0],   
+          isRead:"false",  
           userId: selectedContactUs.userId
         });
-        await deleteContactUs(selectedContactUs.id);
+        deleteContactUs(selectedContactUs.id);
         toast.success("Reply sent successfully");
         setModalShowNotify(false);
+        setselectedContactUs(null);
         formikNotify.resetForm();
-      } catch (error) {
-        toast.error("Error sending notification: " + error.message);
+
+        // Fix pagination if page becomes empty
+        const newTotalPagesContact = Math.ceil((contactUs.length - 1) / contactsPerPage);
+        if (currentPageContact > newTotalPagesContact) {
+          const newPage = Math.max(newTotalPagesContact - 1, 1);
+          setcurrentPageContact(newPage);
+          sessionStorage.setItem("currentPageContact", newPage);
+        }
       }
-    }
+    },
   });
 
   return (

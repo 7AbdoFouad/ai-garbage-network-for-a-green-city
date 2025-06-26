@@ -48,7 +48,7 @@ const CustomNavbar = () => {
         <ul className="sidebar-links">
           <li>
             <NavLink
-              to={`/userDashboard/${id}`}
+              to={`/userDashboard`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -62,7 +62,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to={`contactUs/${id}`}
+              to={`contactUs`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -76,7 +76,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to={`communityEngagement/${id}`}
+              to={`communityEngagement`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -85,7 +85,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to={`notifications/${id}`}
+              to={`notifications`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -94,7 +94,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to={`settings/${id}`}
+              to={`settings`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -103,7 +103,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to={`polls/${id}`}
+              to={`polls`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -112,7 +112,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to={`rewards/${id}`}
+              to={`rewards`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -121,7 +121,7 @@ const CustomNavbar = () => {
           </li>
           <li>
             <NavLink
-              to={`userAnnouncement/${id}`}
+              to={`userAnnouncement`}
               className="nav-link"
               onClick={toggleSidebar}
             >
@@ -134,7 +134,7 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to={`requestSpecialWaste/${id}`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`requestSpecialWaste`} className="nav-link" onClick={toggleSidebar}>
               RequestSpecialWaste
             </NavLink>
           </li>

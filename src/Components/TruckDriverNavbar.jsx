@@ -46,7 +46,7 @@ const CustomNavbar = () => {
 
         <ul className="sidebar-links">
           <li>
-            <NavLink to={`/truckDriverDashboard/${id}`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`/truckDriverDashboard`} className="nav-link" onClick={toggleSidebar}>
               Home
             </NavLink>
           </li>
@@ -62,7 +62,7 @@ const CustomNavbar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to={`settings/${id}`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink to={`DriverSettingsPage`} className="nav-link" onClick={toggleSidebar}>
               Settings
             </NavLink>
           </li>
