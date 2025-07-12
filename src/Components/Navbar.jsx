@@ -1,169 +1,122 @@
-// import React, { useState, useEffect } from "react";
-// import { Link, NavLink } from "react-router-dom";
-
-// const NavBar = () => {
-//   const [isMobile, setIsMobile] = useState(false);
-
-//   useEffect(() => { // useEffect is a hook that runs after the first render and after every update
-//     const handleResize = () => {
-//       setIsMobile(window.innerWidth < 290);
-//     };
-//     window.addEventListener("resize", handleResize);
-//     return () => {  // cleanup function
-//       window.removeEventListener("resize", handleResize);
-//     };
-//   }, []);
-
-//   return (
-//     <div>
-//       <nav className="navbar navbar-expand-lg bg-body-secondary">
-//         <div className="container-fluid">
-//         <div  className="m-5 fw-bold  w-100 text-center" style={{color:`#dc3545`,fontSize:`50px`}}>Note List</div>
-//           <ul
-//             className={`navbar-nav d-flex w-100 ${
-//               isMobile
-//                 ? "flex-column justify-content-start align-items-center"
-//                 : "flex-row justify-content-around align-items-center"
-//             }`}
-//           >
-//             <li className="nav-item">
-//               <NavLink
-//                 to="/"
-//                 className={({ isActive }) =>
-//                   isActive
-//                     ? "link-danger text-decoration-none fs-5 "
-//                     : "link-dark text-decoration-none fs-5"
-//                 }
-//                 //onfocus remove outline
-//                 onFocus={(e) => e.target.blur()}
-//               >
-//                 Home
-//               </NavLink>
-//             </li>
-//             <li className="nav-item">
-//               <NavLink
-//                 to="/login"
-//                 className={({ isActive }) =>
-//                   isActive
-//                     ? "link-danger text-decoration-none fs-5"
-//                     : "link-dark text-decoration-none fs-5"
-//                 }
-//               >
-//                 Login
-//               </NavLink>
-//             </li>
-//             <li className="nav-item">
-//               <NavLink
-//                 to="/registeration"
-//                 className={({ isActive }) =>
-//                   isActive
-//                     ? "link-danger text-decoration-none fs-5"
-//                     : "link-dark text-decoration-none fs-5"
-//                 }
-//               >
-//                 Registration
-//               </NavLink>
-//             </li>
-//           </ul>
-//         </div>
-//       </nav>
-//     </div>
-//   );
-// };
-
-// export default NavBar;
-
-// import React, { useState } from 'react';
-// import { NavLink } from 'react-router-dom';
-// import { FaBars, FaTimes } from 'react-icons/fa';
-// import './Navbar.css'; // Create this file for styling
-
-// const Navbar = () => {
-//   const [isOpen, setIsOpen] = useState(false);
-
-//   const toggleNavbar = () => {
-//     setIsOpen(!isOpen);
-//   };
-
-//   return (
-//     <nav className="navbar">
-//       <div className="navbar-container">
-//         {/* Icon on the left */}
-//         <NavLink to="/" className="navbar-logo">
-//           <img src="/src//Components/13215309.png" alt="Logo" /> {/* Replace with your logo */}
-//         </NavLink>
-
-//         {/* Styled Title "Green City" */}
-//         <div className="navbar-title">
-//           Green City
-//         </div>
-
-//         {/* Hamburger menu for mobile */}
-//         <div className="menu-icon" onClick={toggleNavbar}>
-//           {isOpen ? <FaTimes /> : <FaBars />}
-//         </div>
-
-//         {/* NavLinks */}
-//         <ul className={`nav-menu ${isOpen ? 'active' : ''}`}>
-//           <li className="nav-item">
-//             <NavLink to="/" className="nav-links" onClick={toggleNavbar}>
-//               Home
-//             </NavLink>
-//           </li>
-//           <li className="nav-item">
-//             <NavLink to="/about" className="nav-links" onClick={toggleNavbar}>
-//               About
-//             </NavLink>
-//           </li>
-//           <li className="nav-item">
-//             <NavLink to="/services" className="nav-links" onClick={toggleNavbar}>
-//               Services
-//             </NavLink>
-//           </li>
-//         </ul>
-//       </div>
-//     </nav>
-//   );
-// };
-
-import React from "react";
-import { NavLink } from "react-router-dom";
-import "./Navbar.css";
+import React, { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom"; // Add useLocation
+import styles from "./Navbar.module.css";
+import useAuth from '../hooks/useAuth';
 
 const CustomNavbar = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user, isLoading } = useAuth();    const location = useLocation(); // Get current location
+  
+  var userrole;
+  if (user) {
+    if (user.role === 'User') {
+      userrole='/userDashboard';
+    } else if (user.role === 'TruckDriver') {
+      userrole="/truckDriverDashboard" 
+    } else {
+      // Assume any other role (e.g., Manager, Admin) goes to managerDashboard
+      userrole="/managerDashboard"
+    }
+  }else{
+        userrole="/userDashboard2"
+  }
+
+  // If not logged in, show the landing page content
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <nav className="navbar navbar-dark">
-      <div className="container custom-container d-flex flex-column flex-sm-row align-items-center justify-content-center justify-content-md-between text-center text-sm-start">
-        
-        {/* Logo & Title - Title moves down on small screens */}
-        <div className="d-flex flex-column flex-sm-row align-items-center">
+    <nav className={styles.navbar}>
+      <div className={styles['custom-container']}>
+        {/* Logo & Title */}
+        <div className={styles['logo-title']}>
           <img
             src="/src/Components/4530300.jpg"
-            className="logo-icon me-2"
-            width={150}
+            className={styles['logo-icon']}
+            alt="Logo"
+            width={50}
           />
-          <span className="navbar-title mt-2 mt-sm-0" style={{ marginLeft: `20px`, marginRight: `10px` }}>Green City</span>
+          <div className={styles['navbar-title']}>Green City</div>
         </div>
 
-        {/* Navigation Links - Moves down first on small screens */}
-        <ul className="navbar-nav d-flex flex-column flex-sm-row mt-3 mt-sm-0">
-          <li className="nav-item" onFocus={(e) => e.target.blur()}>
-            <NavLink to="/" className="nav-link">Home</NavLink>
+        {/* Navigation Links for larger screens */}
+        <ul className={styles['navbar-nav']}>
+          <li className={styles['nav-item']}>
+            <NavLink
+              to={`${userrole}`}
+              // end
+              className={({ isActive }) => (isActive && location.pathname === `${userrole}/` ? `${styles['nav-link']} ${styles.active}` : styles['nav-link'])}
+              onFocus={(e) => e.target.blur()}
+            >
+              Home
+            </NavLink>
           </li>
-          <li className="nav-item">
-            <NavLink to="/login" className="nav-link">Login</NavLink>
+          <li className={styles['nav-item']}>
+            <NavLink
+              to="/login"
+              className={({ isActive }) => (isActive ? `${styles['nav-link']} ${styles.active}` : styles['nav-link'])}
+            >
+              Login
+            </NavLink>
           </li>
-          <li className="nav-item">
-            <NavLink to="/registeration" className="nav-link">Registration</NavLink>
+          <li className={styles['nav-item']}>
+            <NavLink
+              to="/registeration"
+              className={({ isActive }) => (isActive ? `${styles['nav-link']} ${styles.active}` : styles['nav-link'])}
+            >
+              Registration
+            </NavLink>
           </li>
         </ul>
 
+        {/* Toggle Button for smaller screens */}
+        <div className={styles['navbar-toggler']} onClick={toggleSidebar}>
+          <span className={styles['toggle-icon']}>☰</span>
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {isSidebarOpen && <div className={`${styles.overlay} ${styles.active}`} onClick={() => setIsSidebarOpen(false)}></div>}
+
+      {/* Sidebar */}
+      <div className={`${styles.sidebar} ${isSidebarOpen ? styles.open : ''}`}>
+        <button className={styles['close-btn']} onClick={() => setIsSidebarOpen(false)}>×</button>
+        <ul className={styles['sidebar-links']}>
+          <li>
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) => (isActive ? `${styles['nav-link']} ${styles.active}` : styles['nav-link'])}
+              onClick={() => setIsSidebarOpen(false)}
+              onFocus={(e) => e.target.blur()}
+            >
+              Home
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/login"
+              className={({ isActive }) => (isActive ? `${styles['nav-link']} ${styles.active}` : styles['nav-link'])}
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              Login
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/registeration"
+              className={({ isActive }) => (isActive ? `${styles['nav-link']} ${styles.active}` : styles['nav-link'])}
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              Registration
+            </NavLink>
+          </li>
+        </ul>
       </div>
     </nav>
   );
 };
 
 export default CustomNavbar;
-
-
-

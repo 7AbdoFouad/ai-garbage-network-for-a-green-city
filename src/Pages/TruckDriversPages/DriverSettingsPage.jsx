@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
 import settingstyle from "../UserPages/SettingPage.module.css";
 import EditProfileModal from "../UserPages/EditProfileModal"; // Import modal component
 import { toast } from "react-toastify";
@@ -8,15 +8,16 @@ import Cookies from "js-cookie";
 
 export default function SettingPage() {
   const { id } = useParams();
-  const [user, setUser] = useState(() => {
-    // Initialize from localStorage if available
-    const savedUser = localStorage.getItem('userProfile');
-    return savedUser ? JSON.parse(savedUser) : {};
-  });
+  // const [user, setUser] = useState(() => {
+  //   // Initialize from localStorage if available
+  //   const savedUser = localStorage.getItem('userProfile');
+  //   return savedUser ? JSON.parse(savedUser) : {};
+  // });
   const [profileImage, setProfileImage] = useState("");
-  const { logout } = useAuth();
+  const { logout,setUser ,user} = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Fixed navigation hook
 
   // Fetch user profile from API
   const fetchUserProfile = async () => {
@@ -49,7 +50,13 @@ export default function SettingPage() {
   useEffect(() => {
     fetchUserProfile();
   }, []);
-
+  const handleLogout = () => {
+    Cookies.remove("token", { path: "/" });
+    localStorage.removeItem("authCredentials");
+    localStorage.removeItem('userProfile'); // Added profile cleanup
+    setUser(null);
+    navigate("/login"); // Fixed navigation
+  };
   // Handle profile image change
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
@@ -190,6 +197,22 @@ export default function SettingPage() {
             disabled
           />
         </div>
+        {/* <div className={settingstyle.profileField}>
+          <strong>licenseNumber:</strong>{" "}
+          <input
+            className={settingstyle.inputField}
+            value={user.licenseNumber || ""}
+            disabled
+          />
+        </div>
+         <div className={settingstyle.profileField}>
+          <strong>licenseExpiryDate:</strong>{" "}
+          <input
+            className={settingstyle.inputField}
+            value={((user.licenseExpiryDate)).slice(0,10) || ""}
+            disabled
+          />
+        </div> */}
       </div>
 
       {/* User Statistics */}
@@ -212,11 +235,12 @@ export default function SettingPage() {
         </button>
         <button
           className={`${settingstyle.button} ${settingstyle.logoutButton}`}
-          onClick={logout}
+          onClick={handleLogout} // Use fixed logout handler
         >
           🚪 Log Out
         </button>
       </div>
+
 
       {/* Edit Profile Modal */}
       {isEditing && (

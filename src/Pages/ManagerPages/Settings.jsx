@@ -4,7 +4,7 @@ import styles from "./SettingPage.module.css";
 import EditProfileModal from "../UserPages/EditProfileModal";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
 import Cookies from "js-cookie";
 
 export default function Settings() {
@@ -14,9 +14,10 @@ export default function Settings() {
     return savedManager ? JSON.parse(savedManager) : {};
   });
   const [profileImage, setProfileImage] = useState("");
-  const { logout } = useAuth();
+  const { logout,setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Fixed navigation hook
 
   // Fetch manager profile from API
   const fetchManagerProfile = async () => {
@@ -121,7 +122,14 @@ export default function Settings() {
       return false;
     }
   };
-
+  const handleLogout = () => {
+    Cookies.remove("token", { path: "/" });
+    localStorage.removeItem("authCredentials");
+    localStorage.removeItem('userProfile'); // Added profile cleanup
+    setManager(null);
+    setUser(null);
+    navigate("/login" ,); // Fixed navigation
+  };
   if (loading) {
     return (
       <div className={styles.container}>
@@ -191,6 +199,7 @@ export default function Settings() {
             disabled
           />
         </div>
+        
 
       </div>
 
@@ -212,7 +221,7 @@ export default function Settings() {
         </button>
         <button
           className={`${styles.button} ${styles.logoutButton}`}
-          onClick={logout}
+          onClick={handleLogout} // Use fixed logout handler
         >
           🚪 Log Out
         </button>

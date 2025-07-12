@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import useUser from "../hooks/useUser";
-import { useParams } from "react-router-dom";
-import { object, string, ref } from "yup";
 import { useFormik } from "formik";
+import { object, string, ref } from "yup";
 import styles from './ResetPassword.module.css';
+
+const baseUrl = "https://greencityapi.runasp.net";
 
 const schema = object().shape({
   password: string()
@@ -18,23 +18,49 @@ const schema = object().shape({
 
 export default function ResetPassword() {
   const [submitting, setSubmitting] = useState(false);
-  const { updateUser, fetchUser } = useUser();
-  const [user, setUser] = useState({});
-  const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extract token and email from URL query parameters
+  const searchParams = new URLSearchParams(location.search);
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
 
   const handleResetPassword = async (values) => {
+    if (!token || !email) {
+      toast.error("Invalid reset link. Please try again.");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      if (user.password === values.password) {
-        toast.error("New password cannot be the same as the old password.");
-        return;
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('token', token);
+      formData.append('newPassword', values.password);
+
+      const res = await fetch(`${baseUrl}/api/Auth/reset-password`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        let errorMessage = `Request failed: ${res.status} ${res.statusText}`;
+        try {
+          const errorData = await res.text();
+          if (errorData) {
+            errorMessage += ` - ${errorData}`;
+          }
+        } catch (e) {
+          console.error("Error parsing response", e);
+        }
+        throw new Error(errorMessage);
       }
-      await updateUser(id, { ...user, password: values.password });
+
       toast.success("Password updated successfully!");
       navigate("/login");
     } catch (error) {
-      toast.error("Failed to update password. Please try again later.");
+      toast.error(`Failed to update password: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -45,14 +71,6 @@ export default function ResetPassword() {
     validationSchema: schema,
     onSubmit: handleResetPassword,
   });
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const userData = await fetchUser(id);
-      setUser(userData);
-    };
-    fetchUsers();
-  }, [id, fetchUser]);
 
   return (
     <div className={styles.container}>
@@ -129,7 +147,6 @@ export default function ResetPassword() {
             </div>
           </form>
         </div>
- 
       </div>
     </div>
   );

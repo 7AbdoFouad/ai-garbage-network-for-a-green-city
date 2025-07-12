@@ -1,259 +1,226 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const WasteBinManagementPage = () => {
-  const [entries, setEntries] = useState([]);
+  const [allEntries, setAllEntries] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentEntry, setCurrentEntry] = useState(null);
-  const [editForm, setEditForm] = useState({
-    warehouseManger: '',
-    warehouseName: '',
-    sendAt: '',
-    material: '',
-    quantity: '',
-    price: '',
-    description: ''
-  });
+  const [expandedMaterials, setExpandedMaterials] = useState({});
 
-  const API_URL = 'http://localhost:3000/sortingstore';
+  const SORTING_STORE_API = 'https://greencityapi.runasp.net/api/Warehouse';
+  const WAREHOUSE_API = 'https://greencityapi.runasp.net/api/StorageWarehouse';
+  const DELETE_API = 'https://greencityapi.runasp.net/api/Warehouse';
+  const getAuthToken = () => Cookies.get("token");
+
+  const materialIcons = {
+    Wood: '🪵',
+    Plastic: '🧴',
+    Paper: '📄',
+    Glass: '🍾',
+    Metals: '🔩',
+    Default: '🧱'
+  };
 
   useEffect(() => {
-    fetchEntries();
+    fetchData();
   }, []);
 
-  const fetchEntries = async () => {
+  const fetchData = async () => {
     try {
-      const response = await axios.get(API_URL);
-      setEntries(response.data);
-      setLoading(false);
+      setLoading(true);
+      const token = getAuthToken();
+      const [entriesResponse, warehousesResponse] = await Promise.all([
+        axios.get(SORTING_STORE_API, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }),
+        axios.get(WAREHOUSE_API, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+      ]);
+      setAllEntries(entriesResponse.data);
+      setWarehouses(warehousesResponse.data);
     } catch (error) {
-      toast.error('Failed to fetch entries');
+      toast.error('Failed to load data');
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this entry?')) return;
-    
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-      setEntries(entries.filter(entry => entry.id !== id));
-      toast.success('Entry deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete entry');
-    }
-  };
-
-  const handleEdit = (entry) => {
-    setCurrentEntry(entry);
-    setEditForm({
-      warehouseManger: entry.warehouseManger,
-      warehouseName: entry.warehouseName,
-      sendAt: entry.sendAt,
-      material: entry.material,
-      quantity: entry.quantity,
-      price: entry.price,
-      description: entry.description
+  const groupEntriesByMaterial = (entries) => {
+    const grouped = {};
+    entries.forEach(entry => {
+      if (!grouped[entry.material]) {
+        grouped[entry.material] = [];
+      }
+      grouped[entry.material].push(entry);
     });
-    setIsEditModalOpen(true);
+    return grouped;
   };
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditForm(prev => ({
+  const toggleMaterial = (warehouseId, material) => {
+    setExpandedMaterials(prev => ({
       ...prev,
-      [name]: value
+      [`${warehouseId}-${material}`]: !prev[`${warehouseId}-${material}`]
     }));
   };
 
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    
+  const getMaterialIcon = (material) => {
+    return materialIcons[material] || materialIcons.Default;
+  };
+
+  const handleDelete = async (entry) => {
     try {
-      await axios.put(`${API_URL}/${currentEntry.id}`, editForm);
-      setIsEditModalOpen(false);
-      fetchEntries();
-      toast.success('Entry updated successfully');
+      const token = getAuthToken();
+      await axios.delete(`${DELETE_API}/${entry.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setAllEntries(prev => prev.filter(e => e.id !== entry.id));
+
+      setWarehouses(prev =>
+        prev.map(warehouse =>
+          warehouse.warehouseName === entry.warehouseName
+            ? {
+                ...warehouse,
+                currentCapacity: warehouse.currentCapacity - entry.quantity
+              }
+            : warehouse
+        )
+      );
+
+      toast.success('Report deleted successfully');
     } catch (error) {
-      toast.error('Failed to update entry');
+      toast.error('Failed to delete report');
     }
   };
 
-  if (loading) {
-    return <div style={styles.loading}>Loading entries...</div>;
-  }
-
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}> Warehouse Management</h1>
-      
-      <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Manager</th>
-              <th style={styles.th}>Warehouse</th>
-              <th style={styles.th}>Material</th>
-              <th style={styles.th}>Quantity (kg)</th>
-              <th style={styles.th}>Value</th>
-              <th style={styles.th}>Date</th>
-              <th style={styles.th}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map(entry => (
-              <tr key={entry.id} style={styles.tr}>
-                <td style={styles.td}>{entry.warehouseManger}</td>
-                <td style={styles.td}>{entry.warehouseName}</td>
-                <td style={styles.td}>{entry.material}</td>
-                <td style={styles.td}>{entry.quantity}</td>
-                <td style={styles.td}>${entry.price}</td>
-                <td style={styles.td}>{entry.sendAt}</td>
-                <td style={styles.td}>
-                  <button 
-                    onClick={() => handleEdit(entry)}
-                    style={styles.editButton}
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(entry.id)}
-                    style={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div style={styles.pageContainer}>
+      <h1 style={styles.pageTitle}>📦 All Warehouse Reports</h1>
+      {loading ? (
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p style={styles.loadingText}>Loading warehouse data...</p>
+        </div>
+      ) : (
+        <div style={styles.warehousesGrid}>
+          {warehouses.map(warehouse => {
+            const relatedEntries = allEntries.filter(e => e.warehouseName === warehouse.warehouseName);
+            const groupedEntries = groupEntriesByMaterial(relatedEntries);
 
-      {/* Edit Modal */}
-      {isEditModalOpen && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <div style={styles.modalHeader}>
-              <h3>Edit Entry</h3>
-              <button 
-                onClick={() => setIsEditModalOpen(false)}
-                style={styles.closeButton}
-              >
-                &times;
-              </button>
-            </div>
-            
-            <form onSubmit={handleEditSubmit} style={styles.modalForm}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Warehouse Manager:</label>
-                <input
-                  type="text"
-                  name="warehouseManger"
-                  value={editForm.warehouseManger}
-                  onChange={handleEditChange}
-                  required
-                  style={styles.input}
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Warehouse:</label>
-                <select
-                  name="warehouseName"
-                  value={editForm.warehouseName}
-                  onChange={handleEditChange}
-                  required
-                  style={styles.input}
-                >
-                  <option value="Masr">Masr</option>
-                  <option value="Elsalam">Elsalam</option>
-                </select>
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Material:</label>
-                <select
-                  name="material"
-                  value={editForm.material}
-                  onChange={handleEditChange}
-                  required
-                  style={styles.input}
-                >
-                  <option value="Metals">Metals</option>
-                  <option value="Plastic">Plastic</option>
-                  <option value="Paper">Paper</option>
-                  <option value="Glass">Glass</option>
-                  <option value="Wood">Wood</option>
-                </select>
-              </div>
-
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Quantity (kg):</label>
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={editForm.quantity}
-                    onChange={handleEditChange}
-                    required
-                    style={styles.input}
-                  />
+            return (
+              <div key={warehouse.id} style={styles.cardContainer}>
+                <div style={styles.cardHeader}>
+                  <h2 style={styles.cardTitle}>{warehouse.warehouseName}</h2>
+                  <div style={styles.capacityMeter}>
+                    <div 
+                      style={{
+                        width: `${(warehouse.currentCapacity / warehouse.totalCapacity) * 100}%`,
+                        backgroundColor: warehouse.currentCapacity / warehouse.totalCapacity > 0.8 
+                          ? '#e74c3c' 
+                          : '#2ecc71'
+                      }}
+                    ></div>
+                  </div>
                 </div>
+                
+                <div style={styles.cardBody}>
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoIcon}>📍</span>
+                    <p style={styles.infoText}>{warehouse.address}</p>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoIcon}>📦</span>
+                    <p style={styles.infoText}>
+                      {warehouse.currentCapacity} / {warehouse.totalCapacity} kg
+                    </p>
+                  </div>
 
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Value:</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={editForm.price}
-                    onChange={handleEditChange}
-                    required
-                    style={styles.input}
-                  />
+                  {Object.keys(groupedEntries).length === 0 ? (
+                    <div style={styles.emptyState}>
+                      <p style={styles.noDataText}>No material data available</p>
+                    </div>
+                  ) : (
+                    <div style={styles.materialsContainer}>
+                      {Object.entries(groupedEntries).map(([material, entries]) => (
+                        <div key={material} style={styles.materialCard}>
+                          <div 
+                            onClick={() => toggleMaterial(warehouse.id, material)} 
+                            style={styles.materialHeader}
+                          >
+                            <div style={styles.materialTitle}>
+                              <span style={styles.materialIcon}>{getMaterialIcon(material)}</span>
+                              <h3 style={styles.materialName}>{material}</h3>
+                            </div>
+                            <span style={styles.toggleIcon}>
+                              {expandedMaterials[`${warehouse.id}-${material}`] ? '−' : '+'}
+                            </span>
+                          </div>
+                          
+                          {expandedMaterials[`${warehouse.id}-${material}`] && (
+                            <div style={styles.tableContainer}>
+                              <table style={styles.table}>
+                                <thead>
+                                  <tr style={styles.tableHeadRow}>
+                                    <th style={styles.tableHeader}>Quantity</th>
+                                    <th style={styles.tableHeader}>Price</th>
+                                    <th style={styles.tableHeader}>Manager</th>
+                                    <th style={styles.tableHeader}>Date</th>
+                                    <th style={styles.tableHeader}>Description</th>
+                                    <th style={styles.tableHeader}>Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {entries.map((entry, index) => (
+                                    <tr key={index} style={styles.tableRow}>
+                                      <td style={styles.tableCell}>{entry.quantity} kg</td>
+                                      <td style={styles.tableCell}>${entry.price}</td>
+                                      <td style={styles.tableCell}>{entry.warehouseManager}</td>
+                                      <td style={styles.tableCell}>
+                                        {new Date(entry.sendAt).toLocaleDateString()}
+                                      </td>
+                                      <td style={styles.tableCell}>{entry.description}</td>
+                                      <td style={styles.tableCell}>
+                                        <button 
+                                          onClick={() => handleDelete(entry)} 
+                                          style={{
+                                            backgroundColor: '#e74c3c',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '6px 10px',
+                                            borderRadius: '5px',
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold'
+                                          }}
+                                        >
+                                          Delete
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Date:</label>
-                <input
-                  type="date"
-                  name="sendAt"
-                  value={editForm.sendAt}
-                  onChange={handleEditChange}
-                  required
-                  style={styles.input}
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Description:</label>
-                <textarea
-                  name="description"
-                  value={editForm.description}
-                  onChange={handleEditChange}
-                  required
-                  style={styles.textarea}
-                  rows="4"
-                />
-              </div>
-
-              <div style={styles.modalFooter}>
-                <button type="submit" style={styles.saveButton}>
-                  Save Changes
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  style={styles.cancelButton}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -261,152 +228,169 @@ const WasteBinManagementPage = () => {
 };
 
 const styles = {
-  container: {
-    padding: '20px',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    maxWidth: '1200px',
+  pageContainer: {
+    padding: '2rem',
+    backgroundColor: '#f8f9fa',
+    minHeight: '100vh',
+    fontFamily: "'Poppins', sans-serif",
+    maxWidth: '1800px',
     margin: '0 auto'
   },
-  loading: {
+  pageTitle: {
     textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px'
-  },
-  header: {
     color: '#2c3e50',
+    marginBottom: '2.5rem',
+    fontSize: '2.5rem',
+    fontWeight: '600',
+    letterSpacing: '0.5px',
+    textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '300px'
+  },
+  spinner: {
+    width: '50px',
+    height: '50px',
+    border: '5px solid #f3f3f3',
+    borderTop: '5px solid #2ecc71',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    marginBottom: '1rem'
+  },
+  loadingText: {
+    color: '#7f8c8d',
+    fontSize: '1.1rem',
+    fontWeight: '500'
+  },
+  warehousesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
+    gap: '2rem',
+    padding: '0 1rem'
+  },
+  cardContainer: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+    overflow: 'hidden',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+  },
+  cardHeader: {
+    backgroundColor: '#2c3e50',
+    color: 'white',
+    padding: '1.5rem',
+    position: 'relative'
+  },
+  cardTitle: {
+    margin: '0',
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: 'white'
+  },
+  capacityMeter: {
+    height: '6px',
+    backgroundColor: '#ecf0f1',
+    borderRadius: '3px',
+    marginTop: '1rem',
+    overflow: 'hidden'
+  },
+  cardBody: {
+    padding: '1.5rem'
+  },
+  infoRow: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '0.75rem'
+  },
+  infoIcon: {
+    marginRight: '0.75rem',
+    fontSize: '1.2rem'
+  },
+  infoText: {
+    margin: '0',
+    color: '#34495e',
+    fontSize: '0.95rem'
+  },
+  emptyState: {
     textAlign: 'center',
-    marginBottom: '30px'
+    padding: '1.5rem 0',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '8px',
+    marginTop: '1rem'
+  },
+  noDataText: {
+    color: '#95a5a6',
+    fontSize: '0.9rem',
+    margin: '0'
+  },
+  materialsContainer: {
+    marginTop: '1.5rem'
+  },
+  materialCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: '12px',
+    marginBottom: '1rem',
+    overflow: 'hidden',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+  },
+  materialHeader: {
+    backgroundColor: '#e8f4f8',
+    padding: '1rem 1.5rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  },
+  materialTitle: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  materialIcon: {
+    fontSize: '1.5rem',
+    marginRight: '0.75rem'
+  },
+  materialName: {
+    margin: '0',
+    fontSize: '1.1rem',
+    fontWeight: '500',
+    color: '#2c3e50'
+  },
+  toggleIcon: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    color: '#7f8c8d'
   },
   tableContainer: {
     overflowX: 'auto',
-    boxShadow: '0 0 20px rgba(0,0,0,0.1)',
-    borderRadius: '8px'
+    padding: '0.5rem'
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    backgroundColor: 'white'
+    fontSize: '0.85rem'
   },
-  th: {
-    backgroundColor: '#27ae60',
-    color: 'white',
-    padding: '12px 15px',
-    textAlign: 'left'
+  tableHeadRow: {
+    backgroundColor: '#e8f4f8'
   },
-  tr: {
-    borderBottom: '1px solid #dddddd'
+  tableHeader: {
+    padding: '0.75rem',
+    textAlign: 'left',
+    fontWeight: '600',
+    color: '#2c3e50',
+    borderBottom: '2px solid #dfe6e9'
   },
-  td: {
-    padding: '12px 15px',
-    verticalAlign: 'middle'
+  tableRow: {
+    // Pseudo-classes removed from style object
   },
-  editButton: {
-    backgroundColor: '#3498db',
-    color: 'white',
-    border: 'none',
-    padding: '8px 12px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginRight: '5px',
-    fontSize: '14px'
-  },
-  deleteButton: {
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    border: 'none',
-    padding: '8px 12px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '14px'
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000
-  },
-  modal: {
-    background: 'linear-gradient(135deg, #d4edda, #a8df8e)',
-    borderRadius: '8px',
-    width: '90%',
-    maxWidth: '600px',
-    maxHeight: '90vh',
-    overflowY: 'auto'
-  },
-  modalHeader: {
-    padding: '15px 20px',
-    borderBottom: '1px solid #eee',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  closeButton: {
-    background: 'none',
-    border: 'none',
-    fontSize: '24px',
-    cursor: 'pointer'
-  },
-  modalForm: {
-    padding: '20px'
-  },
-  formGroup: {
-    marginBottom: '15px'
-  },
-  formRow: {
-    display: 'flex',
-    gap: '15px'
-  },
-  label: {
-    display: 'block',
-    marginBottom: '5px',
-    fontWeight: '500'
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '14px'
-  },
-  textarea: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '14px',
-    minHeight: '80px',
-    resize: 'vertical'
-  },
-  modalFooter: {
-    padding: '15px 20px',
-    borderTop: '1px solid #eee',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px'
-  },
-  saveButton: {
-    backgroundColor: '#27ae60',
-    marginRight: '300px',
-    fontSize: '16px',
-    color: 'white',
-    border: 'none',
-    padding: '8px 2px',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-  cancelButton: {
-    backgroundColor: '#95a5a6',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '4px',
-    cursor: 'pointer'
+  tableCell: {
+    padding: '0.75rem',
+    borderBottom: '1px solid #dfe6e9',
+    color: '#34495e'
   }
 };
 

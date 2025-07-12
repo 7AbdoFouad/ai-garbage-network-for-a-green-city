@@ -22,10 +22,35 @@ export default function ContactUsPage() {
     try {
       setSubmitting(true);
       
-      // Create FormData for multipart/form-data submission
+      const payload = {
+        EmailAddress: "Admin123@example.com",
+        Password: "Admin@12345",
+        deviceInfo: { deviceId: "browser", deviceType: "WEB_BROWSER" },
+      };
+
+      const response2 = await fetch("/api/Auth/Login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });      const data = await response2.json();
+      const tok=data.jwtToken;
+      // console.log("Authentication token:", tok);
+      const res2= await fetch("/api/Users", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${tok}`,
+          "Content-Type": "application/json"
+        }
+      });
+            const allusers = await res2.json();
+
+      const storedCredentials = localStorage.getItem("authCredentials");
+      const { email, password } = JSON.parse(storedCredentials);
+      // search for user by email
+      const user = allusers.find((user) => user.email === email);
       const formData = new FormData();
-      formData.append("name", values.name);
-      formData.append("email", values.email);
+      formData.append("name", user.name);
+      formData.append("email", user.email);
       formData.append("message", values.message);
       
       // Get token from cookies

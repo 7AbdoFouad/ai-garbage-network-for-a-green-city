@@ -154,6 +154,59 @@ import styles from "./PollsPage.module.css";
 import PollPopup from "./PollPopup";
 import { useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
+  const getAuthToken = () => {
+    return Cookies.get("token");
+  };
+
+const addUserNotification = async (content) => {
+  try {
+    const token = getAuthToken();
+     const payload = {
+        EmailAddress: "Admin123@example.com",
+        Password: "Admin@12345",
+        deviceInfo: { deviceId: "browser", deviceType: "WEB_BROWSER" },
+      };
+
+      const response = await fetch("/api/Auth/Login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });      const data = await response.json();
+      const tok=data.jwtToken;
+      // console.log("Authentication token:", tok);
+      const res2= await fetch("/api/Users", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${tok}`,
+          "Content-Type": "application/json"
+        }
+      });
+            const allusers = await res2.json();
+
+      const storedCredentials = localStorage.getItem("authCredentials");
+      const { email, password } = JSON.parse(storedCredentials);
+      // search for user by email
+      const user = allusers.find((user) => user.email === email);
+      const userId = user ? user.id : null;
+
+
+    // Use backend-compatible property names  
+    const formData = new FormData();     
+    formData.append("notificationContent", content);
+    formData.append("notificationDate", new Date().toISOString().split("T")[0]);
+    await fetch(`/api/Notifications/User/${userId}`, {
+      method: "POST",
+      headers: { 
+        Authorization: `Bearer ${tok}`  
+      },
+      body: formData
+    });
+  } catch (error) {
+    console.error("Failed to add user notification:", error);
+  }
+};
 
 export default function PollsPage() {
   const { id } = useParams(); // user id or role-based if needed
@@ -165,8 +218,6 @@ export default function PollsPage() {
     parseInt(sessionStorage.getItem("pollsPage")) || 1
   );
   const itemsPerPage = 6;
-  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
-  console.log(cookies.token);
   
 
   // fetch all polls
@@ -178,7 +229,7 @@ export default function PollsPage() {
           { 
       method: "GET",
             headers: {
-                "Authorization": `Bearer ${cookies.token}`,
+                "Authorization": `Bearer ${getAuthToken()}`,
                 "Content-Type": "application/json"
             }
         }
@@ -199,7 +250,7 @@ export default function PollsPage() {
         const res = await fetch(
           "/api/Polls/subscribed",
           { headers: { 
-             "Authorization": `Bearer ${cookies.token}`,
+             "Authorization": `Bearer ${getAuthToken()}`,
             'Content-Type': 'application/json' } }
         );
         const data = await res.json();
@@ -236,22 +287,27 @@ export default function PollsPage() {
     sessionStorage.setItem("pollsPage", num);
   };
 
-  const handleSubscribe = async (pollId) => {
+  const handleSubscribe = async (poll) => {
     try {
       const res = await fetch(
-        `/api/Polls/${pollId}/subscribe`,
+        `/api/Polls/${poll.id}/subscribe`,
         { method: 'POST'
           , headers: { 
-             "Authorization": `Bearer ${cookies.token}`,
+             "Authorization": `Bearer ${getAuthToken()}`,
             'Content-Type': 'application/json' }
          }
 
       );
       if (!res.ok) throw new Error('Subscription failed');
       // update state
-      setSubscribedPolls(prev => [...prev, pollId]);
-      setFilteredPolls(prev => prev.filter(p => p.id !== pollId));
+      setSubscribedPolls(prev => [...prev, poll.id]);
+      setFilteredPolls(prev => prev.filter(p => p.id !== poll.id));
       setSelectedPoll(null);
+      await  addUserNotification(
+        `You have successfully subscribed to the poll: '${poll.pollName}'
+        and your number of completed polls has been increased by 1.`
+        );
+      toast.success("You have successfully subscribed to the poll!");
     } catch (err) {
       console.error(err);
     }
@@ -315,7 +371,7 @@ export default function PollsPage() {
           <PollPopup
             poll={selectedPoll}
             closePopup={() => setSelectedPoll(null)}
-            onSubmit={() => handleSubscribe(selectedPoll.id)}
+            onSubmit={() => handleSubscribe(selectedPoll)}
           />
         )}
       </div>

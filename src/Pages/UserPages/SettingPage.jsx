@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
 import EditProfileModal from "./EditProfileModal";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
@@ -8,36 +8,35 @@ import Cookies from "js-cookie";
 
 export default function SettingPage() {
   const { id } = useParams();
-  const [user, setUser] = useState(() => {
-    // Initialize from localStorage if available
-    const savedUser = localStorage.getItem('userProfile');
-    return savedUser ? JSON.parse(savedUser) : {};
-  });
+  const navigate = useNavigate(); // Fixed navigation hook
+  // const [user, setUser] = useState(() => {
+  //   const savedUser = localStorage.getItem('userProfile');
+  //   return savedUser ? JSON.parse(savedUser) : {};
+  // });
   const [profileImage, setProfileImage] = useState("");
-  const { logout } = useAuth();
+  const { logout,setUser ,user} = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user profile from API
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
       const token = Cookies.get("token");
       const response = await fetch("/api/Users/my-profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
+      
+      if (response.status === 401) {
+        handleLogout();
+        toast.error("Session expired. Please login again");
+        return;
+      }
       
       if (!response.ok) throw new Error("Failed to fetch user profile");
       
       const data = await response.json();
-      
-      // Save to state and localStorage
       setUser(data);
       localStorage.setItem('userProfile', JSON.stringify(data));
-      
-      // Set profile image
       setProfileImage(data.profileImage || "");
     } catch (error) {
       toast.error(error.message);
@@ -46,11 +45,18 @@ export default function SettingPage() {
     }
   };
 
+  const handleLogout = () => {
+    Cookies.remove("token", { path: "/" });
+    localStorage.removeItem("authCredentials");
+    localStorage.removeItem('userProfile'); // Added profile cleanup
+    setUser(null);
+    navigate("/login"); // Fixed navigation
+  };
+
   useEffect(() => {
     fetchUserProfile();
   }, []);
 
-  // Handle profile image change
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -60,63 +66,57 @@ export default function SettingPage() {
       const formData = new FormData();
       formData.append("profileimage", file);
       
-      // Add other user fields that need to be preserved
-      formData.append("name", user.name);
-      formData.append("phone", user.phone);
-      formData.append("address", user.address);
-
-      const response = await fetch("/api/Users/my-profile", {
+      const response = await fetch("/api/Users/my-profile/image", {
         method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
+      if (response.status === 401) {
+        handleLogout();
+        toast.error("Session expired. Please login again");
+        return;
+      }
+      
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update profile image");
+        throw new Error(errorData.message || "Image update failed");
       }
 
-      // Success - refetch updated profile data
       await fetchUserProfile();
-      toast.success("Profile image updated successfully!");
+      toast.success("Profile image updated!");
     } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Failed to update profile image");
+      toast.error(error.message);
     }
   };
 
-  // Update user profile
   const updateUserProfile = async (updatedData) => {
     try {
       const token = Cookies.get("token");
-      const formData = new FormData();
-      
-      // Append updated fields
-      formData.append("name", updatedData.name);
-      formData.append("phone", updatedData.phone);
-      formData.append("address", updatedData.address);
-      
       const response = await fetch("/api/Users/my-profile", {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
-        body: formData,
+        body: JSON.stringify(updatedData)
       });
 
+      if (response.status === 401) {
+        handleLogout();
+        toast.error("Session expired. Please login again");
+        return;
+      }
+      
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update profile");
+        throw new Error(errorData.message || "Profile update failed");
       }
 
-      // Success - refetch updated profile data
       await fetchUserProfile();
       toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Failed to update profile");
+      toast.error(error.message);
       throw error;
     }
   };
@@ -209,8 +209,7 @@ export default function SettingPage() {
         </li>
       </div>
 
-      {/* Buttons */}
-      <div className={settingstyle.buttonContainer}>
+       <div className={settingstyle.buttonContainer}>
         <button
           className={`${settingstyle.button} ${settingstyle.editButton}`}
           onClick={() => setIsEditing(true)}
@@ -219,13 +218,12 @@ export default function SettingPage() {
         </button>
         <button
           className={`${settingstyle.button} ${settingstyle.logoutButton}`}
-          onClick={logout}
+          onClick={handleLogout} // Use fixed logout handler
         >
           🚪 Log Out
         </button>
       </div>
 
-      {/* Edit Profile Modal */}
       {isEditing && (
         <EditProfileModal
           userData={user}

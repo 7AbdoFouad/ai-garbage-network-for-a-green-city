@@ -402,38 +402,68 @@ export default function DriverMyTasksPage() {
               
               <div className={styles.cardContent}>
                 <div className={styles.cardHeader}>
-                  <div>
-                    <h3 className={styles.taskTitle}>{task.announcementType}</h3>
-                    <p className={styles.taskAuthor}>Posted by: {task.userName}</p>
-                  </div>
-                  <div className={styles.regionBadge}>
-                    {task.regionName}
-                  </div>
-                </div>
-                
-                <p className={styles.taskDescription}>{task.announcementDescription}</p>
-                
-                <div className={styles.taskDetails}>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Location</span>
-                    <span className={styles.detailValue}>{task.siteLocation}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Date</span>
-                    <span className={styles.detailValue}>
-                      {new Date(task.todayDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Priority</span>
-                    <span className={styles.detailValue}>High</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Status</span>
-                    <span className={styles.detailValue}>{task.status}</span>
-                  </div>
-                </div>
-                
+                  <h3 className={styles.taskTitle}>{task.announcementType}</h3>
+                                   {/* <div className={styles.regionBadge}>
+                                     {task.regionName === "None" ? "No Region specified" : task.regionName}
+                                   </div> */}
+                                 </div>
+                                 
+                                 <p className={styles.taskDescription}>
+                                   {task.announcementDescription === "None" ? 
+                                       <div className={styles.taskDetails}>
+                 
+                                                 <div className={styles.detailItem}>
+                                     <span className={styles.detailLabel}>Region</span>
+                                     <span className={styles.detailValue}>
+                                       {task.regionName=== "None" ? "No Region specified": task.regionName}
+                                     </span>
+                                   </div>
+                                   <div className={styles.detailItem}>
+                                     <span className={styles.detailLabel}>Location</span>
+                                     <span className={styles.detailValue}>
+                                       {task.siteLocation === "None" ? "No location specified" : task.siteLocation}
+                                     </span>
+                                   </div>
+                                      
+                                 </div>
+                                   : 
+                                   <>
+                                 {task.siteLocation === "None" ?
+                                                 <div className={styles.taskDetails}> 
+                 
+                                 <div className={styles.detailItem}>
+                                     <span className={styles.detailLabel}>Description</span>
+                                     <span className={styles.detailValue}>
+                                       {task.announcementDescription=== "None" ? "No Description specified": task.announcementDescription}
+                                     </span>
+                                   </div></div> :
+                                 <div className={styles.taskDetails}> 
+                                 {/* <div className={styles.detailItem}>{task.announcementDescription}</div> */}
+                                    <div className={styles.detailItem}>
+                                     <span className={styles.detailLabel}>Description</span>
+                                     <span className={styles.detailValue}>
+                                       {task.announcementDescription=== "None" ? "No Description specified": task.announcementDescription}
+                                     </span>
+                                   </div>
+                                   <div className={styles.detailItem}>
+                                     <span className={styles.detailLabel}>Region</span>
+                                     <span className={styles.detailValue}>
+                                       {task.regionName=== "None" ? "No Region specified": task.regionName}
+                                     </span>
+                                   </div>
+                                   <div className={styles.detailItem}>
+                                     <span className={styles.detailLabel}>Location</span>
+                                     <span className={styles.detailValue}>
+                                       {task.siteLocation === "None" ? "No location specified" : task.siteLocation}
+                                     </span>
+                                   </div>
+                                   
+                           
+                                
+                                 </div>
+                                 }</>
+                                   }
+                                 </p>
                 <button
                   onClick={() => openCompleteModal(task)}
                   className={styles.acceptButton}

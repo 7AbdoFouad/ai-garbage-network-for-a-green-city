@@ -35,6 +35,7 @@ import Settings from "./Pages/ManagerPages/Settings";
 import Notifications from "./Pages/ManagerPages/Notifications";
 import RecycleManagement from "./Pages/ManagerPages/RecycleManagement";
 import RequestSpecialWasteManagement from "./Pages/ManagerPages/RequestSpecialWasteManagement";
+import RegionsBinsManagement from "./Pages/ManagerPages/RegionsBinsManagement";
 
 // User pages
 import HomePageForUsers from "./Pages/UserPages/HomePageForUsers";
@@ -58,6 +59,7 @@ import DriverPollsPage from "./Pages/TruckDriversPages/DriverPollsPage";
 import DriversRequiredTasksPage from "./Pages/TruckDriversPages/DriversRequiredTasksPage";
 import DriverSettingsPage from "./Pages/TruckDriversPages/DriverSettingsPage";
 import Recycle from "./Pages/TruckDriversPages/Recycle";  // TruckDriver pages
+import Acceptedtask from "./Pages/TruckDriversPages/Acceptedtask"; // TruckDriver pages
 
 // Navbar Components
 import NavbarManager from "./Components/NavbarManager";
@@ -91,11 +93,11 @@ const ProtectedManageAnnouncement = withAuthorization(ManageAnnouncement, [
 ]);
 const ProtectedManageTrucks = withAuthorization(ManageTrucks,[
   "Admin",
-  "TruckManagement",
+  "RecylingManagemnet",
 ]);
 const ProtectedManageReportsAndDataAnalysis = withAuthorization(
   ManageReportsAndDataAnalysis,
-  ["Admin", "ReportsAndDataAnalysisManagement"]
+  ["Admin", "RequestSpecialWasteManagement"]
 );
 const ProtectedCommunityEngagementManagement = withAuthorization(
   CommunityEngagementManagement,
@@ -111,7 +113,7 @@ const ProtectedPollsManagement = withAuthorization(PollsManagement,[
 ]);
 const ProtectedRecycleManagement = withAuthorization(RecycleManagement,[
   "Admin",
-  "RecylingManagemnet"
+  "AnnouncementManagement"
 ]);
 const ProtectedRewardsManagement = withAuthorization(RewardsManagement,[
   "Admin",
@@ -119,12 +121,11 @@ const ProtectedRewardsManagement = withAuthorization(RewardsManagement,[
 ]);
 const ProtectedRequestSpecialWasteManagement = withAuthorization(RequestSpecialWasteManagement,[
   "Admin",
-  "RequestSpecialWasteManagement",
   "AnnouncementManagement"
 ]);
 const ProtectedWasteBinManagement = withAuthorization(WasteBinManagement,[
   "Admin",
-  "WasteBinManagement"
+  "RecylingManagemnet"
 ]);
 const ProtectedSettings = withAuthorization(Settings,[
   "Admin",
@@ -152,6 +153,11 @@ const ProtectedNotifications = withAuthorization(Notifications,[
   "RecycleManagment",
   "RequestSpecialWasteManagement",
 ]);
+
+const ProtectedRegionsBinsManagement = withAuthorization(RegionsBinsManagement,[
+  "Admin",
+  "WasteBinManagement"
+])
 // Authentication user pages
 const ProtectedHomePageForUsers = withAuthorization(HomePageForUsers);
 const ProtectedAboutUsPage = withAuthorization(AboutUsPage);
@@ -204,8 +210,9 @@ const LayoutTruckDriver = () => (
     <Outlet />
   </>
 );
-
 // Define Routes
+
+import Layout2 from "./Pages/Layout2"; // Assuming Layout2 is a layout for user dashboard
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
@@ -241,6 +248,7 @@ const router = createBrowserRouter(
         <Route path="notifications" element={<ProtectedNotifications />} />
         <Route path="RecycleManagement" element={<ProtectedRecycleManagement />} />
         <Route path="RequestSpecialWasteManagement" element={<ProtectedRequestSpecialWasteManagement />} />
+        <Route path="RegionsBinsManagement" element={<ProtectedRegionsBinsManagement />} />
         
       </Route>
 
@@ -261,6 +269,11 @@ const router = createBrowserRouter(
         <Route path="requestSpecialWaste" element={<ProtectedRequestSpecialWaste />} />
         
       </Route>
+      <Route path="/userDashboard2" element={<Layout2 />}>
+        <Route index element={<HomePageForUsers/>} />
+        <Route path="aboutUs" element={<AboutUsPage />} />
+        <Route path="faq" element={<FAQPage />} />  
+      </Route>
 
       {/* Truck Driver Routes */}
       <Route path="/truckDriverDashboard" element={<LayoutTruckDriver />}>
@@ -271,6 +284,8 @@ const router = createBrowserRouter(
         <Route path="requiredTasks" element={<ProtectedDriverRequiredTasksPage />} />
         <Route path="DriverSettingsPage" element={<ProtectedDriverSettingsPage />} />
         <Route path="recycle" element={<Recycle />} />
+        <Route path="Acceptedtask" element={<Acceptedtask />} />
+
       </Route>
 
       {/* Authentication Routes */}

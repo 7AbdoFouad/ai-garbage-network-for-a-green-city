@@ -7,10 +7,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://greencityapi.runasp.net', // Changed to HTTPS
+        target: 'https://greencityapi.runasp.net',
         changeOrigin: true,
-        secure: false
+        secure: false,
       },
-    }
-  }
+    
+    },
+  },
 });

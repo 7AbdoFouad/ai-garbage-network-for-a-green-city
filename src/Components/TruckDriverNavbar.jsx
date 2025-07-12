@@ -1,44 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { FaUserTie, FaBars, FaTimes } from "react-icons/fa"; // Changed icon to manager icon
+import { NavLink, useLocation } from "react-router-dom"; // Add useLocation
+import { FaUserTie, FaBars, FaTimes } from "react-icons/fa";
 import "./ManagerNavbar.css";
 import { useParams } from "react-router-dom";
 
 const CustomNavbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const {id}= useParams();
-  //   const { fetchTruckDriver } = useUser();
-    // const[TruckDriver,setTruckDrivers]=useState({})
-    // useEffect(() => {
-    //     const fetchmanager=async()=>{
-    //      const truckdriver=await fetchTruckDriver(id);
-    //      setTruckDrivers(truckdriver)
-    //     }
-    //     fetchmanager();
-    // }, [id]);
+  const {id} = useParams();
+      const location = useLocation(); // Get current location
+  
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
   return (
     <>
-      {/* Main Navbar */}
-      {/* <nav className="navbar custom-navbar">
-        <div className="container custom-container d-flex justify-content-center align-items-center"> */}
-          {/* Centered Title */}
-          {/* <div className="navbar-title d-flex align-items-center">
-            <FaUserTie className="logo-icon" />
-            <span className="greeting-text">Hello, {(TruckDriver.name)}</span>
-          </div> */}
+      <button className="menu-btn" onClick={toggleSidebar}>
+        <FaBars className="toggle-icon" />
+      </button>
 
-          {/* Mobile Toggle Button */}
-          <button className="menu-btn" onClick={toggleSidebar}>
-            <FaBars className="toggle-icon" />
-          </button>
-        {/* </div>
-      </nav> */}
-
-      {/* Sidebar Menu */}
       <div className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <button className="close-btn" onClick={toggleSidebar}>
           <FaTimes />
@@ -46,36 +26,79 @@ const CustomNavbar = () => {
 
         <ul className="sidebar-links">
           <li>
-            <NavLink to={`/truckDriverDashboard`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink 
+              to={`/truckDriverDashboard`} 
+              // Add end prop here
+               className={({ isActive }) => 
+                // Check if we're exactly at the home route
+                (isActive && location.pathname === "/truckDriverDashboard/") 
+                  ? "nav-link active" 
+                  : "nav-link"
+              }
+            >
               Home
             </NavLink>
           </li>
          
           <li>
-            <NavLink to="requiredTasks" className="nav-link" onClick={toggleSidebar}>
+            <NavLink 
+              to="requiredTasks" 
+              className={({ isActive }) => 
+                isActive ? "nav-link active" : "nav-link"
+              } 
+              onClick={toggleSidebar}
+            >
               Available Tasks 
             </NavLink>
           </li>
           <li>
-            <NavLink to="driverNotifications" className="nav-link" onClick={toggleSidebar}>
+            <NavLink 
+              to="driverNotifications" 
+              className={({ isActive }) => 
+                isActive ? "nav-link active" : "nav-link"
+              } 
+              onClick={toggleSidebar}
+            >
               My Tasks
             </NavLink>
           </li>
           <li>
-            <NavLink to={`DriverSettingsPage`} className="nav-link" onClick={toggleSidebar}>
+            <NavLink 
+              to={`DriverSettingsPage`} 
+              className={({ isActive }) => 
+                isActive ? "nav-link active" : "nav-link"
+              } 
+              onClick={toggleSidebar}
+            >
               Settings
             </NavLink>
           </li>
           <li>
-            <NavLink to="Recycle" className="nav-link" onClick={toggleSidebar}>
-              Recycling 
+            <NavLink 
+              to="Recycle" 
+              className={({ isActive }) => 
+                isActive ? "nav-link active" : "nav-link"
+              } 
+              onClick={toggleSidebar}
+            >
+             Available Paid Tasks 
+            </NavLink>
+          </li>
+          <li>
+            <NavLink 
+              to="Acceptedtask" 
+              className={({ isActive }) => 
+                isActive ? "nav-link active" : "nav-link"
+              } 
+              onClick={toggleSidebar}
+            >
+             Accepted Paid Tasks
             </NavLink>
           </li>
         </ul>
       </div>
 
-      {/* Overlay when sidebar is open */}
-      {sidebarOpen && <div className="overlay" onClick={toggleSidebar}></div>}
+      <div className={`overlay ${sidebarOpen ? 'active' : ''}`} onClick={toggleSidebar}></div>
     </>
   );
 };

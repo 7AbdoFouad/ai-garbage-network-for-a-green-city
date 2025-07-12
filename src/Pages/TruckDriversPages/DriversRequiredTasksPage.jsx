@@ -1,10 +1,9 @@
-// DriversAvailableTasks.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import { useCookies } from 'react-cookie';
 import { AuthContext } from '../../Components/AuthContext';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import styles from './DriversAvailableTasks.module.css'; // CSS Module import
+import styles from './DriversAvailableTasks.module.css';
 
 const DriversAvailableTasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -12,21 +11,20 @@ const DriversAvailableTasks = () => {
   const [error, setError] = useState(null);
   const [cookies] = useCookies(['token']);
   const { logout } = useContext(AuthContext);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const tasksPerPage = 6;
-  
+
   const baseUrl = 'https://greencityapi.runasp.net/api';
 
   useEffect(() => {
-    // Get current page from session storage if available
     const savedPage = sessionStorage.getItem('driversTasksPage');
     if (savedPage) {
       setCurrentPage(parseInt(savedPage, 10));
     }
-    
+
     const fetchTasks = async () => {
       try {
         const response = await fetch(`/api/UsersAnnouncements/approved`, {
@@ -78,14 +76,10 @@ const DriversAvailableTasks = () => {
         throw new Error('Failed to accept task');
       }
 
-      // Remove the accepted task from the list
       setTasks(tasks.filter(task => task.id !== taskId));
       toast.success('Task accepted successfully!');
-      
-      // Recalculate total pages after task removal
       setTotalPages(Math.ceil((tasks.length - 1) / tasksPerPage));
-      
-      // Adjust current page if we're on the last page and it becomes empty
+
       if (currentPage > Math.ceil((tasks.length - 1) / tasksPerPage)) {
         const newPage = Math.max(1, Math.ceil((tasks.length - 1) / tasksPerPage));
         setCurrentPage(newPage);
@@ -98,7 +92,6 @@ const DriversAvailableTasks = () => {
     }
   };
 
-  // Pagination functions
   const goToPage = (page) => {
     setCurrentPage(page);
     sessionStorage.setItem('driversTasksPage', page.toString());
@@ -120,7 +113,6 @@ const DriversAvailableTasks = () => {
     }
   };
 
-  // Calculate current tasks to display
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
@@ -204,45 +196,95 @@ const DriversAvailableTasks = () => {
                     <p>No Image Available</p>
                   </div>
                 )}
-                {/* <div className={styles.statusBadge}>
-                  {task.status}
-                </div> */}
               </div>
               
               <div className={styles.cardContent}>
                 <div className={styles.cardHeader}>
                   <div>
-                    <h3 className={styles.taskTitle}>{task.announcementType}</h3>
-                    <p className={styles.taskAuthor}>Posted by: {task.userName}</p>
-                  </div>
-                  <div className={styles.regionBadge}>
-                    {task.regionName}
-                  </div>
+                    {/* Removed userName as it's not in the new data structure */}
+                  </div>                
+    <h3 className={styles.taskTitle}>{task.announcementType}</h3>
+                  {/* <div className={styles.regionBadge}>
+                    {task.regionName === "None" ? "No Region specified" : task.regionName}
+                  </div> */}
                 </div>
                 
-                <p className={styles.taskDescription}>{task.announcementDescription}</p>
-                
-                <div className={styles.taskDetails}>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Location</span>
-                    <span className={styles.detailValue}>{task.siteLocation}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Date</span>
+                <p className={styles.taskDescription}>
+                  {task.announcementDescription === "None" ? 
+                      <div className={styles.taskDetails}>
+
+                                <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Region</span>
                     <span className={styles.detailValue}>
-                      {new Date(task.todayDate).toLocaleDateString()}
+                      {task.regionName=== "None" ? "No Region specified": task.regionName}
                     </span>
                   </div>
                   <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Priority</span>
-                    <span className={styles.detailValue}>High</span>
+                    <span className={styles.detailLabel}>Location</span>
+                    <span className={styles.detailValue}>
+                      {task.siteLocation === "none" ? "No location specified" : task.siteLocation}
+                    </span>
+                  </div>
+                     
+                </div>
+                  : 
+                  <>
+                {task.siteLocation === "None" ?
+                                <div className={styles.taskDetails}> 
+
+                <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Description</span>
+                    <span className={styles.detailValue}>
+                      {task.announcementDescription=== "None" ? "No Description specified": task.announcementDescription}
+                    </span>
+                  </div></div> :
+                <div className={styles.taskDetails}> 
+                {/* <div className={styles.detailItem}>{task.announcementDescription}</div> */}
+                   <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Description</span>
+                    <span className={styles.detailValue}>
+                      {task.announcementDescription=== "None" ? "No Description specified": task.announcementDescription}
+                    </span>
                   </div>
                   <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Estimated Time</span>
-                    <span className={styles.detailValue}>2-3 hours</span>
+                    <span className={styles.detailLabel}>Region</span>
+                    <span className={styles.detailValue}>
+                      {task.regionName=== "None" ? "No Region specified": task.regionName}
+                    </span>
                   </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Location</span>
+                    <span className={styles.detailValue}>
+                      {task.siteLocation === "None" ? "No location specified" : task.siteLocation}
+                    </span>
+                  </div>
+                  
+          
+               
                 </div>
-                
+                }</>
+                  }
+                </p>
+                 {/* {task.siteLocation === "none" ?
+                <div className={styles.taskDetails}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Location</span>
+                    <span className={styles.detailValue}>
+                      {task.siteLocation === "none" ? "No location specified" : task.siteLocation}
+                    </span>
+                  </div>
+                  
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Bin Number</span>
+                    <span className={styles.detailValue}>
+                      {task.binNumber === 0 ? "No bin number" : task.binNumber}
+                    </span>
+                  </div>
+               
+               
+         
+                </div>
+                  :<></>} */}
                 <button
                   onClick={() => handleAcceptTask(task.id)}
                   className={styles.acceptButton}
@@ -257,7 +299,6 @@ const DriversAvailableTasks = () => {
           ))}
         </div>
         
-        {/* Pagination Controls */}
         <div className={styles.paginationContainer}>
           <button 
             onClick={prevPage} 
@@ -290,16 +331,6 @@ const DriversAvailableTasks = () => {
           </button>
         </div>
       </div>
-{/*       
-      <div className={styles.statusBar}>
-        <div className={styles.statusIndicator}>
-          <div className={styles.statusDot}></div>
-          <span>Active: {tasks.length} task{tasks.length !== 1 ? 's' : ''} available</span>
-        </div>
-        <div className={styles.statusText}>
-          Page {currentPage} of {totalPages} • Green City Initiative • Making our city cleaner every day
-        </div>
-      </div> */}
     </div>
   );
 };

@@ -1,41 +1,31 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import  useAuth  from '../hooks/useAuth';
+import React, { useEffect } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
+
 const LandingPage = () => {
-  const { isLoggedIn } = useAuth();
-  const handleclick = () => {
-   if(isLoggedIn){
-     console.log('logged in')
+  const { user, isLoading } = useAuth();
+
+// Show a loading state while authentication is being checked
+if (isLoading) {
+  return <div>Loading...</div>;
+}
+
+
+if (user) {
+  if (user.role === 'User') {
+    return <Navigate to="/userDashboard" replace />;
+  } else if (user.role === 'TruckDriver') {
+    return <Navigate to="/truckDriverDashboard" replace />;
+  } else {
+    // Assume any other role (e.g., Manager, Admin) goes to managerDashboard
+    return <Navigate to="/managerDashboard" replace />;
   }
-  else{
-    console.log('not logged in')
-  }
-  }
-  return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '90vh' }}>
-      <div className="row align-items-center px-4 px-md-0 justify-content-center">
-        <div className="col-lg-6 order-2  text-center text-lg-start">
-          <h1 className="display-3 mb-4">Welcome to our website</h1>
-          <p className="lead mb-4">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
-            voluptatum, quibusdam, quidem, eaque quod quae nemo voluptate
-            voluptatem quos dolores.
-          </p>
-          <Link to="/login" className="btn btn-primary btn-lg">
-            Login
-          </Link>
-        </div>
-        <div className="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center   ">
-          <img
-            src="https://cdn-icons-png.freepik.com/512/14829/14829169.png"
-            alt="placeholder"
-            className="img-fluid rounded-3 shadow-lg mt-5"
-          />
-        </div>
-      </div>
-      {/* <div><button onClick={handleclick}>lolooooooooooooooooooo</button></div> */}
-    </div>
-  );
+}
+
+// If not logged in, show the landing page content
+return (
+  <Navigate to="/userDashboard2" replace />
+);
 };
 
 export default LandingPage;

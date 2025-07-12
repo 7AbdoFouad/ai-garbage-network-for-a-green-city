@@ -86,6 +86,8 @@ const updateCommunityActivity = async (id, activity) => {
     formData.append("numOfRequiredSubscribers", activity.numOfRequiredSubscribers);
     
     if (activity.photo && activity.photo.startsWith("data:image")) {
+      console.log(activity.photo);
+      
       formData.append("photo", activity.photo);
     }
 
@@ -191,16 +193,19 @@ const completeActivity = async (activityId) => {
 const addPublicNotification = async (content) => {
   try {
     const token = getAuthToken();
-    await fetch(`/api/PublicNotifications`, {
+     const formData = new FormData();     
+    
+    // Use backend-compatible property names
+    formData.append("notificationContent", content);
+    formData.append("notificationDate", new Date().toISOString().split("T")[0]);
+   
+    
+    await fetch(`/api/Notifications/Public`, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json",  
         Authorization: `Bearer ${token}` 
       },
-      body: JSON.stringify({
-        notificationContent: content,
-        notificationDate: new Date().toISOString().split("T")[0]
-      })
+      body: formData
     });
   } catch (error) {
     console.error("Failed to add public notification:", error);
@@ -210,17 +215,17 @@ const addPublicNotification = async (content) => {
 const addUserNotification = async (userId, content) => {
   try {
     const token = getAuthToken();
-    await fetch(`/api/UserNotifications?id=${userId}`, {
+     const formData = new FormData();     
+    
+    // Use backend-compatible property names
+    formData.append("notificationContent", content);
+    formData.append("notificationDate", new Date().toISOString().split("T")[0]);
+    await fetch(`/api/Notifications/User/${userId}`, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json",  
         Authorization: `Bearer ${token}`  
       },
-      body: JSON.stringify({
-        notificationContent: content,
-        notificationDate: new Date().toISOString().split("T")[0],
-        isRead: false
-      })
+      body: formData
     });
   } catch (error) {
     console.error("Failed to add user notification:", error);
@@ -344,7 +349,7 @@ const convertDMYToYMD = ( dmyString='') => {
     try {
       const newActivity = await createCommunityActivity(values);
       setCommunityActivities(prev => [...prev, newActivity]);
-      await addPublicNotification(`New activity "${values.ActName}" has been added!`);
+      await addPublicNotification(`New activity : '${(values.ActName).trim()}' has been added!`);
       toast.success("Activity added successfully!");
       setFormVisible(false);
       inputRef.current.value = null;
@@ -505,7 +510,7 @@ const handleDeleteSubscriber = async (userId) => {
           activity.id === updatedActivity.id ? updatedActivity : activity
         )
       );
-      
+
       toast.success("Activity updated successfully!");
       setShowEditCommunity(false);
     } catch (error) {

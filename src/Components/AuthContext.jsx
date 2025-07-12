@@ -73,7 +73,7 @@ export function AuthProvider({ children }) {
       await fetchUserProfile(data.jwtToken);
     } catch (error) {
       console.error("Auto-login error:", error);
-      localStorage.removeItem("authCredentials");
+      // localStorage.removeItem("authCredentials");
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +99,7 @@ export function AuthProvider({ children }) {
     // Clear all previous authentication state
     setUser(null);
     removeCookie("token", { path: "/" });
-    localStorage.removeItem("authCredentials");
+    // localStorage.removeItem("authCredentials");
     
     // Set new token
     const { exp } = jwtDecode(jwtToken);
@@ -121,13 +121,13 @@ export function AuthProvider({ children }) {
   }, [fetchUserProfile, removeCookie, setCookie]);
 
   const logout = useCallback(() => {
-    removeCookie("token", { path: "/" });
-    localStorage.removeItem("authCredentials");
-    setUser(null);
+    // removeCookie("token", { path: "/" });
+    // localStorage.removeItem("authCredentials");
+    // setUser(null);
   }, [removeCookie]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, isLoading, login, logout }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

@@ -6,7 +6,9 @@ import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './DriversAvailableTasks.module.css';
 
-const DriversAvailableTasks = () => {
+
+
+export default function DriverMyTasksPage() { 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,14 +23,14 @@ const DriversAvailableTasks = () => {
   const baseUrl = 'https://greencityapi.runasp.net/api';
 
   useEffect(() => {
-    const savedPage = sessionStorage.getItem('driversTasksPage7');
+    const savedPage = sessionStorage.getItem('driversTasksPage5');
     if (savedPage) {
       setCurrentPage(parseInt(savedPage, 10));
     }
     
     const fetchTasks = async () => {
       try {
-        const response = await fetch(`/api/PaidUserAnnouncements/all-ApprovedPaidannouncements`, {
+        const response = await fetch(`/api/PaidUserAnnouncements/my-paid-tasks`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${cookies.token}`
@@ -84,7 +86,7 @@ const DriversAvailableTasks = () => {
       if (currentPage > Math.ceil((tasks.length - 1) / tasksPerPage)) {
         const newPage = Math.max(1, Math.ceil((tasks.length - 1) / tasksPerPage));
         setCurrentPage(newPage);
-        sessionStorage.setItem('driversTasksPage7', newPage.toString());
+        sessionStorage.setItem('driversTasksPage5', newPage.toString());
       }
     } catch (err) {
       toast.error(`Error: ${err.message}`);
@@ -96,14 +98,14 @@ const DriversAvailableTasks = () => {
   // Pagination functions
   const goToPage = (page) => {
     setCurrentPage(page);
-    sessionStorage.setItem('driversTasksPage7', page.toString());
+    sessionStorage.setItem('driversTasksPage5', page.toString());
   };
 
   const nextPage = () => {
     if (currentPage < totalPages) {
       const newPage = currentPage + 1;
       setCurrentPage(newPage);
-      sessionStorage.setItem('driversTasksPage7', newPage.toString());
+      sessionStorage.setItem('driversTasksPage5', newPage.toString());
     }
   };
 
@@ -111,7 +113,7 @@ const DriversAvailableTasks = () => {
     if (currentPage > 1) {
       const newPage = currentPage - 1;
       setCurrentPage(newPage);
-      sessionStorage.setItem('driversTasksPage7', newPage.toString());
+      sessionStorage.setItem('driversTasksPage5', newPage.toString());
     }
   };
 
@@ -145,7 +147,7 @@ const DriversAvailableTasks = () => {
         >
           <div className={styles.errorIcon}>⚠️</div>
           <h2 className={styles.errorHeading}>Connection Error</h2>
-          <p className={styles.errorMessage}>Couldn't fetch tasks: {error}</p>
+          <p className={styles.errorMessage}>Couldn&apos;t fetch tasks: {error}</p>
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -378,6 +380,5 @@ const DriversAvailableTasks = () => {
       </div>
     </div>
   );
-};
+}
 
-export default DriversAvailableTasks;

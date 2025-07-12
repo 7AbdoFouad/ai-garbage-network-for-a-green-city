@@ -9,7 +9,7 @@ export default function withAuthorization(Component, allowedRoles = []) {
     const { id } = useParams();
 
     // If not logged in, send to /login
-    if (!user) return <Navigate to="/login" replace />;
+    // if (!user) return <Navigate to="/login"  />;
 
     // If allowedRoles is empty, allow all logged-in users
     if (

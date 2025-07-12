@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Form, Modal } from "react-bootstrap";
-import { object, string, array } from "yup";
-import useUser from "../../hooks/useUser";
+import { Table, Button, Form, Modal, Row, Col, Card, Badge } from "react-bootstrap";
+import { object, string } from "yup";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
-import EditManagerModel from "./EditManagerModel";
-import EditTruckDriverModel from "./EditTruckDriverModel";
+import { FaUser, FaUserTie, FaTruck, FaTrash, FaEdit, FaBell, FaSearch, FaPlus } from "react-icons/fa";
+import Cookies from "js-cookie";
+import styles from "./UserManagment.module.css";
 import { useFormik } from "formik";
-import styles from "./EditProfileModal.module.css";
+
+const getAuthToken = () => {
+  return Cookies.get("token");
+};
 
 const schema = object().shape({
   name: string()
     .required("Name is required")
     .min(3, "Name must be more than 3 characters")
     .matches(/^[a-zA-Z\s]+$/, "Invalid Name, must contain letters only"),
-
   phone: string()
     .required("Phone number is required")
     .matches(/^\d+$/, "Phone number must contain only numbers")
@@ -28,9 +30,10 @@ const schema = object().shape({
   password: string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters "),
-  Address: string().min(3, "Address must be more than 3 characters"),
-  Permissions: array().min(1, "At least one permission is required"),
+  address: string().required("Address is required").min(3, "Address must be more than 3 characters"),
+  role: string().required("Role is required"),
 });
+
 const schema2 = object().shape({
   name: string()
     .required("Name is required")
@@ -49,1057 +52,1648 @@ const schema2 = object().shape({
   password: string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters "),
-  Address: string().min(3, "Address must be more than 3 characters"),
-  truckNumber: string()
-    .required("Truck Number is required")
-    .matches(/^[0-9]+$/, "Invalid Truck Number, must contain only numbers"),
+  address: string().required("Address is required").min(3, "Address must be more than 3 characters"),
 });
+
+const managerEditSchema = object().shape({
+  name: string()
+    .required("Name is required")
+    .min(3, "Name must be more than 3 characters")
+    .matches(/^[a-zA-Z\s]+$/, "Invalid Name, must contain letters only"),
+  phone: string()
+    .required("Phone number is required")
+    .matches(/^\d+$/, "Phone number must contain only numbers")
+    .length(11, "Phone number must be exactly 11 digits"),
+  email: string()
+    .required("Email is required")
+    .matches(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      "Email is not valid"
+    ),
+  address: string().required("Address is required").min(3, "Address must be more than 3 characters"),
+  role: string().required("Role is required"),
+  password: string().min(8, "Password must be at least 8 characters"),
+});
+
+const driverEditSchema = object().shape({
+  name: string()
+    .required("Name is required")
+    .min(3, "Name must be more than 3 characters")
+    .matches(/^[a-zA-Z\s]+$/, "Invalid Name, must contain letters only"),
+  email: string()
+    .required("Email is required")
+    .matches(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      "Email is not valid"
+    ),
+  phone: string()
+    .required("Phone number is required")
+    .matches(/^\d+$/, "Phone number must contain only numbers")
+    .length(11, "Phone number must be exactly 11 digits"),
+  address: string().required("Address is required").min(3, "Address must be more than 3 characters"),
+});
+
 const notifySchema = object().shape({
   reason: string()
     .required("Reply is required")
     .min(10, "Message is too short"),
 });
-export default function UserManagement() {
-  const {
-    users,
-    managers,
-    truckDrivers,
-    deleteUser,
-    deleteManager,
-    deleteTruckDriver,
-    updateManager,
-    updateTruckDriver,
-    fetchManager,
-    addManager,
-    addTruckDriver,
-    addUserNotification,
-  } = useUser();
-  const { id } = useParams();
-  const [currentUser, setUser] = useState({});
 
+const roleOptions = [
+  // { value: "Admin", label: "Admin" },
+  { value: "AnnouncementManagement", label: "Announcement Manager" },
+  { value: "WasteBinManagement", label: "Bins and Regions Manager" },
+  { value: "CommunityEngagementManagement", label: "CommunityEngagement Manager" },
+  { value: "UserManagement", label: "Users Manager" },
+  { value: "PollsManagement", label: "Polls Manager" },
+  { value: "RecylingManagemnet", label: "Recyling Manager" },
+  { value: "RequestSpecialWasteManagement", label: "Special Order Manager" },
+];
+
+const UserManagement = () => {
+  const BASE_URL = "https://greencityapi.runasp.net";
+  const { id } = useParams();
+
+  // State declarations
+  const [users, setUsers] = useState([]);
+  const [managers, setManagers] = useState([]);
+  const [truckDrivers, setTruckDrivers] = useState([]);
+  const [currentUser, setUser] = useState({});
   const [isEditingManager, setIsEditingManager] = useState(false);
   const [isEditingTruckDriver, setIsEditingTruckDriver] = useState(false);
   const [selectedManager, setSelectedManager] = useState(null);
   const [selectedTruckDriver, setSelectedTruckDriver] = useState(null);
-
-  // const [loadingDeleteUser, setloadingDeleteUser] = useState(false);
-  // const [loadingDeleteManager, setloadingDeleteManager] = useState(false);
-  // const [loadingDeleteTruckDriver, setloadingDeleteTruckDriver] =
-  //   useState(false);
-
-  // const [error, setError] = useState(null);
-  // const [success, setSuccess] = useState(null);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const user = await fetchManager(id);
-      setUser(user);
-    };
-    fetchUsers();
-  }, []);
-  const loggedInPermissions = currentUser?.Permissions || [];
-  // console.log(loggedInPermissions);
-
-  // Filter managers based on permissions
-  const filteredManagers = managers.filter((manager) => {
-    if (loggedInPermissions.includes("admin")) {
-      return !(manager.id === currentUser.id); // Admin see other admins, but not themselves
-    } else if (loggedInPermissions.includes("UserManagement")) {
-      return (
-        !manager.Permissions.includes("admin") &&
-        !(manager.id === currentUser.id)
-      );
-    }
-    return true;
-  });
   const [loadingDeleteUsers, setLoadingDeleteUsers] = useState({});
+  const [loadingDeleteManager, setLoadingDeleteManager] = useState({});
+  const [loadingDeleteTruckDriver, setLoadingDeleteTruckDriver] = useState({});
+  const [currentManager, setCurrentManager] = useState(null);
+  const [selectedContactUs, setselectedContactUs] = useState(null);
+  const [modalShowNotify, setModalShowNotify] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm2, setSearchTerm2] = useState("");
+  const [searchTerm3, setSearchTerm3] = useState("");
+  const [activeTab, setActiveTab] = useState("users");
+  const [showAddManager, setShowAddManager] = useState(false);
+  const [showAddDriver, setShowAddDriver] = useState(false);
+  const [usersPage, setUsersPage] = useState(1);
+  const [managersPage, setManagersPage] = useState(1);
+  const [driversPage, setDriversPage] = useState(1);
+  const [isUsersLoading, setIsUsersLoading] = useState(true);
+  const [isManagersLoading, setIsManagersLoading] = useState(true);
+  const [isDriversLoading, setIsDriversLoading] = useState(true);
+  const itemsPerPage = 5;
+
+  // Stats for dashboard
+  const stats = [
+    { title: "Total Users", value: users.length, icon: <FaUser className={styles.statIcon} />, color: "#4caf50" },
+    { title: "Managers", value: managers.length, icon: <FaUserTie className={styles.statIcon} />, color: "#2196f3" },
+    { title: "Truck Drivers", value: truckDrivers.length, icon: <FaTruck className={styles.statIcon} />, color: "#ff9800" },
+  ];
+
+  // Fetch data
+  useEffect(() => {
+    fetchUsers();
+    fetchManagers();
+    fetchTruckDrivers();
+    fetchCurrentUser();
+  }, [id]);
+
+  const fetchUsers = async () => {
+    setIsUsersLoading(true);
+    try {
+      const response = await fetch(`/api/Users`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      toast.error("Failed to fetch users");
+    } finally {
+      setIsUsersLoading(false);
+    }
+  };
+
+  const fetchManagers = async () => {
+    setIsManagersLoading(true);
+    try {
+      const response = await fetch(`/api/Managers`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      const data = await response.json();
+      // remove Admin role from managers
+      const filteredData = data.filter((manager) => manager.role !== "Admin");
+      setManagers(filteredData);
+    } catch (error) {
+      toast.error("Failed to fetch managers");
+    } finally {
+      setIsManagersLoading(false);
+    }
+  };
+
+  const fetchTruckDrivers = async () => {
+    setIsDriversLoading(true);
+    try {
+      const response = await fetch(`/api/TruckDrivers`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      const data = await response.json();
+      setTruckDrivers(data);
+    } catch (error) {
+      toast.error("Failed to fetch truck drivers");
+    } finally {
+      setIsDriversLoading(false);
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch(`/api/Managers/${id}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      const data = await response.json();
+      setUser(data);
+      setCurrentManager(data);
+    } catch (error) {
+      toast.error("Failed to fetch current user");
+    }
+  };
+
+  // Delete functions
   const handleDeleteUser = async (userId) => {
-    //    try {
-    //     await deleteUser(userId);
-    //  toast.success("User deleted successfully.");
-    //    } catch (error) {
-    //     toast.error("Failed to delete user. Please try again later.");
-    //    }
-    //----------------------------
     setLoadingDeleteUsers((prev) => ({ ...prev, [userId]: true }));
-
-    // setloadingDeleteUser(true);
-    // setError(null);
-    //  setSuccess(null);
     try {
-      const user = users.find((user) => user.id === userId);
-      const res = await fetch("http://localhost:5000/delUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: user.email }),
+      await fetch(`/api/Users/${userId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to send email.");
-      }
-      await deleteUser(userId);
-                      // Fix pagination if page becomes empty
-    const newTotalPages = Math.ceil((filteredUsers.length - 1) / usersPerPage);
-    if (availableCurrentPage3 > newTotalPages) {
-      const newPage = Math.max(newTotalPages - 1, 1);
-      setAvailableCurrentPage3(newPage);
-      sessionStorage.setItem("availableCurrentPage3", newPage);
-    }
-      // setSuccess("Password reset link sent");
-      toast.success("User deleted successfully, an email has been sent.");
+      fetchUsers();
+      toast.success("User deleted successfully");
     } catch (error) {
-      console.log(error);
-      // setError(error.message);
-    } finally {
-      // setloadingDeleteUser(false);
-      setLoadingDeleteUsers((prev) => ({ ...prev, [userId]: false }));
-    }
-  };
-
-  const [loadingDeleteManager, setloadingDeleteManager] = useState({});
-  const handleDeleteManager = async (userId) => {
-    // try {
-    //   await deleteManager(userId);
-
-    //   toast.success("Manager deleted successfully.");
-    // } catch (error) {
-    //   toast.error("Failed to delete Manager. Please try again later.");
-    // }
-    //----------------------------
-    setloadingDeleteManager((prev) => ({ ...prev, [userId]: true }));
-    // setError(null);
-    try {
-      const user = managers.find((user) => user.id === userId);
-      const res = await fetch("http://localhost:5000/delMang", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: user.email }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to send email.");
-      }
-      await deleteManager(userId);
-                // Fix pagination if page becomes empty
-    const newTotalPages = Math.ceil((filteredManagersSearch.length - 1) / managersPerPage);
-    if (availableCurrentPage > newTotalPages) {
-      const newPage = Math.max(newTotalPages - 1, 1);
-      setAvailableCurrentPage(newPage);
-      sessionStorage.setItem("availableCurrentPage", newPage);
-    }
-      // setSuccess("Password reset link sent");
-      toast.success("Manager deleted successfully, an email has been sent.");
-    } catch (error) {
-      console.log(error);
-      // setError(error.message);
+      toast.error("Failed to delete user");
     } finally {
       setLoadingDeleteUsers((prev) => ({ ...prev, [userId]: false }));
     }
   };
-  const [loadingDeleteTruckDriver, setloadingDeleteTruckDriver] = useState({});
-  const handleDeleteTruckDriver = async (userId) => {
-    // try {
-    //   await deleteTruckDriver(userId);
-    //   toast.success("Truck Driver deleted successfully.");
-    // } catch (error) {
-    //   toast.error("Failed to delete Truck Driver. Please try again later.");
-    // }
-    //-----------------------------
-    setloadingDeleteTruckDriver((prev) => ({ ...prev, [userId]: true }));
-    // setError(null);
+
+  const handleDeleteManager = async (managerId) => {
+    setLoadingDeleteManager((prev) => ({ ...prev, [managerId]: true }));
     try {
-      const user = truckDrivers.find((user) => user.id === userId);
-      const res = await fetch("http://localhost:5000/delTruck", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: user.email }),
+      await fetch(`/api/Managers/${managerId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to send email.");
-      }
-      await deleteTruckDriver(userId); 
-          // Fix pagination if page becomes empty
-    const newTotalPages = Math.ceil((filteredTruckDrivers.length - 1) / driversPerPage);
-    if (availableCurrentPage2 > newTotalPages) {
-      const newPage = Math.max(newTotalPages - 1, 1);
-      setAvailableCurrentPage2(newPage);
-      sessionStorage.setItem("availableCurrentPage2", newPage);
-    }
-      // setSuccess("Password reset link sent");
-      toast.success(
-        "Truck Driver deleted successfully, an email has been sent."
-      );
+      fetchManagers();
+      toast.success("Manager deleted successfully");
     } catch (error) {
-      // setError(error.message);
-      console.log(error);
+      toast.error("Failed to delete manager");
     } finally {
-      setloadingDeleteTruckDriver((prev) => ({ ...prev, [userId]: false }));
+      setLoadingDeleteManager((prev) => ({ ...prev, [managerId]: false }));
     }
   };
 
-  const handleEditManager = (ManagerData) => {
-    setSelectedManager(ManagerData);
+  const handleDeleteTruckDriver = async (driverId) => {
+    setLoadingDeleteTruckDriver((prev) => ({ ...prev, [driverId]: true }));
+    try {
+      await fetch(`/api/TruckDrivers/${driverId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      fetchTruckDrivers();
+      toast.success("Truck driver deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete truck driver");
+    } finally {
+      setLoadingDeleteTruckDriver((prev) => ({ ...prev, [driverId]: false }));
+    }
+  };
+
+  // Edit handlers
+  const handleEditManager = (manager) => {
+    setSelectedManager(manager);
     setIsEditingManager(true);
   };
-  const handleSaveManagerData = async (values) => {
-    // values is now the object with form values
-    const updatedValues = {
-      ...selectedManager,
-      ...values, // Spread the values from the form
-    };
 
-    try {
-      const res = await fetch("http://localhost:5000/edMang", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: updatedValues.email,
-          data: updatedValues,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to send email.");
-      }
-      await updateManager(updatedValues.id, updatedValues);
-      toast.success("Manager updated successfully!, an email has been sent.");
-      setIsEditingManager(false);
-      setSelectedManager(null);
-    } catch (e) {
-      console.log(e);
-      toast.error("Failed to update Manager. Please try again later.");
-    }
-  };
-  const handleEditTruckDriver = (TruckDriverData) => {
-    setSelectedTruckDriver(TruckDriverData);
+  const handleEditTruckDriver = (driver) => {
+    setSelectedTruckDriver(driver);
     setIsEditingTruckDriver(true);
   };
-  const handleSaveTruckDriver = async (values) => {
-    // values is now the object with form values
-    const updatedValues = {
-      ...selectedTruckDriver,
-      ...values, // Spread the values from the form
-    };
 
-    try {
-      const res = await fetch("http://localhost:5000/edTruck", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: updatedValues.email,
-          data: updatedValues,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to send email.");
-      }
-      await updateTruckDriver(updatedValues.id, updatedValues);
-      toast.success("Truck Driver updated successfully!");
-      setIsEditingTruckDriver(false);
-      setSelectedTruckDriver(null);
-    } catch (e) {
-      console.log(e);
-      toast.error("Failed to update Truck Driver. Please try again later.");
-    }
-  };
-
-  const [submitingManager, setSubmitingManager] = useState(false); // ✅ Add submitting state
+  // Form handling for adding manager
+  const [submitingManager, setSubmitingManager] = useState(false);
   const formik = useFormik({
     initialValues: {
       name: "",
       email: "",
       phone: "",
       password: "",
-      Address: "",
-      profileImage:
-        "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
-      Permissions: [],
+      address: "",
+      role: "",
     },
     validationSchema: schema,
     onSubmit: async (data) => {
-      // ✅ Make it async
-      setSubmitingManager(true); // ✅ Set submitting to true before saving
+      setSubmitingManager(true);
       try {
-        // await saveData(data); // ✅ Ensure saveData is awaited
-        await addManager({ ...data, profileImage: formik.values.profileImage });
+        const formData = new FormData();
+        formData.append("Name", data.name);
+        formData.append("Email", data.email);
+        formData.append("Phone", data.phone);
+        formData.append("Password", data.password);
+        formData.append("Address", data.address);
+        formData.append("Roles", data.role);
+
+        const response = await fetch(`/api/Auth/Register`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${getAuthToken()}` },
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error("Registration failed");
+
+        fetchManagers();
         toast.success("Manager added successfully!");
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to add Manager. Please try again later.");
-      } finally {
-        setSubmitingManager(false); // ✅ This will now execute correctly after awaiting saveData
         formik.resetForm();
+        setShowAddManager(false);
+      } catch (error) {
+        toast.error("Failed to add manager");
+      } finally {
+        setSubmitingManager(false);
       }
     },
   });
-  const [submitingDriver, setSubmitingDriver] = useState(false); // ✅ Add submitting state
+
+  // Form handling for adding driver
+  const [submitingDriver, setSubmitingDriver] = useState(false);
   const formik2 = useFormik({
     initialValues: {
       name: "",
       email: "",
       phone: "",
-      Address: "",
+      address: "",
       password: "",
-      truckNumber: "",
-      profileImage:
-        "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
     },
     validationSchema: schema2,
-
     onSubmit: async (data) => {
-      // ✅ Make it async
-      setSubmitingDriver(true); // ✅ Set submitting to true before saving
+      setSubmitingDriver(true);
       try {
-        // await saveData(data); // ✅ Ensure saveData is awaited
-        await addTruckDriver({
-          ...data,
-          profileImage: formik2.values.profileImage,
+        const formData = new FormData();
+        formData.append("Name", data.name);
+        formData.append("Email", data.email);
+        formData.append("Phone", data.phone);
+        formData.append("Password", data.password);
+        formData.append("Address", data.address);
+        formData.append("Roles", "TruckDriver");
+        formData.append("ShiftId", 1);
+        // formData.append("LicenseNumber", 12345);
+        // formData.append("LicenseExpiryDate", "2026-05-04");
+        // formData.append("TruckNumber", 1);
+        // formData.append("RegionName", "Ismailia Fisrt");
+
+        const response = await fetch(`/api/Auth/Register`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${getAuthToken()}` },
+          body: formData,
         });
-        toast.success("Truck Driver added successfully!");
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to add Truck Driver. Please try again later.");
-      } finally {
-        setSubmitingDriver(false); // ✅ This will now execute correctly after awaiting saveData
+
+        if (!response.ok) throw new Error("Registration failed");
+
+        fetchTruckDrivers();
+        toast.success("Truck driver added successfully!");
         formik2.resetForm();
+        setShowAddDriver(false);
+      } catch (error) {
+        toast.error("Failed to add truck driver");
+      } finally {
+        setSubmitingDriver(false);
       }
     },
   });
-  const [currentManager, setCurrentManager] = useState(null);
-  useEffect(() => {
-    const fetchmanager = async () => {
-      const manager = await fetchManager(id);
-      setCurrentManager(manager);
-    };
-    fetchmanager();
-  });
-  const handleCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-    const updatedPermissions = checked
-      ? [...formik.values.Permissions, value] // Add if checked
-      : formik.values.Permissions.filter((perm) => perm !== value); // Remove if unchecked
 
-    formik.setFieldValue("Permissions", updatedPermissions);
-    if (updatedPermissions.length == 0) formik.touched.Permissions = true;
+  // Form handling for editing manager
+  const formikEditManager = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      role: "",
+      password: "",
+    },
+    validationSchema: managerEditSchema,
+    onSubmit: async (values) => {
+      try {
+        const formData = new FormData();
+        formData.append("name", values.name);
+        formData.append("email", values.email);
+        formData.append("phone", values.phone);
+        formData.append("address", values.address);
+        formData.append("role", values.role);
+        if (values.password) {
+          formData.append("password", values.password);
+        }
+
+        const response = await fetch(`/api/Managers/${selectedManager.id}`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${getAuthToken()}` },
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error("Failed to update manager");
+
+        fetchManagers();
+        toast.success("Manager updated successfully!");
+        setIsEditingManager(false);
+        setSelectedManager(null);
+      } catch (error) {
+        toast.error("Failed to update manager");
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (selectedManager) {
+      formikEditManager.setValues({
+        name: selectedManager.name || "",
+        email: selectedManager.email || "",
+        phone: selectedManager.phone || "",
+        address: selectedManager.address || "",
+        role: selectedManager.role || "",
+      });
+    }
+  }, [selectedManager]);
+
+  // Form handling for editing driver
+  const formikEditDriver = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+    },
+    validationSchema: driverEditSchema,
+    onSubmit: async (values) => {
+      try {
+        const formData = new FormData();
+        formData.append("name", values.name);
+        formData.append("email", values.email);
+        formData.append("phone", values.phone);
+        formData.append("address", values.address);
+
+        const response = await fetch(`/api/TruckDrivers/${selectedTruckDriver.id}`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${getAuthToken()}` },
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error("Failed to update driver");
+
+        fetchTruckDrivers();
+        toast.success("Driver updated successfully!");
+        setIsEditingTruckDriver(false);
+        setSelectedTruckDriver(null);
+      } catch (error) {
+        toast.error("Failed to update driver");
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (selectedTruckDriver) {
+      formikEditDriver.setValues({
+        name: selectedTruckDriver.name || "",
+        email: selectedTruckDriver.email || "",
+        phone: selectedTruckDriver.phone || "",
+        address: selectedTruckDriver.address || "",
+      });
+    }
+  }, [selectedTruckDriver]);
+
+  const addUserNotification = async (content) => {
+    try {
+      const payload = {
+        EmailAddress: "Admin123@example.com",
+        Password: "Admin@12345",
+        deviceInfo: { deviceId: "browser", deviceType: "WEB_BROWSER" },
+      };
+
+      const response = await fetch("/api/Auth/Login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      const tok = data.jwtToken;
+
+      const user = users.find((user) => user.email === selectedContactUs.email);
+      const userId = user ? user.id : null;
+
+      const formData = new FormData();
+      formData.append("notificationContent", content);
+      formData.append("notificationDate", new Date().toISOString().split("T")[0]);
+      await fetch(`/api/Notifications/User/${userId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tok}`,
+        },
+        body: formData,
+      });
+    } catch (error) {
+      console.error("Failed to add user notification:", error);
+    }
   };
 
-  const [selectedContactUs, setselectedContactUs] = useState(null);
-  const [modalShowNotify, setModalShowNotify] = useState(false);
   const formikNotify = useFormik({
     initialValues: { reason: "" },
     validationSchema: notifySchema,
-    onSubmit: (values) => {
-      if (selectedContactUs) {
-        addUserNotification({
-          notificationContent: `Reply: "${selectedContactUs.message}" - ${values.reason}`,
-          notificationDate: new Date().toISOString().split("T")[0],
-          isRead: "false",
-          userId: selectedContactUs.userId,
-        });
+    onSubmit: async (values) => {
+      try {
+        await addUserNotification(values.reason);
         toast.success("Reply sent successfully");
         setModalShowNotify(false);
         setselectedContactUs(null);
         formikNotify.resetForm();
+      } catch (err) {
+        console.error(err);
       }
     },
   });
-  const handleNotify = (report) => {
-    setselectedContactUs(report);
-    setModalShowNotify(true);
-  };
-  const [searchTerm, setSearchTerm] = useState("");
-  const filteredUsers = users.filter(
-    (sub) =>sub.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const [searchTerm2, setSearchTerm2] = useState("");
-  const filteredManagersSearch = filteredManagers.filter(
-    (sub) =>sub.name.toLowerCase().includes(searchTerm2.toLowerCase())
-  )
-  const [searchTerm3, setSearchTerm3] = useState("");
-  const filteredTruckDrivers = truckDrivers.filter(
-    (sub) =>sub.name.toLowerCase().includes(searchTerm3.toLowerCase())
+
+  // Filtering
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const [availableCurrentPage, setAvailableCurrentPage] = useState(
-    parseInt(sessionStorage.getItem("availableCurrentPage")) || 1
+  const filteredManagers = managers.filter((manager) =>
+    manager.name.toLowerCase().includes(searchTerm2.toLowerCase())
   );
-  const managersPerPage = 5;
-  const paginatedManagers = filteredManagersSearch.slice(
-    (availableCurrentPage - 1) * managersPerPage,
-    availableCurrentPage * managersPerPage
+
+  const filteredTruckDrivers = truckDrivers.filter((driver) =>
+    driver.name.toLowerCase().includes(searchTerm3.toLowerCase())
   );
-  const totalAvailablePages = Math.ceil(
-    filteredManagersSearch.length / managersPerPage
-  );
-  const handleAvailablePageChange = (page) => {
-    setAvailableCurrentPage(page);
-    sessionStorage.setItem("availableCurrentPage", page);
+
+  // Pagination
+  const paginate = (items, page, itemsPerPage) => {
+    const start = (page - 1) * itemsPerPage;
+    return items.slice(start, start + itemsPerPage);
   };
-  //-------------------------
-  const [availableCurrentPage2, setAvailableCurrentPage2] = useState(
-    parseInt(sessionStorage.getItem("availableCurrentPage2")) || 1
-  );
-  const driversPerPage = 5;
-  const paginatedDrivers = filteredTruckDrivers.slice(
-    (availableCurrentPage2 - 1) * driversPerPage,
-    availableCurrentPage2 * driversPerPage
-  );
-  const totalAvailablePages2 = Math.ceil(
-    filteredTruckDrivers.length / driversPerPage
-  );
-  const handleAvailablePageChange2 = (page) => {
-    setAvailableCurrentPage2(page);
-    sessionStorage.setItem("availableCurrentPage2", page);
-  };
-  //-------------------------
-  const [availableCurrentPage3, setAvailableCurrentPage3] = useState(
-    parseInt(sessionStorage.getItem("availableCurrentPage3")) || 1
-  );
-  const usersPerPage = 5;
-  const paginatedUsers = filteredUsers.slice(
-    (availableCurrentPage3 - 1) * usersPerPage,
-    availableCurrentPage3 * usersPerPage
-  );
-  const totalAvailablePages3 = Math.ceil(filteredUsers.length / usersPerPage);
-  const handleAvailablePageChange3 = (page) => {
-    setAvailableCurrentPage3(page);
-    sessionStorage.setItem("availableCurrentPage3", page);
-  };
+
+  // Session Storage for Pagination and Active Tab
+  useEffect(() => {
+    const storedActiveTab = sessionStorage.getItem("activeTab");
+    const storedUsersPage = sessionStorage.getItem("usersPage");
+    const storedManagersPage = sessionStorage.getItem("managersPage");
+    const storedDriversPage = sessionStorage.getItem("driversPage");
+
+    if (storedActiveTab) setActiveTab(storedActiveTab);
+    if (storedUsersPage) setUsersPage(parseInt(storedUsersPage, 10));
+    if (storedManagersPage) setManagersPage(parseInt(storedManagersPage, 10));
+    if (storedDriversPage) setDriversPage(parseInt(storedDriversPage, 10));
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem("activeTab", activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    sessionStorage.setItem("usersPage", usersPage.toString());
+  }, [usersPage]);
+
+  useEffect(() => {
+    sessionStorage.setItem("managersPage", managersPage.toString());
+  }, [managersPage]);
+
+  useEffect(() => {
+    sessionStorage.setItem("driversPage", driversPage.toString());
+  }, [driversPage]);
+
+  // Adjust page if it exceeds total pages, but only after data is loaded
+  useEffect(() => {
+    if (!isUsersLoading) {
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+      if (totalPages > 0 && usersPage > totalPages) {
+        setUsersPage(totalPages);
+      } else if (totalPages === 0) {
+        setUsersPage(1);
+      }
+    }
+  }, [isUsersLoading, filteredUsers, itemsPerPage, usersPage]);
+
+  useEffect(() => {
+    if (!isManagersLoading) {
+      const totalPages = Math.ceil(filteredManagers.length / itemsPerPage);
+      if (totalPages > 0 && managersPage > totalPages) {
+        setManagersPage(totalPages);
+      } else if (totalPages === 0) {
+        setManagersPage(1);
+      }
+    }
+  }, [isManagersLoading, filteredManagers, itemsPerPage, managersPage]);
+
+  useEffect(() => {
+    if (!isDriversLoading) {
+      const totalPages = Math.ceil(filteredTruckDrivers.length / itemsPerPage);
+      if (totalPages > 0 && driversPage > totalPages) {
+        setDriversPage(totalPages);
+      } else if (totalPages === 0) {
+        setDriversPage(1);
+      }
+    }
+  }, [isDriversLoading, filteredTruckDrivers, itemsPerPage, driversPage]);
 
   return (
-    <div className="container py-4">
-      <h2 className="text-center mb-4">User Accounts Management</h2>
-      <Form.Control
-            type="text"
-            placeholder="Search User"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={styles.searchInput}
-            // onFocus={()=>{document.activeElement.blur()}}
-                  style={{marginTop: "20px", marginBottom: "20px"}}
-                  //onfocus remove outline
-                  onFocus={(e) => {
-                    e.target.style.outline = "none";
-                    e.target.style.boxShadow = "none";
-                    e.target.style.borderColor = "#ced4da";
-                  }}
-          />      <Table striped bordered hover responsive>
-        <thead className="bg-dark text-white">
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedUsers.slice(0, 10).map((user, index) => (
-            <tr key={index}>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>
-                <Button
-                  variant="danger"
-                  className="me-2"
-                  onClick={() => handleDeleteUser(user.id)}
-                >
-                  {loadingDeleteUsers[user.id] ? "Deleting..." : "Delete"}
-                </Button>
-                {/* {error && <div className="text-danger mt-2">{error}</div>} */}
-                {/* {success && <div className="text-success mt-2">{success}</div>} */}
-                <Button
-                  variant="danger"
-                  size="md"
-                  onClick={() => handleNotify(user)}
-                  className={styles.notifyButton}
-                >
-                  Notify
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <div>
-                  {Array.from({ length: totalAvailablePages3 }, (_, i) => (
-                    <Button
-                      key={i + 1}
-                      variant={availableCurrentPage3 === i + 1 ? "primary" : "light"}
-                      style={{backgroundColor:availableCurrentPage3 === i + 1 ? "#2e7d32" : "white",
-                        color: availableCurrentPage3 === i + 1 ? "white" : "black",
-                        border: availableCurrentPage3 === i + 1 ? "#2e7d32" : "white",
-                      }}
-                      onClick={() =>  handleAvailablePageChange3(i + 1)}
-                      className={styles.paginationButton}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.title}><FaUserTie /> User Management Dashboard</h2>
+        <div className={styles.statsContainer}>
+          {stats.map((stat, index) => (
+            <div key={index} className={styles.statCard} style={{ borderLeft: `4px solid ${stat.color}` }}>
+              <div className={styles.statContent}>
+                <div className={styles.statIconContainer} style={{ backgroundColor: `${stat.color}20` }}>
+                  {stat.icon}
                 </div>
-      <div className="container py-4">
-        <h2 className="text-center mt-5 mb-4">Admin Accounts Management</h2>
-        <Form.Control
-            type="text"
-            placeholder="Search Manager"
-            value={searchTerm2}
-            onChange={(e) => setSearchTerm2(e.target.value)}
-            className={styles.searchInput}
-            // onFocus={()=>{document.activeElement.blur()}}
-                  style={{marginTop: "20px", marginBottom: "20px"}}
-                  //onfocus remove outline
-                  onFocus={(e) => {
-                    e.target.style.outline = "none";
-                    e.target.style.boxShadow = "none";
-                    e.target.style.borderColor = "#ced4da";
-                  }}
-          />          <Table striped bordered hover responsive>
-          <thead className="bg-dark text-white">
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Address</th>
-              <th>Permissions</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedManagers.slice(0, 10).map((manager, index) => (
-              <tr key={index}>
-                <td>{manager.name}</td>
-                <td>{manager.email}</td>
-                <td>{manager.phone}</td>
-                <td>{manager.Address}</td>
-                <td>
-                  {Array.isArray(manager.Permissions)
-                    ? manager.Permissions.join(", ")
-                    : "No permissions"}
-                </td>
-                <td>
-                  <Button
-                    variant="warning"
-                    className="me-2"
-                    onClick={() => handleEditManager(manager)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteManager(manager.id)}
-                  >
-                    {loadingDeleteManager[manager.id] ? "Deleting..." : "Delete"}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+                <div>
+                  <h5 className={styles.statTitle}>{stat.title}</h5>
+                  <p className={styles.statValue}>{stat.value}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-        <div>
-                  {Array.from({ length: totalAvailablePages }, (_, i) => (
-                    <Button
-                      key={i + 1}
-                      variant={availableCurrentPage === i + 1 ? "primary" : "light"}
-                      style={{backgroundColor:availableCurrentPage === i + 1 ? "#2e7d32" : "white",
-                        color: availableCurrentPage === i + 1 ? "white" : "black",
-                        border: availableCurrentPage === i + 1 ? "#2e7d32" : "white",
-                      }}
-                      onClick={() =>  handleAvailablePageChange(i + 1)}
-                      className={styles.paginationButton}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
-                </div>
-      <h3 className="text-center mt-5">Add Admin</h3>
-      <form onSubmit={formik.handleSubmit}>
-        <label htmlFor="username" className={styles.label}>
-          Admin Name:
-        </label>
-        <input
-          type="text"
-          name="name"
-          id="username"
-          placeholder="Enter Your Name"
-          value={formik.values.name}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik.touched.name && formik.errors.name ? "is-invalid" : ""
-          }`}
-        />
-        {formik.touched.name && formik.errors.name && (
-          <div className="invalid-feedback">{formik.errors.name}</div>
-        )}
-        <label htmlFor="email" className={styles.label}>
-          Email:
-        </label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="Enter Your Email"
-          value={formik.values.email}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik.touched.email && formik.errors.email ? "is-invalid" : ""
-          }`}
-        />
-        {formik.touched.email && formik.errors.email && (
-          <div className="invalid-feedback">{formik.errors.email}</div>
-        )}
 
-        <label htmlFor="phone" className={styles.label}>
-          Phone Number:
-        </label>
-        <input
-          type="text"
-          name="phone"
-          id="phone"
-          placeholder="Enter Your Phone Number"
-          value={formik.values.phone}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik.touched.phone && formik.errors.phone ? "is-invalid" : ""
-          }`}
-        />
-        {formik.touched.phone && formik.errors.phone && (
-          <div className="invalid-feedback">{formik.errors.phone}</div>
-        )}
-
-        <label htmlFor="Address" className={styles.label}>
-          Address:
-        </label>
-        <input
-          type="text"
-          name="Address"
-          id="Address"
-          placeholder="Enter Your Address"
-          value={formik.values.Address}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik.touched.Address && formik.errors.Address ? "is-invalid" : ""
-          }`}
-        />
-        {formik.touched.Address && formik.errors.Address && (
-          <div className="invalid-feedback">{formik.errors.Address}</div>
-        )}
-        <label htmlFor="password" className={styles.label}>
-          Password:
-        </label>
-        <input
-          type="text"
-          name="password"
-          id="password"
-          placeholder="Enter Your Password"
-          value={formik.values.password}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik.touched.password && formik.errors.password
-              ? "is-invalid"
-              : ""
-          }`}
-        />
-        {formik.touched.password && formik.errors.password && (
-          <div className="invalid-feedback">{formik.errors.password}</div>
-        )}
-        <label htmlFor="Permissions" className={styles.label}>
-          Permissions:
-        </label>
-        {/* chexkbox */}
-        <div
-          className={`${styles.checkboxContainer}   ${
-            formik.touched.Permissions && formik.errors.Permissions
-              ? "is-invalid"
-              : ""
-          }`}
+      {/* Tab Navigation */}
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${activeTab === "users" ? styles.activeTab : ""}`}
+          onClick={() => setActiveTab("users")}
         >
-          <div
-            className={styles.checkboxItem}
-            style={{
-              display: !currentManager?.Permissions?.includes("admin")
-                ? "none"
-                : "block",
-            }}
-          >
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="admin"
-              onChange={handleCheckboxChange}
-              id="admin"
-              checked={formik.values.Permissions.includes("admin")}
-            />
-            <label htmlFor="admin">Super Admin</label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="ManageTrucks"
-              onChange={handleCheckboxChange}
-              id="ManageTrucks"
-              checked={formik.values.Permissions.includes("ManageTrucks")}
-            />
-            <label htmlFor="ManageTrucks">Trucks Manager</label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="ManageAnnouncement"
-              onChange={handleCheckboxChange}
-              id="ManageAnnouncement"
-              checked={formik.values.Permissions.includes("ManageAnnouncement")}
-            />
-            <label htmlFor="ManageAnnouncement">Announcements Manager</label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="ManageReportsAndDataAnalysis"
-              onChange={handleCheckboxChange}
-              id="ManageReportsAndDataAnalysis"
-              checked={formik.values.Permissions.includes(
-                "ManageReportsAndDataAnalysis"
-              )}
-            />
-            <label htmlFor="ManageReportsAndDataAnalysis">
-              Reports and Data Analysis Manager
-            </label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="CommunityEngagementManagement"
-              onChange={handleCheckboxChange}
-              id="CommunityEngagementManagement"
-              checked={formik.values.Permissions.includes(
-                "CommunityEngagementManagement"
-              )}
-            />
-            <label htmlFor="CommunityEngagementManagement">Events Manager</label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="UserManagement"
-              onChange={handleCheckboxChange}
-              id="UserManagement"
-              checked={formik.values.Permissions.includes("UserManagement")}
-            />
-            <label htmlFor="UserManagement">Users Manager</label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="PollsManagement"
-              onChange={handleCheckboxChange}
-              id="PollsManagement"
-              checked={formik.values.Permissions.includes("PollsManagement")}
-            />
-            <label htmlFor="PollsManagement">Polls Manager</label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="RewardsManagement"
-              onChange={handleCheckboxChange}
-              id="RewardsManagement"
-              checked={formik.values.Permissions.includes("RewardsManagement")}
-            />
-            <label htmlFor="RewardsManagement">Rewards Manager</label>
-          </div>
-          <div className={styles.checkboxItem}>
-            <input
-              type="checkbox"
-              name="Permissions"
-              value="WasteBinManagement"
-              onChange={handleCheckboxChange}
-              id="WasteBinManagement"
-              checked={formik.values.Permissions.includes("WasteBinManagement")}
-            />
-            <label htmlFor="WasteBinManagement">Waste Bins Manager</label>
-          </div>
-        </div>
-        {formik.touched.Permissions && formik.errors.Permissions && (
-          <div className="invalid-feedback ">{formik.errors.Permissions}</div>
-        )}
-        <div className={styles.modalButtons}>
-          <button
-            className={`${styles.button} ${submitingManager ? styles.disabled : styles.saveButton}`}
-            type="submit"
-            disabled={submitingManager}
-          >
-            {submitingManager ? "Adding..." : " 🧑🏻‍💼 Add"}
-          </button>
-        </div>
-      </form>
+          <FaUser /> Users
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === "Managers" ? styles.activeTab : ""}`}
+          onClick={() => setActiveTab("Managers")}
+        >
+          <FaUserTie /> Managers
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === "drivers" ? styles.activeTab : ""}`}
+          onClick={() => setActiveTab("drivers")}
+        >
+          <FaTruck /> Drivers
+        </button>
+      </div>
 
-      <h2 className="text-center mt-5 mb-4">Truck Drivers Accounts Management</h2>
-      <Form.Control
-            type="text"
-            placeholder="Search Truck Driver"
-            value={searchTerm3}
-            onChange={(e) => setSearchTerm3(e.target.value)}
-            className={styles.searchInput}
-            // onFocus={()=>{document.activeElement.blur()}}
-                  style={{marginTop: "20px", marginBottom: "20px"}}
-                  //onfocus remove outline
-                  onFocus={(e) => {
-                    e.target.style.outline = "none";
-                    e.target.style.boxShadow = "none";
-                    e.target.style.borderColor = "#ced4da";
-                  }}
-          />        
-      <Table striped bordered hover responsive>
-        <thead className="bg-dark text-white">
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Truck Number</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTruckDrivers.slice(0, 10).map((driver, index) => (
-            <tr key={index}>
-              <td>{driver.name}</td>
-              <td>{driver.email}</td>
-              <td>{driver.phone}</td>
-              <td>{driver.Address}</td>
-              <td>{driver.truckNumber}</td>
-              <td>
+      {/* Users Tab */}
+      {activeTab === "users" && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>User Accounts</h3>
+            <div className={styles.searchContainer}>
+              <FaSearch className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.searchInput}
+              />
+            </div>
+          </div>
+
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginate(filteredUsers, usersPage, itemsPerPage).map((user, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div className={styles.userCell}>
+                        <div className={styles.avatar}>
+                          {user.name.charAt(0)}
+                        </div>
+                        <div>
+                          <strong>{user.name}</strong>
+                          <div className={styles.email}>{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{user.email}</td>
+                    <td>{user.phone || "N/A"}</td>
+                    <td>
+                      <div className={styles.actions}>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.id)}
+                          className={styles.actionButton}
+                        >
+                          <FaTrash /> {loadingDeleteUsers[user.id] ? "Deleting..." : "Delete"}
+                        </Button>
+                        <Button
+                          variant="info"
+                          size="sm"
+                          onClick={() => {
+                            setselectedContactUs(user);
+                            setModalShowNotify(true);
+                          }}
+                          className={styles.actionButton}
+                        >
+                          <FaBell /> Notify
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {filteredUsers.length === 0 && (
+              <div className={styles.noResults}>
+                <p>No users found</p>
+              </div>
+            )}
+
+            {filteredUsers.length > itemsPerPage && (
+              <div className={styles.pagination}>
                 <Button
-                  variant="warning"
-                  className="me-2"
-                  onClick={() => handleEditTruckDriver(driver)}
+                  variant="outline-success"
+                  disabled={usersPage === 1}
+                  onClick={() => setUsersPage(usersPage - 1)}
                 >
-                  Edit
+                  Previous
                 </Button>
+                <span>Page {usersPage} of {Math.ceil(filteredUsers.length / itemsPerPage)}</span>
                 <Button
-                  variant="danger"
-                  onClick={() => handleDeleteTruckDriver(driver.id)}
+                  variant="outline-success"
+                  disabled={usersPage === Math.ceil(filteredUsers.length / itemsPerPage)}
+                  onClick={() => setUsersPage(usersPage + 1)}
                 >
-                  {loadingDeleteTruckDriver[driver.id]
-                    ? "Deleting..."
-                    : "Delete"}
+                  Next
                 </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <div>
-                  {Array.from({ length: totalAvailablePages2 }, (_, i) => (
-                    <Button
-                      key={i + 1}
-                      variant={availableCurrentPage2 === i + 1 ? "primary" : "light"}
-                      style={{backgroundColor:availableCurrentPage2 === i + 1 ? "#2e7d32" : "white",
-                        color: availableCurrentPage2 === i + 1 ? "white" : "black",
-                        border: availableCurrentPage2 === i + 1 ? "#2e7d32" : "white",
-                      }}
-                      onClick={() =>  handleAvailablePageChange2(i + 1)}
-                      className={styles.paginationButton}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
-                </div>
-      <h3 className="text-center mt-5">Add Driver</h3>
-      <form onSubmit={formik2.handleSubmit}>
-        <label htmlFor="username" className={styles.label}>
-          Username:
-        </label>
-        <input
-          type="text"
-          name="name"
-          id="username"
-          placeholder="Enter Your Name"
-          value={formik2.values.name}
-          onChange={formik2.handleChange}
-          onBlur={formik2.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik2.touched.name && formik2.errors.name ? "is-invalid" : ""
-          }`}
-        />
-        {formik2.touched.name && formik2.errors.name && (
-          <div className="invalid-feedback">{formik2.errors.name}</div>
-        )}
-        <label htmlFor="email" className={styles.label}>
-          Email:
-        </label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="Enter Your Email"
-          value={formik2.values.email}
-          onChange={formik2.handleChange}
-          onBlur={formik2.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik2.touched.email && formik2.errors.email ? "is-invalid" : ""
-          }`}
-        />
-        {formik2.touched.email && formik2.errors.email && (
-          <div className="invalid-feedback">{formik2.errors.email}</div>
-        )}
-
-        <label htmlFor="phone" className={styles.label}>
-          Phone Number:
-        </label>
-        <input
-          type="text"
-          name="phone"
-          id="phone"
-          placeholder="Enter Your Phone Number"
-          value={formik2.values.phone}
-          onChange={formik2.handleChange}
-          onBlur={formik2.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik2.touched.phone && formik2.errors.phone ? "is-invalid" : ""
-          }`}
-        />
-        {formik2.touched.phone && formik2.errors.phone && (
-          <div className="invalid-feedback">{formik2.errors.phone}</div>
-        )}
-
-        <label htmlFor="Address" className={styles.label}>
-          Address:
-        </label>
-        <input
-          type="text"
-          name="Address"
-          id="Address"
-          placeholder="Enter Your Address"
-          value={formik2.values.Address}
-          onChange={formik2.handleChange}
-          onBlur={formik2.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik2.touched.Address && formik2.errors.Address
-              ? "is-invalid"
-              : ""
-          }`}
-        />
-        {formik2.touched.Address && formik2.errors.Address && (
-          <div className="invalid-feedback">{formik2.errors.Address}</div>
-        )}
-        <label htmlFor="password" className={styles.label}>
-          Password:
-        </label>
-        <input
-          type="text"
-          name="password"
-          id="password"
-          placeholder="Enter Your Password"
-          value={formik2.values.password}
-          onChange={formik2.handleChange}
-          onBlur={formik2.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik2.touched.password && formik2.errors.password
-              ? "is-invalid"
-              : ""
-          }`}
-        />
-        {formik2.touched.password && formik2.errors.password && (
-          <div className="invalid-feedback">{formik2.errors.password}</div>
-        )}
-        <label htmlFor="truckNumber" className={styles.label}>
-          Truck Number:
-        </label>
-        <input
-          type="text"
-          name="truckNumber"
-          id="truckNumber"
-          placeholder="Enter Your Truck Number"
-          value={formik2.values.truckNumber}
-          onChange={formik2.handleChange}
-          onBlur={formik2.handleBlur}
-          className={`form-control ${styles.input} ${
-            formik2.touched.truckNumber && formik2.errors.truckNumber
-              ? "is-invalid"
-              : ""
-          }`}
-        />
-        {formik2.touched.truckNumber && formik2.errors.truckNumber && (
-          <div className="invalid-feedback">{formik2.errors.truckNumber}</div>
-        )}
-
-        <div className={styles.modalButtons}>
-          <button
-            className={`${styles.button} ${submitingDriver ? styles.disabled : styles.saveButton}`}
-            type="submit"
-            disabled={submitingDriver}
-          >
-            {submitingDriver ? "Adding..." : " 🧑🏻‍💼 Add"}
-          </button>
+              </div>
+            )}
+          </div>
         </div>
-      </form>
-      {selectedManager && isEditingManager && (
-        <EditManagerModel
-          // show={isEditing}
-          closeModal={() => setIsEditingManager(false)}
-          saveData={handleSaveManagerData}
-          userData={selectedManager}
-        />
       )}
-      {selectedTruckDriver && isEditingTruckDriver && (
-        <EditTruckDriverModel
-          // show={showModal}
-          closeModal={() => setIsEditingTruckDriver(false)}
-          saveData={handleSaveTruckDriver}
-          userData={selectedTruckDriver}
-        />
+
+      {/* Managers Tab */}
+      {activeTab === "Managers" && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>Manager Accounts</h3>
+            <div>
+              <div className={styles.searchContainer}>
+                <FaSearch className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search Managers..."
+                  value={searchTerm2}
+                  onChange={(e) => setSearchTerm2(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
+            </div>
+            <Button
+              variant="success"
+              className={styles.addButton}
+              onClick={() => setShowAddManager(true)}
+            >
+              <FaPlus /> Add Manager
+            </Button>
+          </div>
+
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Manager</th>
+                  <th>Contact</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginate(filteredManagers, managersPage, itemsPerPage).map((manager, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div className={styles.userCell}>
+                        <div className={styles.avatar} style={{ backgroundColor: "#2196f3" }}>
+                          {manager.name.charAt(0)}
+                        </div>
+                        <div>
+                          <strong>{manager.name}</strong>
+                          <div className={styles.email}>{manager.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div>{manager.email}</div>
+                      <div className={styles.phone}>{manager.phone}</div>
+                    </td>
+                    <td>
+                      <Badge bg="primary" className={styles.roleBadge}>
+                        {manager.role}
+                      </Badge>
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => handleEditManager(manager)}
+                          className={styles.actionButton}
+                        >
+                          <FaEdit /> Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteManager(manager.id)}
+                          className={styles.actionButton}
+                        >
+                          <FaTrash /> {loadingDeleteManager[manager.id] ? "Deleting..." : "Delete"}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {filteredManagers.length === 0 && (
+              <div className={styles.noResults}>
+                <p>No Managers found</p>
+              </div>
+            )}
+
+            {filteredManagers.length > itemsPerPage && (
+              <div className={styles.pagination}>
+                <Button
+                  variant="outline-success"
+                  disabled={managersPage === 1}
+                  onClick={() => setManagersPage(managersPage - 1)}
+                >
+                  Previous
+                </Button>
+                <span>Page {managersPage} of {Math.ceil(filteredManagers.length / itemsPerPage)}</span>
+                <Button
+                  variant="outline-success"
+                  disabled={managersPage === Math.ceil(filteredManagers.length / itemsPerPage)}
+                  onClick={() => setManagersPage(managersPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
+
+      {/* Drivers Tab */}
+      {activeTab === "drivers" && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>Truck Drivers</h3>
+            <div>
+              <div className={styles.searchContainer}>
+                <FaSearch className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search drivers..."
+                  value={searchTerm3}
+                  onChange={(e) => setSearchTerm3(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
+            </div>
+            <div>
+              <Button
+                variant="success"
+                className={`${styles.addButton} `}
+                onClick={() => setShowAddDriver(true)}
+              >
+                <FaPlus /> Add Driver
+              </Button>
+            </div>
+          </div>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Driver</th>
+                  <th>Contact</th>
+                  <th>Truck Info</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginate(filteredTruckDrivers, driversPage, itemsPerPage).map((driver, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div className={styles.userCell}>
+                        <div className={styles.avatar} style={{ backgroundColor: "#ff9800" }}>
+                          {driver.name.charAt(0)}
+                        </div>
+                        <div>
+                          <strong>{driver.name}</strong>
+                          <div className={styles.email}>{driver.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div>{driver.email}</div>
+                      <div className={styles.phone}>{driver.phone}</div>
+                    </td>
+                    <td>
+                      <div>Truck #{driver.truckNumber}</div>
+                      <div>Shift: {driver.shiftId}</div>
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => handleEditTruckDriver(driver)}
+                          className={styles.actionButton}
+                        >
+                          <FaEdit /> Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteTruckDriver(driver.id)}
+                          className={styles.actionButton}
+                        >
+                          <FaTrash /> {loadingDeleteTruckDriver[driver.id] ? "Deleting..." : "Delete"}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {filteredTruckDrivers.length === 0 && (
+              <div className={styles.noResults}>
+                <p>No drivers found</p>
+              </div>
+            )}
+
+            {filteredTruckDrivers.length > itemsPerPage && (
+              <div className={styles.pagination}>
+                <Button
+                  variant="outline-success"
+                  disabled={driversPage === 1}
+                  onClick={() => setDriversPage(driversPage - 1)}
+                >
+                  Previous
+                </Button>
+                <span>Page {driversPage} of {Math.ceil(filteredTruckDrivers.length / itemsPerPage)}</span>
+                <Button
+                  variant="outline-success"
+                  disabled={driversPage === Math.ceil(filteredTruckDrivers.length / itemsPerPage)}
+                  onClick={() => setDriversPage(driversPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Add Manager Modal */}
+      <Modal show={showAddManager} onHide={() => setShowAddManager(false)} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
+          <Modal.Title>Add New Manager</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={formik.handleSubmit} className={styles.form}>
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Full Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                placeholder="Enter full name"
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formik.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = formik.errors.name ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
+                }}
+                isInvalid={formik.touched.name && formik.errors.name}
+              />
+              {formik.touched.name && formik.errors.name && (
+                <Form.Control.Feedback type="invalid">
+                  {formik.errors.name}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Email Address</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                placeholder="Enter email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formik.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = formik.errors.email ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
+                }}
+                isInvalid={formik.touched.email && formik.errors.email}
+              />
+              {formik.touched.email && formik.errors.email && (
+                <Form.Control.Feedback type="invalid">
+                  {formik.errors.email}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Phone Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="phone"
+                    placeholder="Enter phone"
+                    value={formik.values.phone}
+                    onChange={formik.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formik.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formik.errors.phone ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formik.touched.phone && formik.errors.phone}
+                  />
+                  {formik.touched.phone && formik.errors.phone && (
+                    <Form.Control.Feedback type="invalid">
+                      {formik.errors.phone}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    name="password"
+                    placeholder="Enter password"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formik.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formik.errors.password ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formik.touched.password && formik.errors.password}
+                  />
+                  {formik.touched.password && formik.errors.password && (
+                    <Form.Control.Feedback type="invalid">
+                      {formik.errors.password}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Address</Form.Label>
+              <Form.Control
+                type="text"
+                name="address"
+                placeholder="Enter address"
+                value={formik.values.address}
+                onChange={formik.handleChange}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formik.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = formik.errors.address ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
+                }}
+                isInvalid={formik.touched.address && formik.errors.address}
+              />
+              {formik.touched.address && formik.errors.address && (
+                <Form.Control.Feedback type="invalid">
+                  {formik.errors.address}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Role</Form.Label>
+              <div className={styles.radioGroup}>
+                {roleOptions.map((option) => (
+                  <Form.Check
+                    key={option.value}
+                    type="radio"
+                    id={`role-${option.value}`}
+                    name="role"
+                    label={option.label}
+                    value={option.value}
+                    onChange={formik.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                    }}
+                    onBlur={formik.handleBlur}
+                    checked={formik.values.role === option.value}
+                    className={styles.radioOption}
+                  />
+                ))}
+              </div>
+              {formik.touched.role && formik.errors.role && (
+                <div className="text-danger mt-2">{formik.errors.role}</div>
+              )}
+            </Form.Group>
+
+            <div className={styles.modalFooter}>
+              <Button variant="secondary" onClick={() => setShowAddManager(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={submitingManager}
+                className={styles.submitButton}
+              >
+                {submitingManager ? "Adding..." : "Add Manager"}
+              </Button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Edit Manager Modal */}
+      <Modal show={isEditingManager} onHide={() => setIsEditingManager(false)} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
+          <Modal.Title>Edit Manager</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={formikEditManager.handleSubmit} className={styles.form}>
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Full Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formikEditManager.values.name}
+                onChange={formikEditManager.handleChange}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formikEditManager.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = formikEditManager.errors.name ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
+                }}
+                isInvalid={formikEditManager.touched.name && formikEditManager.errors.name}
+              />
+              {formikEditManager.touched.name && formikEditManager.errors.name && (
+                <Form.Control.Feedback type="invalid">
+                  {formikEditManager.errors.name}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Email Address</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formikEditManager.values.email}
+                onChange={formikEditManager.handleChange}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formikEditManager.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = formikEditManager.errors.email ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
+                }}
+                isInvalid={formikEditManager.touched.email && formikEditManager.errors.email}
+              />
+              {formikEditManager.touched.email && formikEditManager.errors.email && (
+                <Form.Control.Feedback type="invalid">
+                  {formikEditManager.errors.email}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Phone Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="phone"
+                    value={formikEditManager.values.phone}
+                    onChange={formikEditManager.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formikEditManager.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formikEditManager.errors.phone ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formikEditManager.touched.phone && formikEditManager.errors.phone}
+                  />
+                  {formikEditManager.touched.phone && formikEditManager.errors.phone && (
+                    <Form.Control.Feedback type="invalid">
+                      {formikEditManager.errors.phone}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="address"
+                    value={formikEditManager.values.address}
+                    onChange={formikEditManager.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formikEditManager.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formikEditManager.errors.address ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formikEditManager.touched.address && formikEditManager.errors.address}
+                  />
+                  {formikEditManager.touched.address && formikEditManager.errors.address && (
+                    <Form.Control.Feedback type="invalid">
+                      {formikEditManager.errors.address}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Role</Form.Label>
+              <div className={styles.radioGroup}>
+                {roleOptions.map((option) => (
+                  <Form.Check
+                    key={option.value}
+                    type="radio"
+                    id={`edit-role-${option.value}`}
+                    name="role"
+                    label={option.label}
+                    value={option.value}
+                    onChange={formikEditManager.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                    }}
+                    onBlur={formikEditManager.handleBlur}
+                    checked={formikEditManager.values.role === option.value}
+                    className={styles.radioOption}
+                  />
+                ))}
+              </div>
+              {formikEditManager.touched.role && formikEditManager.errors.role && (
+                <div className="text-danger mt-2">{formikEditManager.errors.role}</div>
+              )}
+            </Form.Group>
+
+            <div className={styles.modalFooter}>
+              <Button variant="secondary" onClick={() => setIsEditingManager(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={formikEditManager.isSubmitting}
+                className={styles.submitButton}
+              >
+                {formikEditManager.isSubmitting ? "Updating..." : "Update Manager"}
+              </Button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Add Driver Modal */}
+      <Modal show={showAddDriver} onHide={() => setShowAddDriver(false)} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
+          <Modal.Title>Add New Driver</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={formik2.handleSubmit} className={styles.form}>
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Full Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                placeholder="Enter full name"
+                value={formik2.values.name}
+                onChange={formik2.handleChange}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formik2.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = formik2.errors.name ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
+                }}
+                isInvalid={formik2.touched.name && formik2.errors.name}
+              />
+              {formik2.touched.name && formik2.errors.name && (
+                <Form.Control.Feedback type="invalid">
+                  {formik2.errors.name}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Email Address</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    placeholder="Enter email"
+                    value={formik2.values.email}
+                    onChange={formik2.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formik2.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formik2.errors.email ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formik2.touched.email && formik2.errors.email}
+                  />
+                  {formik2.touched.email && formik2.errors.email && (
+                    <Form.Control.Feedback type="invalid">
+                      {formik2.errors.email}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Phone Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="phone"
+                    placeholder="Enter phone"
+                    value={formik2.values.phone}
+                    onChange={formik2.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formik2.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formik2.errors.phone ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formik2.touched.phone && formik2.errors.phone}
+                  />
+                  {formik2.touched.phone && formik2.errors.phone && (
+                    <Form.Control.Feedback type="invalid">
+                      {formik2.errors.phone}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    name="password"
+                    placeholder="Enter password"
+                    value={formik2.values.password}
+                    onChange={formik2.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formik2.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formik2.errors.password ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formik2.touched.password && formik2.errors.password}
+                  />
+                  {formik2.touched.password && formik2.errors.password && (
+                    <Form.Control.Feedback type="invalid">
+                      {formik2.errors.password}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="address"
+                    placeholder="Enter address"
+                    value={formik2.values.address}
+                    onChange={formik2.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formik2.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formik2.errors.address ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formik2.touched.address && formik2.errors.address}
+                  />
+                  {formik2.touched.address && formik2.errors.address && (
+                    <Form.Control.Feedback type="invalid">
+                      {formik2.errors.address}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <div className={styles.modalFooter}>
+              <Button variant="secondary" onClick={() => setShowAddDriver(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={submitingDriver}
+                className={styles.submitButton}
+              >
+                {submitingDriver ? "Adding..." : "Add Driver"}
+              </Button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Edit Driver Modal */}
+      <Modal show={isEditingTruckDriver} onHide={() => setIsEditingTruckDriver(false)} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
+          <Modal.Title>Edit Driver</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={formikEditDriver.handleSubmit} className={styles.form}>
+            <Form.Group className={styles.formGroup}>
+              <Form.Label>Full Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formikEditDriver.values.name}
+                onChange={formikEditDriver.handleChange}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = "#00980DFF";
+                  e.target.style.borderWidth = "2px";
+                }}
+                onBlur={(e) => {
+                  formikEditDriver.handleBlur(e);
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.borderColor = formikEditDriver.errors.name ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
+                }}
+                isInvalid={formikEditDriver.touched.name && formikEditDriver.errors.name}
+              />
+              {formikEditDriver.touched.name && formikEditDriver.errors.name && (
+                <Form.Control.Feedback type="invalid">
+                  {formikEditDriver.errors.name}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Email Address</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={formikEditDriver.values.email}
+                    onChange={formikEditDriver.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formikEditDriver.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formikEditDriver.errors.email ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formikEditDriver.touched.email && formikEditDriver.errors.email}
+                  />
+                  {formikEditDriver.touched.email && formikEditDriver.errors.email && (
+                    <Form.Control.Feedback type="invalid">
+                      {formikEditDriver.errors.email}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Phone Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="phone"
+                    value={formikEditDriver.values.phone}
+                    onChange={formikEditDriver.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formikEditDriver.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formikEditDriver.errors.phone ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formikEditDriver.touched.phone && formikEditDriver.errors.phone}
+                  />
+                  {formikEditDriver.touched.phone && formikEditDriver.errors.phone && (
+                    <Form.Control.Feedback type="invalid">
+                      {formikEditDriver.errors.phone}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className={styles.formGroup}>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="address"
+                    value={formikEditDriver.values.address}
+                    onChange={formikEditDriver.handleChange}
+                    onFocus={(e) => {
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = "#00980DFF";
+                      e.target.style.borderWidth = "2px";
+                    }}
+                    onBlur={(e) => {
+                      formikEditDriver.handleBlur(e);
+                      e.target.style.outline = "none";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.borderColor = formikEditDriver.errors.address ? "red" : "transparent";
+                      e.target.style.borderWidth = "1px";
+                    }}
+                    isInvalid={formikEditDriver.touched.address && formikEditDriver.errors.address}
+                  />
+                  {formikEditDriver.touched.address && formikEditDriver.errors.address && (
+                    <Form.Control.Feedback type="invalid">
+                      {formikEditDriver.errors.address}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <div className={styles.modalFooter}>
+              <Button variant="secondary" onClick={() => setIsEditingTruckDriver(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={formikEditDriver.isSubmitting}
+                className={styles.submitButton}
+              >
+                {formikEditDriver.isSubmitting ? "Updating..." : "Update Driver"}
+              </Button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
+
       {/* Notify Modal */}
-      <Modal
-        show={modalShowNotify}
-        onHide={() => setModalShowNotify(false)}
-        centered
-      >
+      <Modal show={modalShowNotify} onHide={() => setModalShowNotify(false)} centered>
         <Modal.Header closeButton className={styles.modalHeader}>
           <Modal.Title>Notify User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={formikNotify.handleSubmit}>
             <Form.Group>
-              <Form.Label>Reply:</Form.Label>
+              <Form.Label>Message to {selectedContactUs?.name || "User"}:</Form.Label>
               <Form.Control
                 as="textarea"
                 name="reason"
                 rows={3}
                 value={formikNotify.values.reason}
                 onChange={formikNotify.handleChange}
-                // onBlur={formikNotify.handleBlur}
-                className={`form-control  ${
-                  formikNotify.touched.reason && formikNotify.errors.reason
-                    ? "is-invalid"
-                    : ""
-                }`}
-                style={{ height: "100px", resize: "none" }}
-                // onFocus={()=>{document.activeElement.blur()}}
                 onFocus={(e) => {
                   e.target.style.outline = "none";
                   e.target.style.boxShadow = "none";
@@ -1110,24 +1704,21 @@ export default function UserManagement() {
                   formikNotify.handleBlur(e);
                   e.target.style.outline = "none";
                   e.target.style.boxShadow = "none";
-                  e.target.style.borderColor = "none";
-                  e.target.style.borderWidth = "0px";
+                  e.target.style.borderColor = formikNotify.errors.reason ? "red" : "transparent";
+                  e.target.style.borderWidth = "1px";
                 }}
+                className={`form-control ${formikNotify.touched.reason && formikNotify.errors.reason ? "is-invalid" : ""}`}
+                style={{ height: "100px", resize: "none" }}
               />
               {formikNotify.touched.reason && formikNotify.errors.reason && (
-                <div className="invalid-feedback">
-                  {formikNotify.errors.reason}
-                </div>
+                <div className="text-danger mt-2">{formikNotify.errors.reason}</div>
               )}
             </Form.Group>
             <Modal.Footer className={styles.modalFooter}>
-              <Button
-                variant="secondary"
-                onClick={() => setModalShowNotify(false)}
-              >
+              <Button variant="secondary" onClick={() => setModalShowNotify(false)}>
                 Cancel
               </Button>
-              <Button variant="danger" type="submit">
+              <Button variant="primary" type="submit">
                 Send Notification
               </Button>
             </Modal.Footer>
@@ -1136,4 +1727,6 @@ export default function UserManagement() {
       </Modal>
     </div>
   );
-}
+};
+
+export default UserManagement;
