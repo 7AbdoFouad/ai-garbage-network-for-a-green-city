@@ -172,7 +172,7 @@ const PaidAnnouncementsManagement = () => {
     try {
       setApprovingId(id);
       const token = getAuthToken();
-      await axios.post(`${API_URL}/approve/${id}`, null, {
+      await axios.put(`${API_URL}/approve/${id}`, null, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

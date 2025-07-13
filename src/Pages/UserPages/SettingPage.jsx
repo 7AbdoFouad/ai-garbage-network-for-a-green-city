@@ -66,7 +66,7 @@ export default function SettingPage() {
       const formData = new FormData();
       formData.append("profileimage", file);
       
-      const response = await fetch("/api/Users/my-profile/image", {
+      const response = await fetch("/api/Users/my-profile", {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

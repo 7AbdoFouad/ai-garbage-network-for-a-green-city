@@ -161,7 +161,7 @@ const [filterType, setFilterType] = useState("");
 
     if (containsKeyword(highPriorityKeywords)) return "high";
     if (containsKeyword(mediumPriorityKeywords)) return "medium";
-    if (text === "") return "unknown";
+    if (text === "none") return "unknown";
     return "low";
   };
 
@@ -509,7 +509,7 @@ const [filterType, setFilterType] = useState("");
                 >
                   <option value="">All Report Types</option>
                   <option value="Full Bin">Full Bin</option>
-                  <option value="Damaged Bin">Damaged Bin</option>
+                  <option value="damaged bin">Damaged Bin</option>
                   <option value="Scattered Waste">Scattered Waste</option>
                   <option value="Hazardous Garbage">Hazardous Garbage</option>
                   <option value="Waste Not Collected">Waste Not Collected</option>
@@ -620,7 +620,7 @@ const [filterType, setFilterType] = useState("");
                             onClick={() => handleAcceptPublic(report)}
                             style={{width:"60px",height:"30.6px",marginBottom:"4px", marginRight:"2px"}}
                           >
-                            <span style={{marginLeft:"0px"}}>Accept</span>
+                            <span style={{marginLeft:"-3px"}}>Accept</span>
                           </Button>
                           <Button
                             variant="danger"

@@ -45,6 +45,8 @@ const DriversAvailableTasks = () => {
         }
 
         const data = await response.json();
+                console.log('Fetched tasks:', data);
+
         setTasks(data);
         setTotalPages(Math.ceil(data.length / tasksPerPage));
       } catch (err) {

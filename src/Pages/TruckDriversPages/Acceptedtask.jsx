@@ -1,12 +1,32 @@
 // DriversAvailableTasks.jsx
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { AuthContext } from '../../Components/AuthContext';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import styles from './DriversAvailableTasks2.module.css';
 
-
+// Added validation schema from first example
+const CompleteTaskSchema = Yup.object().shape({
+  driverName: Yup.string()
+    .min(2, 'Too Short!')
+    .max(50, 'Too Long!')
+    .required('Driver name is required'),
+  reportDESC: Yup.string()
+    .min(10, 'Description must be at least 10 characters')
+    .required('Report description is required'),
+  photoFile: Yup.mixed()
+    .required('Photo is required')
+    .test('fileSize', 'File too large (max 5MB)', value => value && value.size <= 5 * 1024 * 1024)
+    .test('fileType', 'Unsupported file type (JPG/PNG only)', value => 
+      value && ['image/jpg', 'image/jpeg', 'image/png'].includes(value.type)
+    ),
+  sentAt: Yup.date()
+    .required('Date is required')
+    .max(new Date(), 'Date cannot be in the future')
+});
 
 export default function DriverMyTasksPage() { 
   const [tasks, setTasks] = useState([]);
@@ -14,13 +34,96 @@ export default function DriverMyTasksPage() {
   const [error, setError] = useState(null);
   const [cookies] = useCookies(['token']);
   const { logout } = useContext(AuthContext);
-  
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const tasksPerPage = 6;
   
+  const modalRef = useRef(null); // Added ref for modal
   const baseUrl = 'https://greencityapi.runasp.net/api';
+
+  const openCompleteModal = (task) => {
+    setSelectedTask(task);
+    setShowCompleteModal(true);
+  };
+
+  const closeCompleteModal = () => {
+    setShowCompleteModal(false);
+    setSelectedTask(null);
+  };
+  
+  // Handle outside click to close modal
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        closeCompleteModal();
+      }
+    };
+    
+    if (showCompleteModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'hidden';
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'auto';
+    };
+  }, [showCompleteModal]);
+
+  const handleCompleteTask = async (values, { resetForm }) => {
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('driverName', values.driverName);
+      formData.append('reportDESC', values.reportDESC);
+      formData.append('sentAt', values.sentAt);
+      formData.append('photoFile', values.photoFile);
+      formData.append('announcementsID', selectedTask.id.toString());
+
+      const response = await fetch(`/api/PaidUserAnnouncements/complete-task/${selectedTask.id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${cookies.token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+          toast.error('Session expired. Please log in again.');
+          return;
+        }
+        throw new Error('Failed to complete task');
+      }
+
+      // Remove completed task
+      setTasks(tasks.filter(task => task.id !== selectedTask.id));
+      toast.success('Task completed successfully!');
+      
+      // Update pagination
+      setTotalPages(Math.ceil((tasks.length - 1) / tasksPerPage));
+      
+      // Adjust current page if needed
+      if (currentPage > Math.ceil((tasks.length - 1) / tasksPerPage)) {
+        const newPage = Math.max(1, Math.ceil((tasks.length - 1) / tasksPerPage));
+        setCurrentPage(newPage);
+        sessionStorage.setItem('driversTasksPage5', newPage.toString());
+      }
+      
+      closeCompleteModal();
+      resetForm();
+    } catch (err) {
+      toast.error(`Error: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const savedPage = sessionStorage.getItem('driversTasksPage5');
@@ -48,6 +151,7 @@ export default function DriverMyTasksPage() {
 
         const data = await response.json();
         setTasks(data);
+        console.log('Fetched tasks:', data);
         setTotalPages(Math.ceil(data.length / tasksPerPage));
       } catch (err) {
         setError(err.message);
@@ -59,41 +163,6 @@ export default function DriverMyTasksPage() {
 
     fetchTasks();
   }, [cookies.token, logout]);
-
-  const handleAcceptTask = async (taskId) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/PaidUserAnnouncements/accept-pickup/${taskId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${cookies.token}`,
-        }
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          logout();
-          toast.error('Session expired. Please log in again.');
-          return;
-        }
-        throw new Error('Failed to accept task');
-      }
-
-      setTasks(tasks.filter(task => task.id !== taskId));
-      toast.success('Task accepted successfully!');
-      setTotalPages(Math.ceil((tasks.length - 1) / tasksPerPage));
-      
-      if (currentPage > Math.ceil((tasks.length - 1) / tasksPerPage)) {
-        const newPage = Math.max(1, Math.ceil((tasks.length - 1) / tasksPerPage));
-        setCurrentPage(newPage);
-        sessionStorage.setItem('driversTasksPage5', newPage.toString());
-      }
-    } catch (err) {
-      toast.error(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Pagination functions
   const goToPage = (page) => {
@@ -194,6 +263,131 @@ export default function DriverMyTasksPage() {
 
   return (
     <div className={styles.container}>
+      {/* Added complete task modal */}
+      {showCompleteModal && selectedTask && (
+        <div className={styles.modalOverlay}>
+          <motion.div 
+            ref={modalRef}
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className={styles.modalContent}
+          >
+            <div className={styles.modalHeader}>
+              <h2>Complete Task</h2>
+              <button 
+                onClick={closeCompleteModal}
+                className={styles.closeButton}
+              >
+                &times;
+              </button>
+            </div>
+            
+            <Formik
+              initialValues={{
+                driverName: '',
+                reportDESC: '',
+                photoFile: null,
+                sentAt: new Date().toISOString().split('T')[0],
+                announcementsID: selectedTask.id
+              }}
+              validationSchema={CompleteTaskSchema}
+              onSubmit={handleCompleteTask}
+            >
+              {({ setFieldValue, values, errors, touched }) => (
+                <Form className={styles.completeForm}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="driverName">Driver Name</label>
+                    <Field 
+                      type="text" 
+                      name="driverName" 
+                      placeholder="Enter your full name"
+                      className={`${styles.formInput} ${errors.driverName && touched.driverName ? styles.inputError : ''}`}
+                    />
+                    <ErrorMessage name="driverName" component="div" className={styles.errorText} />
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label htmlFor="reportDESC">Report Description</label>
+                    <Field 
+                      as="textarea" 
+                      name="reportDESC" 
+                      placeholder="Describe the task completion details"
+                      rows="4"
+                      className={`${styles.formTextarea} ${errors.reportDESC && touched.reportDESC ? styles.inputError : ''}`}
+                    />
+                    <ErrorMessage name="reportDESC" component="div" className={styles.errorText} />
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label htmlFor="sentAt">Completion Date</label>
+                    <Field 
+                      type="date" 
+                      name="sentAt" 
+                      className={`${styles.formInput} ${errors.sentAt && touched.sentAt ? styles.inputError : ''}`}
+                    />
+                    <ErrorMessage name="sentAt" component="div" className={styles.errorText} />
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label htmlFor="photoFile">Upload Photo</label>
+                    <input
+                      id="photoFile"
+                      name="photoFile"
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => {
+                        setFieldValue("photoFile", event.currentTarget.files[0]);
+                      }}
+                      className={styles.formFileInput}
+                    />
+                    <ErrorMessage name="photoFile" component="div" className={styles.errorText} />
+                    
+                    <div className={styles.fileSection}>
+                      <button 
+                        type="button"
+                        onClick={() => document.getElementById('photoFile').click()}
+                        className={styles.fileButton}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        Choose File
+                      </button>
+                      
+                      {values.photoFile && (
+                        <div className={styles.filePreview}>
+                          <p className={styles.fileName}>{values.photoFile.name}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className={styles.modalButtons}>
+                    <button 
+                      type="button" 
+                      onClick={closeCompleteModal}
+                      className={styles.cancelButton}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      className={styles.completeButton}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <div className={styles.submitSpinner}></div>
+                      ) : 'Complete Task'}
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </motion.div>
+        </div>
+      )}
+      
       <div className={styles.headerBanner}>
         <div className={styles.bannerGradient}></div>
         <div className={styles.bannerContent}>
@@ -314,13 +508,13 @@ export default function DriverMyTasksPage() {
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => handleAcceptTask(task.id)}
+                  onClick={() => openCompleteModal(task)}
                   className={styles.acceptButton}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  Accept Mission
+                  Send Completion Report
                 </motion.button>
               </motion.div>
             ))}
@@ -381,4 +575,3 @@ export default function DriverMyTasksPage() {
     </div>
   );
 }
-

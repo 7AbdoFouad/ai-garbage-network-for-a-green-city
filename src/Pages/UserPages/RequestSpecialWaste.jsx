@@ -33,10 +33,11 @@ const WasteRequestApp = () => {
   };
 
   const durationMultipliers = {
-    "Monthly": 1,
-    "3 monthly": 3,
-    "6 monthly": 6,
-    "12 monthly": 12,
+    "1 week": 0,
+    "1 month": 1,
+    "3 months": 3,
+    "6 months": 6,
+    "12 months": 12,
   };
 
   const handleChange = (e) => {
@@ -282,10 +283,11 @@ const WasteRequestApp = () => {
                 required={subscriptionOptions[formData.subscriptionType]?.key !== "On time"}
               >
                 <option value="">Select Duration</option>
-                <option value="Monthly">Monthly</option>
-                <option value="3 monthly">3 monthly</option>
-                <option value="6 monthly">6 monthly</option>
-                <option value="12 monthly">12 monthly</option>
+                <option value="1 week">1 Week</option>
+                <option value="1 Month">1 Month</option>
+                <option value="3 months">3 months</option>
+                <option value="6 months">6 months</option>
+                <option value="12 months">12 months</option>
               </select>
             </div>
           </div>
