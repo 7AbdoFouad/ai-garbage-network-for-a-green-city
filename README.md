@@ -6,7 +6,7 @@ Images of a feasibility study plan for a graduation project
 Note: A few pages and ideas were not implemented.
 
 <img width="1210" height="772" alt="1" src="https://github.com/user-attachments/assets/dff5b989-124d-4c7a-a185-cd6cb79c374e" />
-<img width="1855" height="708" alt="2" src="https://github.com/user-attachments/assets/ecfde41e-c20f-41de-a66f-985345e5eca8" />
+<img width="1847" height="717" alt="2" src="https://github.com/user-attachments/assets/c58c7d64-3970-4bb0-9f99-f2840f078055" />
 <img width="1820" height="829" alt="3" src="https://github.com/user-attachments/assets/75231c84-08d7-4fba-b0c1-6cd6c7eec2ce" />
 <img width="1832" height="647" alt="4" src="https://github.com/user-attachments/assets/127a2beb-f8b6-48fa-8e22-e57a226549e7" />
 <img width="1820" height="633" alt="5" src="https://github.com/user-attachments/assets/94478227-d3ca-4733-aca9-65c3ed20f6b4" />
