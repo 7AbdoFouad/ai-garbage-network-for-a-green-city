@@ -21,6 +21,9 @@ These are links to the detailed content pages related to the project planning ph
 Note: A few pages and ideas were not implemented
 
 user pages "stakeholders" => https://app.notion.com/p/user-pages-1373c5a5103780ab8022d5b7db2bcdf2?source=copy_link
+
 manager pages => https://app.notion.com/p/manager-pages-1303c5a5103780069712f6b8e8b6af56?source=copy_link
+
 manager pages continue => https://app.notion.com/p/manager-pages-continue-1555ef4a1e0f80a68acec962a99d2530?source=copy_link
+
 Truck Drivers Pages => https://app.notion.com/p/Truck-Drivers-Pages-1353c5a51037806cbeafe820223d80c0?source=copy_link
